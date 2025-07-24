@@ -1,0 +1,261 @@
+/* detailPopup 페이드인 애니메이션 */
+@keyframes detailPopupFadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+#detailPopup.animate-in {
+    animation: detailPopupFadeIn 0.3s ease-out forwards;
+}
+
+#detailPopup.animate-out {
+    animation: detailPopupFadeOut 0.3s ease-in forwards;
+}
+
+@keyframes detailPopupFadeOut {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+}
+
+/* 상세 팝업 모던 스타일 */
+.detail-popup-modern {
+    position: fixed;
+    z-index: 1000 !important; /* 일반적인 팝업 레벨 */
+    width: 400px;
+    max-width: 90vw;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    animation: detailPopupFadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.detail-popup-modern .close-btn-modern {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6b7280;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    z-index: 1001 !important; /* 팝업보다 위에 표시 */
+}
+
+.detail-popup-modern .close-btn-modern:hover {
+    color: #374151;
+}
+
+.detail-popup-modern .popup-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 20px 15px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.detail-popup-modern .missionary-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.detail-popup-modern .missionary-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.detail-popup-modern .missionary-info {
+    flex: 1;
+}
+
+.detail-popup-modern .missionary-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 5px;
+}
+
+.detail-popup-modern .missionary-location {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.detail-popup-modern .prayer-btn {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.detail-popup-modern .prayer-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(240, 147, 251, 0.4);
+}
+
+.detail-popup-modern .popup-body {
+    padding: 20px;
+}
+
+.detail-popup-modern .info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.detail-popup-modern .info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.detail-popup-modern .info-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.detail-popup-modern .info-content {
+    flex: 1;
+}
+
+.detail-popup-modern .info-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 2px;
+}
+
+.detail-popup-modern .info-value {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+}
+
+.detail-popup-modern .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 10px;
+}
+
+.detail-popup-modern .prayer-content {
+    color: #4a5568;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .detail-popup-modern {
+        width: 95vw;
+        max-width: 95vw;
+        margin: 10px;
+    }
+}
+
+/* 선교사 이름 팝업 스타일 (국가별/노회별 보기 모드용) */
+.missionary-name-popup {
+    position: absolute;
+    background: #00509e;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: opacity 0.2s ease;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.missionary-name-popup:hover {
+    opacity: 0.9;
+}
+
+/* 최근 업데이트된 선교사의 이름 팝업 강조 */
+.missionary-name-popup.recent {
+    background: #28a745;
+    font-weight: 600;
+}
+
+/* 원형 배치된 이름 팝업 스타일 */
+.missionary-name-popup.circular {
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 3px;
+    background: rgba(0, 80, 158, 0.9);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.missionary-name-popup.circular.recent {
+    background: rgba(40, 167, 69, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 애니메이션 효과 */
+@keyframes missionaryNamePopupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes circularPopupFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.missionary-name-popup {
+    animation: missionaryNamePopupFadeIn 0.3s ease-out;
+}
+
+.missionary-name-popup.circular {
+    animation: circularPopupFadeIn 0.4s ease-out;
+}

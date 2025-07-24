@@ -1,0 +1,20 @@
+/* =========================
+   기장선교지도 CSS 모듈 시스템
+   ========================= */
+
+/* Base 모듈 */
+@import 'base/variables.css';
+@import 'base/reset.css';
+
+/* Layout 모듈 */
+@import 'layout/map.css';
+@import 'layout.css';
+
+/* Components 모듈 */
+@import 'components/header.css';
+@import 'components/search.css';
+
+/* Features 모듈 */
+@import 'features/prayer-count.css';
+
+/* 추가 모듈들은 필요에 따라 계속 추가 예정 */ 

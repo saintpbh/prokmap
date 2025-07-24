@@ -1,0 +1,621 @@
+/* animation.css: 애니메이션, 트랜지션 등 */
+
+/* 플로팅 선교사 팝업 */
+.floating-missionary-wrapper {
+    position: absolute;
+    z-index: 120; /* 테이블보다 높게 */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.floating-missionary-wrapper.fade-in {
+    opacity: 1;
+}
+
+.floating-missionary-wrapper.fade-out {
+    opacity: 0;
+}
+
+.floating-missionary-content {
+    position: relative; /* 말풍선 꼬리를 위한 position 설정 */
+    background: #fff;
+    color: #333;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: auto; /* 내용에 맞춰 자동 */
+    max-width: 300px; /* 너무 넓어지지 않도록 */
+    font-size: 14px;
+}
+
+/* 말풍선 꼬리 (아래를 향하는 삼각형) */
+.floating-missionary-content::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; /* 팝업 하단에 위치 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #fff; /* 배경색과 동일하게 */
+}
+
+.floating-missionary-content.recent {
+    border-left: 4px solid #ff6b35;
+}
+
+.floating-missionary-content img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.floating-missionary-content .name {
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.floating-missionary-content .prayer {
+    font-size: 12px;
+    color: #666;
+}
+
+/* 검색 플로팅 라벨 */
+.search-floating-label {
+    position: absolute;
+    z-index: 1000;
+    pointer-events: auto;
+    animation: floatInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+@keyframes floatInFromTop {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.floating-label-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 20px;
+    padding: 12px 16px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    min-width: 200px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.floating-label-content:hover,
+.floating-label-content.selected {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.18),
+        0 0 0 1px rgba(103, 126, 234, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(103, 126, 234, 0.4);
+}
+
+.floating-label-content.selected {
+    background: rgba(103, 126, 234, 0.1);
+    border-color: rgba(103, 126, 234, 0.8);
+    animation: selectedPulse 1.5s infinite;
+}
+
+@keyframes selectedPulse {
+    0%, 100% {
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.18),
+            0 0 0 1px rgba(103, 126, 234, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    50% {
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.18),
+            0 0 0 3px rgba(103, 126, 234, 0.8),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+}
+
+.floating-label-content::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.floating-label-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    margin-right: 12px;
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.floating-label-content:hover .floating-label-avatar {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(103, 126, 234, 0.4);
+}
+
+.floating-label-info {
+    flex: 1;
+}
+
+.floating-label-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #2d3748;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.floating-label-location {
+    font-size: 11px;
+    color: #718096;
+    font-weight: 500;
+}
+
+.floating-label-index {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 11px;
+    margin-left: 8px;
+    box-shadow: 0 2px 8px rgba(255, 216, 155, 0.4);
+}
+
+/* 마커 펄스 효과 */
+.search-pulse-marker {
+    animation: enhancedSearchPulse 2s infinite;
+    z-index: 999;
+}
+
+@keyframes enhancedSearchPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(103, 126, 234, 0.8);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 20px rgba(103, 126, 234, 0);
+        transform: scale(1.1);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(103, 126, 234, 0);
+        transform: scale(1);
+    }
+}
+
+/* 마커 흐림 효과 */
+.search-dimmed-marker {
+    opacity: 0.25;
+    filter: grayscale(0.8) blur(1px);
+    transition: all 0.4s ease;
+    z-index: 1;
+}
+
+/* 검색 결과 카운터 */
+.search-result-counter {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.3);
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1002;
+}
+
+.search-result-counter.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.search-result-counter::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #667eea;
+}
+
+/* 검색어 하이라이트 */
+.search-highlight {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    padding: 0 2px;
+    position: relative;
+}
+
+.search-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 216, 155, 0.2), rgba(25, 84, 123, 0.2));
+    border-radius: 3px;
+    z-index: -1;
+}
+
+/* 플로팅 라벨 애니메이션 */
+@keyframes floatingLabelAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 플로팅 선교사 라벨 */
+.floating-missionary-label {
+    position: absolute;
+    z-index: 1000;
+    pointer-events: auto;
+    cursor: pointer;
+    transform-origin: center bottom;
+    animation: floatingLabelAppear 0.5s ease-out both;
+}
+
+.floating-label-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 20px;
+    padding: 12px 16px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    min-width: 200px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.floating-missionary-label:hover .floating-label-content {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.18),
+        0 0 0 1px rgba(103, 126, 234, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(103, 126, 234, 0.4);
+}
+
+.floating-missionary-label.selected .floating-label-content {
+    background: rgba(103, 126, 234, 0.1);
+    border-color: rgba(103, 126, 234, 0.8);
+    animation: selectedPulse 1.5s infinite;
+}
+
+@keyframes selectedPulse {
+    0%, 100% {
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.18),
+            0 0 0 1px rgba(103, 126, 234, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    50% {
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.18),
+            0 0 0 3px rgba(103, 126, 234, 0.8),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+}
+
+.floating-label-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    margin-right: 12px;
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.floating-missionary-label.selected .floating-label-avatar {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(103, 126, 234, 0.4);
+}
+
+.floating-label-info {
+    flex: 1;
+}
+
+.floating-label-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #2d3748;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.floating-missionary-label.selected .floating-label-name {
+    color: #667eea;
+}
+
+.floating-label-location {
+    font-size: 11px;
+    color: #718096;
+    font-weight: 500;
+}
+
+.floating-missionary-label.selected .floating-label-location {
+    color: #667eea;
+}
+
+.floating-label-index {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 11px;
+    margin-left: 8px;
+    box-shadow: 0 2px 8px rgba(255, 216, 155, 0.4);
+}
+
+.floating-missionary-label.selected .floating-label-index {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 2px 8px rgba(103, 126, 234, 0.4);
+}
+
+.floating-label-tail {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    transition: all 0.3s ease;
+}
+
+.floating-missionary-label.selected .floating-label-tail {
+    border-top-color: rgba(103, 126, 234, 0.1);
+}
+
+/* 마커 펄스 효과 */
+.search-pulse-marker {
+    animation: markerPulse 2s infinite;
+    z-index: 999;
+}
+
+@keyframes markerPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(103, 126, 234, 0.8);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 20px rgba(103, 126, 234, 0);
+        transform: scale(1.1);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(103, 126, 234, 0);
+        transform: scale(1);
+    }
+}
+
+/* 마커 흐림 효과 */
+.search-dimmed-marker {
+    opacity: 0.25;
+    filter: grayscale(0.8) blur(1px);
+    transition: all 0.4s ease;
+    z-index: 1;
+}
+
+/* 검색 결과 카운터 */
+.search-result-counter {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.3);
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1002;
+}
+
+.search-result-counter.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.search-result-counter .result-count {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* 검색 메시지 */
+.search-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.search-message.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.search-message.loading {
+    background: rgba(59, 130, 246, 0.9);
+}
+
+.search-message.error {
+    background: rgba(239, 68, 68, 0.9);
+}
+
+.search-message.no-results {
+    background: rgba(245, 158, 11, 0.9);
+}
+
+/* 검색어 하이라이트 */
+.search-highlight {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    padding: 0 2px;
+    position: relative;
+}
+
+.floating-missionary-label.selected .search-highlight {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 지도 마커 포커스 애니메이션 */
+@keyframes marker-focus-pulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.3); filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+.marker-focused {
+    animation: marker-focus-pulse 0.6s ease-in-out;
+    z-index: 1000 !important;
+}
+
+/* 마커 클러스터 포커스 효과 */
+.marker-cluster-focused {
+    animation: marker-focus-pulse 0.6s ease-in-out;
+    z-index: 1000 !important;
+}
+
+/* 뉴스바 애니메이션 */
+@keyframes glow-breath {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(33, 149, 243, 0.3);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(33, 149, 243, 0.5);
+        transform: scale(1.02);
+    }
+}
+
+@keyframes marquee-left {
+    from { transform: translateX(100%); }
+    to { transform: translateX(-100%); }
+}
+
+@keyframes news-fadein {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 사이드바 애니메이션 */
+@keyframes pulse-glow {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+/* 테이블 오버레이 애니메이션 */
+@keyframes floatUpAndFade {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+} 

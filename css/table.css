@@ -1,0 +1,207 @@
+/* table.css: 테이블, 리스트, 표 관련 스타일 */
+
+/* 테이블 스타일 - 원래 위치와 크기로 복원 */
+#missionary-table-country,
+#missionary-table-presbytery {
+    position: fixed;
+    padding: 12px 10px 8px 10px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    z-index: 100; /* 제목 로고보다 낮게 */
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    font-family: var(--font-body);
+    margin-bottom: 18px;
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    opacity: 0.95;
+}
+
+#missionary-table-country {
+    top: 110px;
+    left: 10px;
+    right: auto;
+    min-width: 140px;
+    max-width: 160px;
+    width: 160px;
+}
+
+#missionary-table-presbytery {
+    top: 110px;
+    left: 200px;
+    right: auto;
+    min-width: 140px;
+    max-width: 160px;
+    width: 160px;
+}
+
+/* 테이블 제목 - 원래 스타일로 복원 */
+#missionary-table-country > div:first-child,
+#missionary-table-presbytery > div:first-child {
+    font-size: 0.75em;
+    margin-bottom: 6px;
+}
+
+/* 테이블 스크롤바 스타일링 */
+#missionary-table-country::-webkit-scrollbar,
+#missionary-table-presbytery::-webkit-scrollbar {
+    width: 6px;
+}
+
+#missionary-table-country::-webkit-scrollbar-track,
+#missionary-table-presbytery::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+#missionary-table-country::-webkit-scrollbar-thumb,
+#missionary-table-presbytery::-webkit-scrollbar-thumb {
+    background: #b6c6e3;
+    border-radius: 3px;
+}
+
+#missionary-table-country::-webkit-scrollbar-thumb:hover,
+#missionary-table-presbytery::-webkit-scrollbar-thumb:hover {
+    background: #a0b3d6;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+    font-size: 0.6em;
+    background: none;
+    table-layout: fixed;
+}
+
+th, td {
+    padding: 4px 0;
+    text-align: left;
+    border-bottom: 1.5px solid #e0e0e0;
+    transition: all 0.2s ease;
+    font-size: 0.55em;
+}
+
+th {
+    background: rgba(247, 247, 247, 0.5);
+    font-weight: bold;
+    font-size: 0.6em;
+    color: #495057;
+    text-transform: none;
+    letter-spacing: normal;
+    position: static;
+    z-index: auto;
+}
+
+th:first-child {
+    border-top-left-radius: 0;
+}
+
+th:last-child {
+    border-top-right-radius: 0;
+}
+
+td {
+    font-size: 0.6em;
+    color: #212529;
+    font-weight: normal;
+    padding: 3px 0;
+    background: none;
+}
+
+tr:hover td {
+    background: rgba(102, 126, 234, 0.05);
+    transform: none;
+}
+
+.country-click,
+.presbytery-click {
+    cursor: pointer;
+    color: #00509e;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.country-click:hover,
+.presbytery-click:hover {
+    color: #003d82;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+}
+
+.flag-icon {
+    width: 16px;
+    height: 12px;
+    border-radius: 2px;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: #1976d2;
+}
+
+tr {
+    transition: all 0.2s ease;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+}
+
+tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+}
+
+/* 국가별 모드 종료 버튼 - Shoelace 스타일로 재구성 */
+#country-exit-btn {
+    position: fixed;
+    top: 100px; /* 타이틀 바로 아래 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+#country-exit-btn.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#country-exit-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+}
+
+/* 노회별 모드 종료 버튼 - 국가별 버튼과 같은 스타일 */
+#presbytery-exit-btn {
+    position: fixed;
+    top: 100px; /* 타이틀 바로 아래 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+#presbytery-exit-btn.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#presbytery-exit-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+} 

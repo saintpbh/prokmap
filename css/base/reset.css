@@ -1,0 +1,84 @@
+/* 기본 스타일 */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-text);
+    overflow: hidden; /* 전체화면에서 스크롤 방지 */
+}
+
+/* 전체화면 모드에서 스크롤 완전 방지 */
+body.fullscreen-mode {
+    overflow: hidden !important;
+}
+
+body.fullscreen-mode #map {
+    overflow: hidden !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--color-text);
+}
+
+/* 기본 테이블 스타일 */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+
+th {
+    background: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+th:first-child {
+    border-top-left-radius: 8px;
+}
+
+th:last-child {
+    border-top-right-radius: 8px;
+}
+
+td {
+    font-size: 14px;
+    color: var(--color-text);
+}
+
+tr:hover td {
+    background: rgba(37, 99, 235, 0.05);
+}
+
+/* 기본 구분선 */
+hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 20px 0;
+}
+
+/* 기본 텍스트 영역 */
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 14px;
+    resize: vertical;
+    min-height: 100px;
+} 

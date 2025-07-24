@@ -1,0 +1,69 @@
+/* 제목 로고 - 3D 플립 컨테이너 */
+#titleLogo {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    cursor: pointer;
+    perspective: 1000px;
+    min-width: 450px;
+    max-width: 85vw;
+    height: 50px;
+}
+
+.title-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title-flip-inner.flipped {
+    transform: rotateY(180deg);
+}
+
+.title-front, .title-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(20px) saturate(180%);
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    color: var(--color-text);
+    letter-spacing: -0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title-front {
+    font-size: 1.3em;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.title-back {
+    transform: rotateY(180deg);
+    padding: 10px 16px;
+}
+
+.title-front:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 24px 72px rgba(0, 0, 0, 0.2);
+}
+
+#titleLogo.anim-off .title-front {
+    opacity: 0.6;
+    background: rgba(255, 255, 255, 0.8);
+} 

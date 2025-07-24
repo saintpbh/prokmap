@@ -1,0 +1,482 @@
+/* component.css: 버튼, 카드, 뱃지 등 재사용 컴포넌트 */
+
+.fullscreen-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    color: #667eea;
+}
+
+.fullscreen-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    color: #764ba2;
+}
+
+.fullscreen-btn.hidden {
+    display: none;
+}
+
+.fullscreen-btn svg {
+    width: 20px;
+    height: 20px;
+    transition: all 0.2s ease;
+}
+
+.fullscreen-btn:hover svg {
+    transform: scale(1.1);
+}
+
+/* 뉴스레터 오버레이 - 현대적 디자인 */
+#newsletter-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+#newsletter-content {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    max-width: 90vw;
+    max-height: 90vh;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+#newsletter-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    z-index: 10;
+}
+
+#newsletter-close-btn:hover {
+    background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+}
+
+/* 범례 - 현대적 디자인 */
+.leaflet-legend-box {
+    background: transparent;
+    backdrop-filter: none;
+    padding: 12px 16px;
+    border-radius: 16px;
+    box-shadow: none;
+    border: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-orange {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+}
+
+/* 설정 버튼 스타일 */
+.settings-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 18.67px; /* 28px의 2/3 */
+    height: 18.67px; /* 28px의 2/3 */
+    background-color: #808080; /* 회색 */
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.settings-btn:hover {
+    background-color: #666666; /* 호버 시 더 진한 회색 */
+}
+
+.settings-btn svg {
+    width: 12px; /* 18px의 2/3 */
+    height: 12px; /* 18px의 2/3 */
+    color: white;
+}
+
+/* 설정/뉴스레터 업로드 모달 */
+#setup-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 3000;
+}
+
+.setup-modal-backdrop {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.25);
+}
+
+.setup-modal-content {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    padding: 32px 28px 24px 28px;
+    min-width: 320px;
+    max-width: 90vw;
+}
+
+.setup-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.setup-modal-title {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.setup-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.6em;
+    color: #888;
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.setup-modal-close:hover {
+    background: #eee;
+    color: #d32f2f;
+}
+
+#newsletter-upload-form label {
+    font-weight: bold;
+}
+
+#newsletter-upload-form input[type="file"] {
+    margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+#newsletter-upload-form button[type="submit"] {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+#newsletter-upload-form button[type="submit"]:hover {
+    background: #0d47a1;
+}
+
+/* 설정 모달 - 현대적 디자인 */
+.modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    z-index: 10001;
+    left: 0; top: 0; width: 100vw; height: 100vh;
+    background: transparent;
+    backdrop-filter: none;
+}
+
+.modal-content {
+    background: var(--modal-bg);
+    border-radius: var(--modal-radius);
+    box-shadow: var(--modal-shadow);
+    padding: var(--modal-padding);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-content h2 {
+    margin: 0 0 20px 0;
+    font-size: 1.5em;
+    font-weight: 600;
+    color: var(--modal-title);
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--modal-text);
+}
+
+.modal-content input[type="number"],
+.modal-content input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--modal-input-border);
+    border-radius: 6px;
+    font-size: 1em;
+    margin-bottom: 16px;
+}
+
+.modal-content input[type="number"]:focus,
+.modal-content input[type="text"]:focus {
+    outline: none;
+    border-color: var(--modal-focus);
+}
+
+.modal-content button,
+.modal-content input[type="submit"] {
+    background: var(--modal-button-bg);
+    color: var(--modal-button-text);
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+    margin-right: 10px;
+}
+
+.modal-content button:hover,
+.modal-content input[type="submit"]:hover {
+    background: var(--modal-button-hover);
+}
+
+.modal-content .close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: #888;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.modal-content .close:hover {
+    background: #eee;
+    color: #d32f2f;
+}
+
+.modal-content .upload-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--modal-divider);
+}
+
+.modal-content h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+#newsletter-upload-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+#newsletter-upload-form input[type="file"] {
+    margin-bottom: 16px;
+}
+
+#newsletter-upload-form button {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+#news-speed-apply-btn {
+    background: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+    vertical-align: middle;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 28px;
+}
+
+.toggle-switch .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.toggle-switch input:checked + .slider {
+    background-color: #2196f3;
+}
+
+.toggle-switch input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.toggle-switch .slider {
+    box-shadow: 0 2px 8px rgba(33,150,243,0.08);
+}
+
+/* Tab Navigation */
+.tab-nav {
+    display: flex;
+    border-bottom: 2px solid var(--modal-divider, #e3eaf3);
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-size: 1.05em;
+    font-weight: 600;
+    color: #888;
+    position: relative;
+    transition: color 0.3s;
+}
+
+.tab-button:hover {
+    color: var(--modal-title, #1976d2);
+}
+
+.tab-button.active {
+    color: var(--modal-title, #1976d2);
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--modal-title, #1976d2);
+}
+
+/* Tab Content */
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--modal-divider, #e3eaf3);
+}
+
+textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--modal-input-border, #ccc);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1em;
+    resize: vertical;
+} 

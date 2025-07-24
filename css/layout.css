@@ -1,0 +1,90 @@
+/* layout.css: 전체 레이아웃, 지도, 타이틀바, UI 컨트롤 등 */
+
+#map {
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    position: relative; /* 팝업이 지도 위에 정확히 뜨도록 기준 설정 */
+}
+
+#titleLogo {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    cursor: pointer;
+    perspective: 1000px;
+    min-width: 450px;
+    max-width: 85vw;
+    height: 50px;
+}
+
+#ui-controls {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 24px !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    gap: 12px;
+    align-items: center;
+    background: rgba(255,255,255,0.1) !important;
+    padding: 8px !important;
+    border-radius: 8px !important;
+}
+
+/* 사각형 버튼 스타일 */
+.square-button {
+    background: rgba(255,255,255,0.2) !important;
+    border: 1px solid rgba(25,118,210,0.4) !important;
+    border-radius: 6px !important;
+    padding: 8px 10px !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    color: rgba(25,118,210,0.9) !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    backdrop-filter: blur(8px) !important;
+    min-width: 40px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    z-index: 10000 !important;
+}
+
+.square-button:hover {
+    background: rgba(25,118,210,0.1) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 12px rgba(25,118,210,0.2) !important;
+    border-color: rgba(25,118,210,0.6) !important;
+}
+
+.square-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(25,118,210,0.2);
+}
+
+.square-button.hidden {
+    display: none !important;
+}
+
+.settings-panel {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    z-index: 400;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    padding: 24px 32px;
+    min-width: 320px;
+    max-width: 90vw;
+    display: none;
+}
+
+.settings-panel.open {
+    display: block;
+} 

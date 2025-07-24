@@ -1,0 +1,4843 @@
+/* =========================
+   뉴스바 배경색을 바꾸려면 아래 변수만 수정하세요!
+   예시: #1976d2, #2196f3, rgba(33,150,243,0.92) 등
+   ========================= */
+:root {
+  --sl-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sl-color-primary-50: #eef8ff;
+  --sl-color-primary-100: #d1eaff;
+  --sl-color-primary-200: #b1d9ff;
+  --sl-color-primary-300: #88c5ff;
+  --sl-color-primary-400: #5aa9ff;
+  --sl-color-primary-500: #2b87ff;
+  --sl-color-primary-600: #1a73ff;
+  --sl-color-primary-700: #0f62ff;
+  --sl-color-primary-800: #0a4ecc;
+  --sl-color-primary-900: #104199;
+  --sl-color-primary-950: #0d2859;
+  --news-bar-bg: rgba(33, 149, 243, 0.196); /* ← 여기서 색상 지정 */
+  --news-bar-text: #fff; /* ← 자막(글자)색 기본값 */
+  --modal-bg: rgba(255,255,255,0.98);
+  --modal-shadow: 0 8px 40px rgba(33, 150, 243, 0.18);
+  --modal-radius: 18px;
+  --modal-title: #1976d2;
+  --modal-divider: #e3eaf3;
+  --modal-label: #1976d2;
+  --modal-btn-bg: #2196f3;
+  --modal-btn-bg-hover: #1976d2;
+  --modal-btn-color: #fff;
+  --modal-input-bg: #f7fafd;
+  --modal-input-border: #b6c6e3;
+  --color-primary: #2563eb;
+  --color-primary-light: #3b82f6;
+  --color-bg: #f9fafb;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text: #111827;
+  --color-muted: #6b7280;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,.05);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.10);
+  --font-heading: "Inter", "Pretendard", var(--sl-font-sans);
+  --font-body: "Pretendard", var(--sl-font-sans);
+}
+
+/* 기본 스타일 */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-text);
+    overflow: hidden; /* 전체화면에서 스크롤 방지 */
+}
+
+/* 전체화면 모드에서 스크롤 완전 방지 */
+body.fullscreen-mode {
+    overflow: hidden !important;
+}
+
+body.fullscreen-mode #map {
+    overflow: hidden !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--color-text);
+}
+
+#map {
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    position: relative; /* 팝업이 지도 위에 정확히 뜨도록 기준 설정 */
+}
+
+/* 제목 로고 - 3D 플립 컨테이너 */
+#titleLogo {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    cursor: pointer;
+    perspective: 1000px;
+    min-width: 450px;
+    max-width: 85vw;
+    height: 50px;
+}
+
+.title-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title-flip-inner.flipped {
+    transform: rotateY(180deg);
+}
+
+.title-front, .title-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(20px) saturate(180%);
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    color: var(--color-text);
+    letter-spacing: -0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title-front {
+    font-size: 1.3em;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.title-back {
+    transform: rotateY(180deg);
+    padding: 10px 16px;
+}
+
+.title-front:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 24px 72px rgba(0, 0, 0, 0.2);
+}
+
+#titleLogo.anim-off .title-front {
+    opacity: 0.6;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+/* 검색 컨테이너 */
+.search-container {
+    position: relative;
+    width: 100%;
+}
+
+/* 🎨 예쁜 검색 입력창 디자인 */
+.search-input-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.95));
+    border: 2px solid transparent;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(10px);
+}
+
+.search-input-wrapper:focus-within {
+    transform: translateY(-2px) scale(1.02);
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 
+        0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+        0 10px 10px -5px rgba(0, 0, 0, 0.04),
+        0 0 0 3px rgba(99, 102, 241, 0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+}
+
+.search-icon {
+    padding: 0 16px;
+    color: rgba(99, 102, 241, 0.7);
+    font-size: 18px;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.search-input-wrapper:focus-within .search-icon {
+    color: rgba(99, 102, 241, 0.9);
+    transform: scale(1.1);
+}
+
+#missionary-search {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 16px 8px;
+    background: transparent;
+    font-size: 15px;
+    color: var(--color-text);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+#missionary-search::placeholder {
+    color: rgba(107, 114, 128, 0.6);
+    font-weight: 400;
+    transition: all 0.2s ease;
+}
+
+#missionary-search:focus::placeholder {
+    color: rgba(107, 114, 128, 0.4);
+    transform: translateX(4px);
+}
+
+.search-clear {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+    border: none;
+    padding: 8px 12px;
+    margin: 4px 8px 4px 0;
+    border-radius: 12px;
+    cursor: pointer;
+    color: rgba(239, 68, 68, 0.7);
+    font-size: 14px;
+    font-weight: 600;
+    display: none;
+    flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-clear:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
+    color: rgba(239, 68, 68, 0.9);
+    transform: scale(1.05);
+}
+
+.search-clear.show {
+    display: block;
+    animation: slideInRight 0.2s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* 검색 끄기 버튼 */
+.search-close-btn {
+    position: absolute;
+    top: 50%;
+    right: -85px;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.search-close-btn:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-50%) translateX(-2px) scale(1.05);
+    box-shadow: 0 8px 12px -1px rgba(239, 68, 68, 0.4);
+}
+
+.search-close-btn:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* 🎯 검색 시 지도 마커 하이라이트 */
+.search-highlight-marker {
+    animation: searchPulse 1.5s ease-in-out infinite;
+    transform: scale(1.2);
+    filter: brightness(1.3) saturate(1.4);
+    z-index: 1000 !important;
+}
+
+.search-dimmed-marker {
+    opacity: 0.3;
+    filter: grayscale(0.7);
+    transform: scale(0.85);
+    transition: all 0.3s ease;
+}
+
+@keyframes searchPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+        transform: scale(1.2);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+        transform: scale(1.3);
+    }
+}
+
+/* 검색 결과 드롭다운 개선 */
+.search-results-dropdown.show {
+    animation: slideDownFade 0.3s ease-out;
+}
+
+@keyframes slideDownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 검색 결과 드롭다운 */
+.search-results-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-results-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.search-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform: translateX(0);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover,
+.search-result-item.selected {
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1));
+    transform: translateX(8px);
+}
+
+.search-result-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.search-result-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-result-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-result-location {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.search-highlight {
+    background: linear-gradient(135deg, #fef3c7, #fbbf24);
+    padding: 1px 3px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.search-no-results {
+    padding: 20px;
+    text-align: center;
+    color: var(--color-muted);
+    font-style: italic;
+}
+
+/* 지도 dimming 효과 */
+#map.search-mode {
+    filter: brightness(0.7) blur(1px);
+    transition: all 0.3s ease;
+}
+
+/* 검색 모드 시 마커 하이라이트 */
+.search-highlighted-marker {
+    animation: search-pulse 2s infinite;
+    z-index: 1000 !important;
+}
+
+@keyframes search-pulse {
+    0%, 100% { 
+        transform: scale(1);
+        filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+    }
+    50% { 
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 16px rgba(59, 130, 246, 0.8));
+    }
+}
+
+/* 검색 결과 스크롤바 */
+.search-results-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted);
+}
+
+
+
+/* 테이블 스타일 - 원래 위치와 크기로 복원 */
+#missionary-table-country,
+#missionary-table-presbytery {
+    position: fixed;
+    padding: 12px 10px 8px 10px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    z-index: 100; /* 제목 로고보다 낮게 */
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    font-family: var(--font-body);
+    margin-bottom: 18px;
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    opacity: 0.95;
+}
+
+#missionary-table-country {
+    top: 110px;
+    left: 10px;
+    right: auto;
+    min-width: 140px;
+    max-width: 160px;
+    width: 160px;
+}
+
+#missionary-table-presbytery {
+    top: 110px;
+    left: 200px;
+    right: auto;
+    min-width: 140px;
+    max-width: 160px;
+    width: 160px;
+}
+
+/* 테이블 제목 - 원래 스타일로 복원 */
+#missionary-table-country > div:first-child,
+#missionary-table-presbytery > div:first-child {
+    font-size: 0.75em;
+    margin-bottom: 6px;
+}
+
+/* 테이블 스크롤바 스타일링 */
+#missionary-table-country::-webkit-scrollbar,
+#missionary-table-presbytery::-webkit-scrollbar {
+    width: 6px;
+}
+
+#missionary-table-country::-webkit-scrollbar-track,
+#missionary-table-presbytery::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+#missionary-table-country::-webkit-scrollbar-thumb,
+#missionary-table-presbytery::-webkit-scrollbar-thumb {
+    background: #b6c6e3;
+    border-radius: 3px;
+}
+
+#missionary-table-country::-webkit-scrollbar-thumb:hover,
+#missionary-table-presbytery::-webkit-scrollbar-thumb:hover {
+    background: #a0b3d6;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+    font-size: 0.6em;
+    background: none;
+    table-layout: fixed;
+}
+
+th, td {
+    padding: 4px 0;
+    text-align: left;
+    border-bottom: 1.5px solid #e0e0e0;
+    transition: all 0.2s ease;
+    font-size: 0.55em;
+}
+
+th {
+    background: rgba(247, 247, 247, 0.5);
+    font-weight: bold;
+    font-size: 0.6em;
+    color: #495057;
+    text-transform: none;
+    letter-spacing: normal;
+    position: static;
+    z-index: auto;
+}
+
+th:first-child {
+    border-top-left-radius: 0;
+}
+
+th:last-child {
+    border-top-right-radius: 0;
+}
+
+td {
+    font-size: 0.6em;
+    color: #212529;
+    font-weight: normal;
+    padding: 3px 0;
+    background: none;
+}
+
+tr:hover td {
+    background: rgba(102, 126, 234, 0.05);
+    transform: none;
+}
+
+.country-click,
+.presbytery-click {
+    cursor: pointer;
+    color: #00509e;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.country-click:hover,
+.presbytery-click:hover {
+    color: #003d82;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+}
+
+.flag-icon {
+    width: 16px;
+    height: 12px;
+    border-radius: 2px;
+    vertical-align: middle;
+}
+
+td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: #1976d2;
+}
+
+tr {
+    transition: all 0.2s ease;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+}
+
+tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+}
+
+/* 국가별 모드 종료 버튼 - Shoelace 스타일로 재구성 */
+#country-exit-btn {
+    position: fixed;
+    top: 100px; /* 타이틀 바로 아래 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+#country-exit-btn.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#country-exit-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+}
+
+/* 노회별 모드 종료 버튼 - 국가별 버튼과 같은 스타일 */
+#presbytery-exit-btn {
+    position: fixed;
+    top: 100px; /* 타이틀 바로 아래 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+#presbytery-exit-btn.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#presbytery-exit-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+}
+
+/* 플로팅 선교사 팝업 */
+.floating-missionary-wrapper {
+    position: absolute;
+    z-index: 120; /* 테이블보다 높게 */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.floating-missionary-wrapper.fade-in {
+    opacity: 1;
+}
+
+.floating-missionary-wrapper.fade-out {
+    opacity: 0;
+}
+
+.floating-missionary-content {
+    position: relative; /* 말풍선 꼬리를 위한 position 설정 */
+    background: #fff;
+    color: #333;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: auto; /* 내용에 맞춰 자동 */
+    max-width: 300px; /* 너무 넓어지지 않도록 */
+    font-size: 14px;
+}
+
+/* 말풍선 꼬리 (아래를 향하는 삼각형) */
+.floating-missionary-content::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; /* 팝업 하단에 위치 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #fff; /* 팝업과 같은 흰색 */
+}
+
+.floating-missionary-content.recent {
+    border: 2px solid orange;
+}
+
+.floating-missionary-content img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.floating-missionary-content .name {
+    font-weight: bold;
+    font-size: 1.05em;
+    padding-bottom: 0;
+    border-bottom: none;
+    margin-bottom: 4px;
+}
+
+.floating-missionary-content .prayer {
+    font-size: 0.9em;
+    color: #555;
+    line-height: 1.4;
+}
+
+/* 상세 팝업 - Shoelace 카드 기반 */
+#detailPopupContainer {
+    /* 화면 중앙에 고정 배치 */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999; /* 최상위 레이어로 설정 */
+    display: none; /* 평소에는 숨겨 둠 */
+    pointer-events: none; /* 팝업 영역 외에는 클릭이 통과되도록 */
+    transition: all 0.3s ease; /* 위치 변경 시 부드러운 애니메이션 */
+}
+
+/* 사이드바 근처에 위치할 때의 스타일 */
+#detailPopupContainer.sidebar-positioned {
+    top: 50%;
+    left: calc(50% - 100px); /* 사이드바 쪽으로 약간 이동 */
+    transform: translate(-50%, -50%);
+}
+
+#detailPopupContainer > * {
+    pointer-events: auto; /* 팝업 자체는 클릭 가능하도록 */
+    max-width: 92vw; /* 작은 화면에서 넘치지 않도록 */
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* 뉴스바 */
+#news-bar {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    background: var(--sl-color-primary-600);
+    color: #fff;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 2px 16px 0 #0003;
+    z-index: 1002;
+    display: none; /* 기본적으로 숨김 */
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    min-width: 180px;
+    min-height: 36px;
+    max-width: 90vw;
+    transition: all 0.7s cubic-bezier(0.4,0,0.2,1);
+    opacity: 0.85;
+}
+#news-bar.news-loading {
+  animation: glow-breath 2.2s ease-in-out infinite;
+  background: var(--sl-color-primary-500);
+}
+@keyframes glow-breath {
+  0%, 100% { 
+    box-shadow: 0 0 0px 0px rgba(255,255,255,0.3), 0 0 0px 0px rgba(255,255,255,0.2); 
+  }
+  50% { 
+    box-shadow: 0 0 24px 8px rgba(255,255,255,0.4), 0 0 48px 16px rgba(255,255,255,0.3); 
+  }
+}
+#news-bar .news-text {
+  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 8px #fff8, 0 0px 2px #0006;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: inherit;
+  transition: color 0.3s;
+}
+#news-bar .news-close {
+  background: rgba(255,255,255,0.18);
+  border: none;
+  color: #fff;
+  font-size: 1.5em;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  margin-left: 12px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px #0002;
+  transition: background 0.2s;
+}
+#news-bar .news-close:hover {
+  background: rgba(255,255,255,0.32);
+}
+
+
+#news-bar .news-marquee {
+  display: block;
+  will-change: transform;
+  min-width: 300%;
+  animation: marquee-left 100s linear infinite;
+}
+
+#news-bar .marquee-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+#news-bar .marquee-text {
+  white-space: nowrap;
+  animation: marquee-left 100s linear infinite;
+  will-change: transform;
+}
+
+@keyframes marquee-left {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+#news-bar .news-text.news-fadein {
+  opacity: 0;
+  animation: news-fadein 1s cubic-bezier(0.4,0,0.2,1) forwards;
+  transform: none !important;
+}
+
+@keyframes news-fadein {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+#news-bar .news-text.centered {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: max-content;
+  white-space: nowrap;
+  text-align: left;
+  opacity: 0;
+  animation: news-fadein 1s cubic-bezier(0.4,0,0.2,1) forwards;
+  font-size: inherit;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 8px #fff8, 0 0px 2px #0006;
+}
+
+/* iOS 스타일 토글 스위치 */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  vertical-align: middle;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 28px;
+}
+.toggle-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.toggle-switch input:checked + .slider {
+  background-color: #2196f3;
+}
+.toggle-switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+.toggle-switch .slider {
+  box-shadow: 0 2px 8px rgba(33,150,243,0.08);
+}
+
+/* Tab Navigation */
+.tab-nav {
+  display: flex;
+  border-bottom: 2px solid var(--modal-divider, #e3eaf3);
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 1.05em;
+  font-weight: 600;
+  color: #888;
+  position: relative;
+  transition: color 0.3s;
+}
+
+.tab-button:hover {
+  color: var(--modal-title, #1976d2);
+}
+
+.tab-button.active {
+  color: var(--modal-title, #1976d2);
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--modal-title, #1976d2);
+}
+
+/* Tab Content */
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+hr {
+  border: none;
+  border-top: 1px solid var(--modal-divider, #e3eaf3);
+}
+textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--modal-input-border, #ccc);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1em;
+  resize: vertical;
+}
+
+#news-bar {
+  background: var(--sl-color-primary-600);
+  opacity: 0.85;
+}
+
+#missionary-table-country,
+#missionary-table-presbytery {
+    background: var(--sl-color-neutral-0);
+    border: 1px solid var(--sl-color-neutral-200);
+    box-shadow: var(--sl-shadow-large);
+    backdrop-filter: blur(10px);
+    opacity: 0.9;
+}
+
+#detailPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001; /* 팝업이 최상단에 오도록 */
+    width: 380px; /* 전체 너비 축소 */
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow: visible; /* 그림자가 잘리지 않도록 */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.95);
+    pointer-events: none;
+}
+
+.detail-popup-card::part(base) {
+    border: 2px solid var(--sl-color-primary-200);
+}
+
+.detail-popup-card [slot="header"] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-popup-card h3 {
+    margin: 0;
+    font-size: var(--sl-font-size-large);
+}
+
+.detail-popup-card .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sl-spacing-medium);
+}
+
+.detail-popup-card .info-item {
+    font-size: var(--sl-font-size-small);
+}
+
+.detail-popup-card .info-item strong {
+    color: var(--sl-color-neutral-500);
+}
+
+/* Shoelace 설정 모달 커스텀 스타일 */
+.settings-dialog::part(body) {
+    overflow-y: auto;
+}
+
+.settings-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sl-spacing-large);
+}
+
+.setting-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sl-spacing-medium);
+}
+
+.setting-section .section-title {
+    font-size: var(--sl-font-size-medium);
+    font-weight: var(--sl-font-weight-semibold);
+    color: var(--sl-color-neutral-600);
+    margin-bottom: var(--sl-spacing-x-small);
+}
+
+.color-picker-group {
+    display: flex;
+    align-items: center;
+    gap: var(--sl-spacing-small);
+}
+.color-picker-group label {
+    display: flex;
+    align-items: center;
+    gap: var(--sl-spacing-x-small);
+    font-size: var(--sl-font-size-medium);
+}
+
+#news-bar .close-news-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    color: var(--sl-color-neutral-0);
+}
+
+.detail-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Shoelace 버튼 호버 효과 개선 */
+sl-icon-button:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+sl-button:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s ease;
+}
+
+/* 마커 툴팁 스타일 */
+.missionary-tooltip {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.missionary-tooltip::before {
+    border-top-color: rgba(0, 0, 0, 0.8);
+}
+
+.leaflet-popup-content .popup-list:last-child {
+  border-bottom: none;
+}
+
+/* Styles for missionary list with prayer topics */
+.leaflet-popup-content .missionary-entry {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+}
+.leaflet-popup-content .missionary-entry:last-child {
+    border-bottom: none;
+}
+.leaflet-popup-content .missionary-entry .missionary-name {
+    font-weight: bold;
+    font-size: 0.95em;
+}
+.leaflet-popup-content .missionary-entry .missionary-prayer-topic {
+    display: none; /* Hide by default */
+    padding: 8px 0 4px 10px;
+    margin-top: 4px;
+    font-size: 0.9em;
+    color: #333;
+    border-left: 2px solid #00509e;
+    background-color: #f8f9fa;
+}
+.leaflet-popup-content .missionary-entry.active .missionary-prayer-topic {
+    display: block; /* Show when active */
+}
+
+.country-table-overlay, .presbytery-table-overlay {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+@keyframes floatUpAndFade {
+    0%   { opacity: 0; transform: translateY(10px) scale(0.97); }
+    15%  { opacity: 1; transform: translateY(0) scale(1); }
+    85%  { opacity: 1; transform: translateY(-10px) scale(1.02); }
+    100% { opacity: 0; transform: translateY(-18px) scale(1.03); }
+}
+
+.detail-popup-card.fancy::part(base) {
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+.detail-cover {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+}
+.detail-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.detail-cover .cover-overlay {
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 100%;
+    background: linear-gradient(transparent 0%, rgba(0,0,0,0.7) 100%);
+    padding: 32px 20px 12px;
+    color: #fff;
+}
+.detail-cover .cover-overlay h2 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+.detail-cover sl-icon-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.55);
+    border-radius: 50%;
+}
+.detail-popup-body {
+    padding: 18px 22px 10px;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    background: var(--color-surface);
+}
+.detail-popup-footer {
+    padding: 12px 22px 18px;
+    background: var(--color-surface);
+    text-align: right;
+}
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 14px;
+    font-size: 0.9rem;
+}
+.info-grid sl-icon {
+    margin-right: 4px;
+    color: var(--color-primary);
+}
+.missionary-entry .missionary-name { font-weight: 600; font-size: 0.95em; }
+
+/* 선교사 이름 툴팁 스타일 (국가별 보기) */
+.missionary-name-tooltip {
+    background: rgba(25, 118, 210, 0.9) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    z-index: 1000 !important;
+}
+
+.missionary-name-tooltip::before {
+    border-top-color: rgba(25, 118, 210, 0.9) !important;
+}
+
+/* 마커 클러스터 커스텀 스타일 */
+.marker-cluster-small {
+    background-color: rgba(76, 175, 80, 0.6);
+}
+
+.marker-cluster-small div {
+    background-color: rgba(76, 175, 80, 0.8);
+}
+
+.marker-cluster-medium {
+    background-color: rgba(255, 152, 0, 0.6);
+}
+
+.marker-cluster-medium div {
+    background-color: rgba(255, 152, 0, 0.8);
+}
+
+.marker-cluster-large {
+    background-color: rgba(244, 67, 54, 0.6);
+}
+
+.marker-cluster-large div {
+    background-color: rgba(244, 67, 54, 0.8);
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+    width: 40px;
+    height: 40px;
+    margin-left: 3px;
+    margin-top: 3px;
+    text-align: center;
+    border-radius: 50%;
+    font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 검색 플로팅 라벨 애니메이션 */
+
+/* 마커 클러스터 spiderfy 선 스타일 (간격 넓히기) */
+.leaflet-cluster-spider-leg {
+    stroke-width: 2px !important;
+    stroke: rgba(25, 118, 210, 0.6) !important;
+    stroke-dasharray: none !important;
+}
+
+/* spiderfy된 마커 간격 조정 */
+.leaflet-marker-icon.marker-cluster-spiderfied {
+    z-index: 1000 !important;
+}
+
+/* 사이드바 패널 */
+.sidebar-panel {
+    position: fixed;
+    top: 0;
+    right: -400px; /* 초기에는 숨김 */
+    width: 400px;
+    height: 100vh;
+    background: var(--color-surface);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+    z-index: 2000; /* 더 높은 z-index로 설정 */
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+}
+
+.sidebar-panel.open {
+    right: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    font-family: var(--font-heading);
+}
+
+.sidebar-close {
+    color: var(--color-muted);
+}
+
+.sidebar-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar-search {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.sidebar-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.sidebar-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-list::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+}
+
+.sidebar-list::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted);
+}
+
+/* 사이드바 선교사 아이템 */
+.sidebar-missionary-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.sidebar-missionary-item:hover {
+    background: var(--color-bg);
+    transform: translateX(4px);
+}
+
+.sidebar-missionary-item.active {
+    background: rgba(37, 99, 235, 0.1);
+    border-left: 4px solid var(--color-primary);
+}
+
+.sidebar-missionary-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+.sidebar-missionary-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sidebar-missionary-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--color-text);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-missionary-location {
+    font-size: 0.875rem;
+    color: var(--color-muted);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sidebar-missionary-org {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    opacity: 0.8;
+}
+
+.sidebar-recent-badge {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+/* 사이드바 오버레이 */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1950; /* 사이드바보다 낮게 설정 */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .sidebar-panel {
+        width: 100vw;
+        right: -100vw;
+    }
+    
+    .sidebar-panel.open {
+        right: 0;
+    }
+    
+    .sidebar-header {
+        padding: 16px 20px;
+    }
+    
+    .sidebar-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .sidebar-search {
+        padding: 12px 20px;
+    }
+    
+    .sidebar-missionary-item {
+        padding: 12px 20px;
+    }
+    
+    .sidebar-missionary-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+        margin-right: 12px;
+    }
+    
+    .sidebar-missionary-name {
+        font-size: 0.95rem;
+    }
+    
+    .sidebar-missionary-location {
+        font-size: 0.8rem;
+    }
+    
+    .sidebar-missionary-org {
+        font-size: 0.75rem;
+    }
+}
+
+/* 지도 마커 포커스 애니메이션 */
+@keyframes marker-focus-pulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.3); filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+.marker-focused {
+    animation: marker-focus-pulse 0.6s ease-in-out;
+    z-index: 1000 !important;
+}
+
+/* 마커 클러스터 포커스 효과 */
+.marker-cluster-focused {
+    animation: marker-focus-pulse 0.6s ease-in-out;
+    z-index: 1000 !important;
+}
+
+/* =========================================
+   💫 스터닝한 지도 위 플로팅 검색 결과 스타일
+   ========================================= */
+
+/* 플로팅 라벨 */
+.search-floating-label {
+    position: absolute;
+    z-index: 1000;
+    pointer-events: auto;
+    animation: floatInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+@keyframes floatInFromTop {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.floating-label-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 20px;
+    padding: 12px 16px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    min-width: 200px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.floating-label-content:hover,
+.floating-label-content.selected {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.18),
+        0 0 0 1px rgba(103, 126, 234, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(103, 126, 234, 0.4);
+}
+
+.floating-label-content.selected {
+    background: rgba(103, 126, 234, 0.1);
+    border-color: rgba(103, 126, 234, 0.8);
+    animation: selectedPulse 1.5s infinite;
+}
+
+@keyframes selectedPulse {
+    0%, 100% {
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.18),
+            0 0 0 1px rgba(103, 126, 234, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    50% {
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.18),
+            0 0 0 3px rgba(103, 126, 234, 0.8),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+}
+
+.floating-label-content::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.floating-label-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    margin-right: 12px;
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.floating-label-content:hover .floating-label-avatar {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(103, 126, 234, 0.4);
+}
+
+.floating-label-info {
+    flex: 1;
+}
+
+.floating-label-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #2d3748;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.floating-label-location {
+    font-size: 11px;
+    color: #718096;
+    font-weight: 500;
+}
+
+.floating-label-index {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 11px;
+    margin-left: 8px;
+    box-shadow: 0 2px 8px rgba(255, 216, 155, 0.4);
+}
+
+/* 마커 펄스 효과 - 기존 스타일 업그레이드 */
+.search-pulse-marker {
+    animation: enhancedSearchPulse 2s infinite;
+    z-index: 999;
+}
+
+@keyframes enhancedSearchPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(103, 126, 234, 0.8);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 20px rgba(103, 126, 234, 0);
+        transform: scale(1.1);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(103, 126, 234, 0);
+        transform: scale(1);
+    }
+}
+
+/* 마커 흐림 효과 - 기존 스타일 업그레이드 */
+.search-dimmed-marker {
+    opacity: 0.25;
+    filter: grayscale(0.8) blur(1px);
+    transition: all 0.4s ease;
+    z-index: 1;
+}
+
+/* 검색 결과 카운터 */
+.search-result-counter {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.3);
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1002;
+}
+
+.search-result-counter.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.search-result-counter::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #667eea;
+}
+
+/* 검색어 하이라이트 - 기존 스타일 강화 */
+.search-highlight {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    padding: 0 2px;
+    position: relative;
+}
+
+.search-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 216, 155, 0.2), rgba(25, 84, 123, 0.2));
+    border-radius: 3px;
+    z-index: -1;
+}
+
+
+/* ==============================================
+   개선된 SimpleSearch 스타일
+   ============================================== */
+
+/* 플로팅 라벨 애니메이션 */
+@keyframes floatingLabelAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 플로팅 선교사 라벨 */
+.floating-missionary-label {
+    position: absolute;
+    z-index: 1000;
+    pointer-events: auto;
+    cursor: pointer;
+    transform-origin: center bottom;
+    animation: floatingLabelAppear 0.5s ease-out both;
+}
+
+.floating-label-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 12px;
+    min-width: 200px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 2px 16px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.floating-missionary-label:hover .floating-label-content {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.18),
+        0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+.floating-missionary-label.selected .floating-label-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: scale(1.05);
+    animation: selectedPulse 2s ease-in-out infinite;
+}
+
+@keyframes selectedPulse {
+    0%, 100% { box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3); }
+    50% { box-shadow: 0 12px 48px rgba(102, 126, 234, 0.5); }
+}
+
+.floating-label-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.floating-missionary-label.selected .floating-label-avatar {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.floating-label-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.floating-label-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #2c3e50;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.floating-missionary-label.selected .floating-label-name {
+    color: white;
+}
+
+.floating-label-location {
+    font-size: 12px;
+    color: #7f8c8d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.floating-missionary-label.selected .floating-label-location {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.floating-label-index {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e74c3c;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.floating-missionary-label.selected .floating-label-index {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 말풍선 꼬리 */
+.floating-label-tail {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.floating-missionary-label.selected .floating-label-tail {
+    border-top-color: #667eea;
+}
+
+/* 펄스 효과가 적용된 마커 */
+.search-pulse-marker {
+    animation: markerPulse 2s ease-in-out infinite;
+    transform-origin: center;
+    z-index: 999 !important;
+}
+
+@keyframes markerPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+    }
+}
+
+/* 흐려진 마커 */
+.search-dimmed-marker {
+    opacity: 0.3;
+    filter: grayscale(80%) blur(1px);
+    transition: all 0.3s ease;
+}
+
+/* 검색 결과 카운터 */
+.search-result-counter {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 1001;
+    white-space: nowrap;
+}
+
+.search-result-counter.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.search-result-counter .result-count {
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 검색 메시지 */
+.search-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    padding: 20px 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 1002;
+    font-size: 16px;
+    font-weight: 500;
+    color: #2c3e50;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.search-message.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.search-message.loading {
+    color: #3498db;
+}
+
+.search-message.error {
+    color: #e74c3c;
+    background: rgba(255, 235, 235, 0.95);
+}
+
+.search-message.no-results {
+    color: #7f8c8d;
+}
+
+/* 검색어 하이라이트 */
+.search-highlight {
+    background: linear-gradient(120deg, #ffeaa7 0%, #fab1a0 100%);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #2d3436;
+    text-shadow: none;
+}
+
+.floating-missionary-label.selected .search-highlight {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+/* 반응형 디자인 */
+
+
+/* ==============================================
+   모던 상세보기 팝업 스타일 (네이처 테마)
+   ============================================== */
+
+/* 팝업 컨테이너 */
+#detailPopup {
+    position: fixed;
+    z-index: 10000;
+    display: none;
+    max-width: 400px;
+    min-width: 320px;
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+}
+
+#detailPopup.animate-in {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+#detailPopup.animate-out {
+    transform: scale(0.95) translateY(-10px);
+    opacity: 0;
+}
+
+/* 모던 팝업 컨테이너 */
+.detail-popup-modern {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+    backdrop-filter: blur(40px) saturate(200%);
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    border-radius: 24px; /* 미세 조정 */
+    overflow: hidden;
+    position: relative;
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1.5px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* 닫기 버튼 - 더 정제된 스타일 */
+.close-btn-modern {
+    position: absolute;
+    top: 20px; /* 위치 조정 */
+    right: 20px; /* 위치 조정 */
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.close-btn-modern:hover {
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    transform: scale(1.1) rotate(90deg);
+}
+
+/* 헤더 섹션 - 조명 효과 추가 */
+.popup-header {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.popup-header::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px; /* 크기 조정 */
+    height: 200px; /* 크기 조정 */
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+}
+
+/* 선교사 아바타 - 더 입체적으로 */
+.missionary-avatar {
+    width: 100px; /* 크기 축소 */
+    height: 100px; /* 크기 축소 */
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin: 24px 0 16px 0; /* 여백 축소 */
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 0 1.5px rgba(255, 255, 255, 0.2) inset;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.missionary-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.4),
+        0 0 0 1.5px rgba(255, 255, 255, 0.3) inset;
+}
+
+.missionary-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+/* 선교사 정보 - 가독성 향상 */
+.missionary-info {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    margin-bottom: 16px; /* 여백 축소 */
+}
+
+.missionary-name {
+    font-size: 22px; /* 폰트 크기 조정 */
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 4px 0; /* 여백 축소 */
+    line-height: 1.2;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.missionary-location {
+    font-size: 15px; /* 폰트 크기 조정 */
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* 기도 버튼 - 세련된 디자인 */
+.prayer-btn {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 52px; /* 크기 축소 */
+    height: 52px; /* 크기 축소 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px; /* 여백 축소 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.prayer-btn:hover {
+    transform: scale(1.1);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.prayer-btn:active {
+    transform: scale(0.95);
+}
+
+.prayer-btn.prayed {
+    background: rgba(34, 197, 94, 0.5);
+    border-color: rgba(34, 197, 94, 0.7);
+    transform: scale(1.1);
+}
+
+.prayer-emoji {
+    font-size: 24px; /* 아이콘 크기 조정 */
+    transition: transform 0.2s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    color: #fff;
+}
+
+/* 팝업 본문 - 콘텐츠 집중도 향상 */
+.popup-body {
+    padding: 0 24px 24px;
+}
+
+/* 정보 그리드 */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 16px 0 24px 0;
+    padding: 16px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+}
+
+.info-icon {
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.info-label {
+    font-size: 11px;
+    font-weight: 400;
+    color: #b0b0b0;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFFFFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* 기도제목 섹션 */
+.prayer-section {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.prayer-content {
+    margin: 0;
+    font-size: 14px;
+    color: #E0E0E0;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   기도 확인 토스트 메시지 스타일
+   ========================================================================== */
+.prayer-toast {
+    position: fixed;
+    top: -100px; /* 초기 위치 (화면 밖) */
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.85), rgba(0, 0, 0, 0.85));
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10001; /* 팝업보다 위에 표시 */
+    transition: top 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* 부드러운 슬라이드 효과 */
+    display: flex;
+    align-items: center;
+    font-family: 'Pretendard', sans-serif;
+    opacity: 0; /* 초기 투명도 */
+}
+
+.prayer-toast.show {
+    top: 20px; /* 최종 위치 (화면 상단) */
+    opacity: 1; /* 표시될 때 투명도 */
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.toast-icon {
+    font-size: 24px;
+}
+
+.toast-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.toast-main {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.toast-sub {
+    font-size: 13px;
+    color: #B0B0B0;
+    margin-top: 2px;
+}
+
+/* 모바일 최적화 */
+
+
+
+
+/* ==========================================================================
+   Detail Popup Modern
+   ========================================================================== */
+#detailPopup {
+    position: fixed;
+    z-index: 10000;
+    display: none;
+    max-width: 400px;
+    min-width: 320px;
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+}
+
+#detailPopup.animate-in {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+#detailPopup.animate-out {
+    transform: scale(0.95) translateY(-10px);
+    opacity: 0;
+}
+
+/* 모던 팝업 컨테이너 */
+.detail-popup-modern {
+    position: relative;
+    width: 380px;
+    background: rgba(20, 20, 20, 0.7);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    color: #fff;
+    font-family: 'Pretendard', sans-serif;
+    overflow: hidden;
+    transform: perspective(1000px) rotateY(0deg);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.close-btn-modern {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 14px;
+    line-height: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    z-index: 10;
+}
+
+.close-btn-modern:hover {
+    background-color: rgba(255, 0, 0, 0.7);
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* 헤더 섹션 */
+.popup-header {
+    display: flex;
+    align-items: center;
+    padding: 24px;
+    gap: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.missionary-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.missionary-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.missionary-info {
+    flex-grow: 1;
+}
+
+.missionary-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #fff;
+}
+
+.missionary-location {
+    font-size: 14px;
+    color: #c8c8c8;
+    margin: 0;
+}
+
+.prayer-btn {
+    background: linear-gradient(145deg, #4caf50, #43a047);
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.prayer-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 15px rgba(76, 175, 80, 0.4);
+}
+
+.prayer-btn .prayer-emoji {
+    transition: transform 0.3s;
+}
+
+.prayer-btn:hover .prayer-emoji {
+    transform: scale(1.2);
+}
+
+/* 팝업 본문 */
+.popup-body {
+    padding: 0 24px 24px;
+}
+
+/* 정보 그리드 */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 16px 0 24px 0;
+    padding: 16px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+}
+
+.info-icon {
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.info-label {
+    font-size: 11px;
+    font-weight: 400;
+    color: #b0b0b0;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFFFFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* 기도제목 섹션 */
+.prayer-section {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.prayer-content {
+    margin: 0;
+    font-size: 14px;
+    color: #E0E0E0;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   반응형 디자인
+   ========================================================================== */
+/* ... existing code ... */
+
+
+/* 지도 마커 포커스 애니메이션 */
+@keyframes marker-focus-pulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.3); filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+.marker-focused {
+    animation: marker-focus-pulse 0.6s ease-in-out;
+    z-index: 1000 !important;
+}
+
+/* 마커 클러스터 포커스 효과 */
+.marker-cluster-focused {
+    animation: marker-focus-pulse 0.6s ease-in-out;
+    z-index: 1000 !important;
+}
+
+/* =========================================
+   💫 스터닝한 지도 위 플로팅 검색 결과 스타일
+   ========================================= */
+
+/* 플로팅 라벨 */
+.search-floating-label {
+    position: absolute;
+    z-index: 1000;
+    pointer-events: auto;
+    animation: floatInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+@keyframes floatInFromTop {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.floating-label-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 20px;
+    padding: 12px 16px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    min-width: 200px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.floating-label-content:hover,
+.floating-label-content.selected {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.18),
+        0 0 0 1px rgba(103, 126, 234, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(103, 126, 234, 0.4);
+}
+
+.floating-label-content.selected {
+    background: rgba(103, 126, 234, 0.1);
+    border-color: rgba(103, 126, 234, 0.8);
+    animation: selectedPulse 1.5s infinite;
+}
+
+@keyframes selectedPulse {
+    0%, 100% {
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.18),
+            0 0 0 1px rgba(103, 126, 234, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    50% {
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.18),
+            0 0 0 3px rgba(103, 126, 234, 0.8),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+}
+
+.floating-label-content::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.floating-label-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    margin-right: 12px;
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.floating-label-content:hover .floating-label-avatar {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(103, 126, 234, 0.4);
+}
+
+.floating-label-info {
+    flex: 1;
+}
+
+.floating-label-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #2d3748;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.floating-label-location {
+    font-size: 11px;
+    color: #718096;
+    font-weight: 500;
+}
+
+.floating-label-index {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 11px;
+    margin-left: 8px;
+    box-shadow: 0 2px 8px rgba(255, 216, 155, 0.4);
+}
+
+/* 마커 펄스 효과 - 기존 스타일 업그레이드 */
+.search-pulse-marker {
+    animation: enhancedSearchPulse 2s infinite;
+    z-index: 999;
+}
+
+@keyframes enhancedSearchPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(103, 126, 234, 0.8);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 20px rgba(103, 126, 234, 0);
+        transform: scale(1.1);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(103, 126, 234, 0);
+        transform: scale(1);
+    }
+}
+
+/* 마커 흐림 효과 - 기존 스타일 업그레이드 */
+.search-dimmed-marker {
+    opacity: 0.25;
+    filter: grayscale(0.8) blur(1px);
+    transition: all 0.4s ease;
+    z-index: 1;
+}
+
+/* 검색 결과 카운터 */
+.search-result-counter {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.3);
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1002;
+}
+
+.search-result-counter.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.search-result-counter::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #667eea;
+}
+
+/* 검색어 하이라이트 - 기존 스타일 강화 */
+.search-highlight {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    padding: 0 2px;
+    position: relative;
+}
+
+.search-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 216, 155, 0.2), rgba(25, 84, 123, 0.2));
+    border-radius: 3px;
+    z-index: -1;
+}
+
+/* 반응형 디자인 */
+
+
+
+
+/* ==============================================
+   개선된 SimpleSearch 스타일
+   ============================================== */
+
+/* 플로팅 라벨 애니메이션 */
+@keyframes floatingLabelAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 플로팅 선교사 라벨 */
+.floating-missionary-label {
+    position: absolute;
+    z-index: 1000;
+    pointer-events: auto;
+    cursor: pointer;
+    transform-origin: center bottom;
+    animation: floatingLabelAppear 0.5s ease-out both;
+}
+
+.floating-label-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 12px;
+    min-width: 200px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 2px 16px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.floating-missionary-label:hover .floating-label-content {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.18),
+        0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+.floating-missionary-label.selected .floating-label-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: scale(1.05);
+    animation: selectedPulse 2s ease-in-out infinite;
+}
+
+@keyframes selectedPulse {
+    0%, 100% { box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3); }
+    50% { box-shadow: 0 12px 48px rgba(102, 126, 234, 0.5); }
+}
+
+.floating-label-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.floating-missionary-label.selected .floating-label-avatar {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.floating-label-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.floating-label-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #2c3e50;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.floating-missionary-label.selected .floating-label-name {
+    color: white;
+}
+
+.floating-label-location {
+    font-size: 12px;
+    color: #7f8c8d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.floating-missionary-label.selected .floating-label-location {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.floating-label-index {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e74c3c;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.floating-missionary-label.selected .floating-label-index {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 말풍선 꼬리 */
+.floating-label-tail {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.floating-missionary-label.selected .floating-label-tail {
+    border-top-color: #667eea;
+}
+
+/* 펄스 효과가 적용된 마커 */
+.search-pulse-marker {
+    animation: markerPulse 2s ease-in-out infinite;
+    transform-origin: center;
+    z-index: 999 !important;
+}
+
+@keyframes markerPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+    }
+}
+
+/* 흐려진 마커 */
+.search-dimmed-marker {
+    opacity: 0.3;
+    filter: grayscale(80%) blur(1px);
+    transition: all 0.3s ease;
+}
+
+/* 검색 결과 카운터 */
+.search-result-counter {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 1001;
+    white-space: nowrap;
+}
+
+.search-result-counter.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.search-result-counter .result-count {
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 검색 메시지 */
+.search-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    padding: 20px 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 1002;
+    font-size: 16px;
+    font-weight: 500;
+    color: #2c3e50;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.search-message.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.search-message.loading {
+    color: #3498db;
+}
+
+.search-message.error {
+    color: #e74c3c;
+    background: rgba(255, 235, 235, 0.95);
+}
+
+.search-message.no-results {
+    color: #7f8c8d;
+}
+
+/* 검색어 하이라이트 */
+.search-highlight {
+    background: linear-gradient(120deg, #ffeaa7 0%, #fab1a0 100%);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #2d3436;
+    text-shadow: none;
+}
+
+.floating-missionary-label.selected .search-highlight {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+/* 반응형 디자인 */
+
+
+
+
+/* ==============================================
+   모던 상세보기 팝업 스타일 (네이처 테마)
+   ============================================== */
+
+/* 팝업 컨테이너 */
+#detailPopup {
+    position: fixed;
+    z-index: 10000;
+    display: none;
+    max-width: 400px;
+    min-width: 320px;
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+}
+
+#detailPopup.animate-in {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+#detailPopup.animate-out {
+    transform: scale(0.95) translateY(-10px);
+    opacity: 0;
+}
+
+/* 모던 팝업 컨테이너 */
+.detail-popup-modern {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+    backdrop-filter: blur(40px) saturate(200%);
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    border-radius: 24px; /* 미세 조정 */
+    overflow: hidden;
+    position: relative;
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1.5px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* 닫기 버튼 - 더 정제된 스타일 */
+.close-btn-modern {
+    position: absolute;
+    top: 20px; /* 위치 조정 */
+    right: 20px; /* 위치 조정 */
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.close-btn-modern:hover {
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    transform: scale(1.1) rotate(90deg);
+}
+
+/* 헤더 섹션 - 조명 효과 추가 */
+.popup-header {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.popup-header::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px; /* 크기 조정 */
+    height: 200px; /* 크기 조정 */
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+}
+
+/* 선교사 아바타 - 더 입체적으로 */
+.missionary-avatar {
+    width: 100px; /* 크기 축소 */
+    height: 100px; /* 크기 축소 */
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin: 24px 0 16px 0; /* 여백 축소 */
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 0 1.5px rgba(255, 255, 255, 0.2) inset;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.missionary-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.4),
+        0 0 0 1.5px rgba(255, 255, 255, 0.3) inset;
+}
+
+.missionary-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+/* 선교사 정보 - 가독성 향상 */
+.missionary-info {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    margin-bottom: 16px; /* 여백 축소 */
+}
+
+.missionary-name {
+    font-size: 22px; /* 폰트 크기 조정 */
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 4px 0; /* 여백 축소 */
+    line-height: 1.2;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.missionary-location {
+    font-size: 15px; /* 폰트 크기 조정 */
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* 기도 버튼 - 세련된 디자인 */
+.prayer-btn {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 52px; /* 크기 축소 */
+    height: 52px; /* 크기 축소 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px; /* 여백 축소 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.prayer-btn:hover {
+    transform: scale(1.1);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.prayer-btn:active {
+    transform: scale(0.95);
+}
+
+.prayer-btn.prayed {
+    background: rgba(34, 197, 94, 0.5);
+    border-color: rgba(34, 197, 94, 0.7);
+    transform: scale(1.1);
+}
+
+.prayer-emoji {
+    font-size: 24px; /* 아이콘 크기 조정 */
+    transition: transform 0.2s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    color: #fff;
+}
+
+/* 팝업 본문 - 콘텐츠 집중도 향상 */
+.popup-body {
+    padding: 0 24px 24px;
+}
+
+/* 정보 그리드 */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 16px 0 24px 0;
+    padding: 16px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+}
+
+.info-icon {
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.info-label {
+    font-size: 11px;
+    font-weight: 400;
+    color: #b0b0b0;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFFFFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* 기도제목 섹션 */
+.prayer-section {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.prayer-content {
+    margin: 0;
+    font-size: 14px;
+    color: #E0E0E0;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   기도 확인 토스트 메시지 스타일
+   ========================================================================== */
+.prayer-toast {
+    position: fixed;
+    top: -100px; /* 초기 위치 (화면 밖) */
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.85), rgba(0, 0, 0, 0.85));
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10001; /* 팝업보다 위에 표시 */
+    transition: top 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+    display: flex;
+    align-items: center;
+    font-family: 'Pretendard', sans-serif;
+    opacity: 0; /* 초기 투명도 */
+}
+
+.prayer-toast.show {
+    top: 20px; /* 최종 위치 (화면 상단) */
+    opacity: 1; /* 표시될 때 투명도 */
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.toast-icon {
+    font-size: 24px;
+}
+
+.toast-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.toast-main {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.toast-sub {
+    font-size: 13px;
+    color: #B0B0B0;
+    margin-top: 2px;
+}
+
+/* 모바일 최적화 */
+
+
+
+
+/* ==========================================================================
+   Detail Popup Modern
+   ========================================================================== */
+#detailPopup {
+    position: fixed;
+    z-index: 10000;
+    display: none;
+    max-width: 400px;
+    min-width: 320px;
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+}
+
+#detailPopup.animate-in {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+#detailPopup.animate-out {
+    transform: scale(0.95) translateY(-10px);
+    opacity: 0;
+}
+
+/* 모던 팝업 컨테이너 */
+.detail-popup-modern {
+    position: relative;
+    width: 380px;
+    background: rgba(20, 20, 20, 0.7);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    color: #fff;
+    font-family: 'Pretendard', sans-serif;
+    overflow: hidden;
+    transform: perspective(1000px) rotateY(0deg);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.close-btn-modern {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 14px;
+    line-height: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    z-index: 10;
+}
+
+.close-btn-modern:hover {
+    background-color: rgba(255, 0, 0, 0.7);
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* 헤더 섹션 */
+.popup-header {
+    display: flex;
+    align-items: center;
+    padding: 24px;
+    gap: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.missionary-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.missionary-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.missionary-info {
+    flex-grow: 1;
+}
+
+.missionary-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #fff;
+}
+
+.missionary-location {
+    font-size: 14px;
+    color: #c8c8c8;
+    margin: 0;
+}
+
+.prayer-btn {
+    background: linear-gradient(145deg, #4caf50, #43a047);
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.prayer-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 15px rgba(76, 175, 80, 0.4);
+}
+
+.prayer-btn .prayer-emoji {
+    transition: transform 0.3s;
+}
+
+.prayer-btn:hover .prayer-emoji {
+    transform: scale(1.2);
+}
+
+/* 팝업 본문 */
+.popup-body {
+    padding: 0 24px 24px;
+}
+
+/* 정보 그리드 */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 16px 0 24px 0;
+    padding: 16px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+}
+
+.info-icon {
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.info-label {
+    font-size: 11px;
+    font-weight: 400;
+    color: #b0b0b0;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFFFFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* 기도제목 섹션 */
+.prayer-section {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.prayer-content {
+    margin: 0;
+    font-size: 14px;
+    color: #E0E0E0;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   반응형 디자인
+   ========================================================================== */
+/* ... existing code ... */
+
+
+/* 지도 마커 포커스 애니메이션 */
+@keyframes marker-focus-pulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.3); filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+.marker-focused {
+    animation: marker-focus-pulse 0.6s ease-in-out;
+    z-index: 1000 !important;
+}
+
+/* 마커 클러스터 포커스 효과 */
+.marker-cluster-focused {
+    animation: marker-focus-pulse 0.6s ease-in-out;
+    z-index: 1000 !important;
+}
+
+/* =========================================
+   💫 스터닝한 지도 위 플로팅 검색 결과 스타일
+   ========================================= */
+
+/* 플로팅 라벨 */
+.search-floating-label {
+    position: absolute;
+    z-index: 1000;
+    pointer-events: auto;
+    animation: floatInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+@keyframes floatInFromTop {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.floating-label-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 20px;
+    padding: 12px 16px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    min-width: 200px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.floating-label-content:hover,
+.floating-label-content.selected {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.18),
+        0 0 0 1px rgba(103, 126, 234, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(103, 126, 234, 0.4);
+}
+
+.floating-label-content.selected {
+    background: rgba(103, 126, 234, 0.1);
+    border-color: rgba(103, 126, 234, 0.8);
+    animation: selectedPulse 1.5s infinite;
+}
+
+@keyframes selectedPulse {
+    0%, 100% {
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.18),
+            0 0 0 1px rgba(103, 126, 234, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    50% {
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.18),
+            0 0 0 3px rgba(103, 126, 234, 0.8),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+}
+
+.floating-label-content::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.floating-label-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    margin-right: 12px;
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.floating-label-content:hover .floating-label-avatar {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(103, 126, 234, 0.4);
+}
+
+.floating-label-info {
+    flex: 1;
+}
+
+.floating-label-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #2d3748;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.floating-label-location {
+    font-size: 11px;
+    color: #718096;
+    font-weight: 500;
+}
+
+.floating-label-index {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 11px;
+    margin-left: 8px;
+    box-shadow: 0 2px 8px rgba(255, 216, 155, 0.4);
+}
+
+/* 마커 펄스 효과 - 기존 스타일 업그레이드 */
+.search-pulse-marker {
+    animation: enhancedSearchPulse 2s infinite;
+    z-index: 999;
+}
+
+@keyframes enhancedSearchPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(103, 126, 234, 0.8);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 20px rgba(103, 126, 234, 0);
+        transform: scale(1.1);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(103, 126, 234, 0);
+        transform: scale(1);
+    }
+}
+
+/* 마커 흐림 효과 - 기존 스타일 업그레이드 */
+.search-dimmed-marker {
+    opacity: 0.25;
+    filter: grayscale(0.8) blur(1px);
+    transition: all 0.4s ease;
+    z-index: 1;
+}
+
+/* 검색 결과 카운터 */
+.search-result-counter {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.3);
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1002;
+}
+
+.search-result-counter.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.search-result-counter::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #667eea;
+}
+
+/* 검색어 하이라이트 - 기존 스타일 강화 */
+.search-highlight {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    padding: 0 2px;
+    position: relative;
+}
+
+.search-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 216, 155, 0.2), rgba(25, 84, 123, 0.2));
+    border-radius: 3px;
+    z-index: -1;
+}
+
+/* 반응형 디자인 */
+
+
+
+
+/* ==============================================
+   개선된 SimpleSearch 스타일
+   ============================================== */
+
+/* 플로팅 라벨 애니메이션 */
+@keyframes floatingLabelAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 플로팅 선교사 라벨 */
+.floating-missionary-label {
+    position: absolute;
+    z-index: 1000;
+    pointer-events: auto;
+    cursor: pointer;
+    transform-origin: center bottom;
+    animation: floatingLabelAppear 0.5s ease-out both;
+}
+
+.floating-label-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 12px;
+    min-width: 200px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 2px 16px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.floating-missionary-label:hover .floating-label-content {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.18),
+        0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+.floating-missionary-label.selected .floating-label-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: scale(1.05);
+    animation: selectedPulse 2s ease-in-out infinite;
+}
+
+@keyframes selectedPulse {
+    0%, 100% { box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3); }
+    50% { box-shadow: 0 12px 48px rgba(102, 126, 234, 0.5); }
+}
+
+.floating-label-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.floating-missionary-label.selected .floating-label-avatar {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.floating-label-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.floating-label-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #2c3e50;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.floating-missionary-label.selected .floating-label-name {
+    color: white;
+}
+
+.floating-label-location {
+    font-size: 12px;
+    color: #7f8c8d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.floating-missionary-label.selected .floating-label-location {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.floating-label-index {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e74c3c;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.floating-missionary-label.selected .floating-label-index {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 말풍선 꼬리 */
+.floating-label-tail {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.floating-missionary-label.selected .floating-label-tail {
+    border-top-color: #667eea;
+}
+
+/* 펄스 효과가 적용된 마커 */
+.search-pulse-marker {
+    animation: markerPulse 2s ease-in-out infinite;
+    transform-origin: center;
+    z-index: 999 !important;
+}
+
+@keyframes markerPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+    }
+}
+
+/* 흐려진 마커 */
+.search-dimmed-marker {
+    opacity: 0.3;
+    filter: grayscale(80%) blur(1px);
+    transition: all 0.3s ease;
+}
+
+/* 검색 결과 카운터 */
+.search-result-counter {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 1001;
+    white-space: nowrap;
+}
+
+.search-result-counter.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.search-result-counter .result-count {
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 검색 메시지 */
+.search-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    padding: 20px 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 1002;
+    font-size: 16px;
+    font-weight: 500;
+    color: #2c3e50;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.search-message.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.search-message.loading {
+    color: #3498db;
+}
+
+.search-message.error {
+    color: #e74c3c;
+    background: rgba(255, 235, 235, 0.95);
+}
+
+.search-message.no-results {
+    color: #7f8c8d;
+}
+
+/* 검색어 하이라이트 */
+.search-highlight {
+    background: linear-gradient(120deg, #ffeaa7 0%, #fab1a0 100%);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #2d3436;
+    text-shadow: none;
+}
+
+.floating-missionary-label.selected .search-highlight {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+
+
+/* ==========================================================================
+   Detail Popup & Prayer Toast (FINAL VERSION)
+   ========================================================================== */
+
+#detailPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#detailPopup.visible {
+    display: flex;
+    opacity: 1;
+}
+
+.detail-popup-modern {
+    position: relative;
+    width: 380px;
+    background: rgba(20, 20, 20, 0.7);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    color: #fff;
+    font-family: 'Pretendard', sans-serif;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#detailPopup.visible .detail-popup-modern {
+    transform: scale(1);
+}
+
+.close-btn-modern {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 14px;
+    line-height: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    z-index: 10;
+}
+
+.close-btn-modern:hover {
+    background-color: rgba(255, 0, 0, 0.7);
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* 헤더 섹션 */
+.popup-header {
+    display: flex;
+    align-items: center;
+    padding: 24px;
+    gap: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.missionary-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.missionary-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.missionary-info {
+    flex-grow: 1;
+}
+
+.missionary-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #fff;
+}
+
+.missionary-location {
+    font-size: 14px;
+    color: #c8c8c8;
+    margin: 0;
+}
+
+.prayer-btn {
+    background: linear-gradient(145deg, #4caf50, #43a047);
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.prayer-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 15px rgba(76, 175, 80, 0.4);
+}
+
+.prayer-btn .prayer-emoji {
+    transition: transform 0.3s;
+}
+
+.prayer-btn:hover .prayer-emoji {
+    transform: scale(1.2);
+}
+
+/* 팝업 본문 */
+.popup-body {
+    padding: 0 24px 24px;
+}
+
+/* 정보 그리드 */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 16px 0 24px 0;
+    padding: 16px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+}
+
+.info-icon {
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.info-label {
+    font-size: 11px;
+    font-weight: 400;
+    color: #b0b0b0;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFFFFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* 기도제목 섹션 */
+.prayer-section {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.prayer-content {
+    margin: 0;
+    font-size: 14px;
+    color: #E0E0E0;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+}
+
+/* 기도 확인 토스트 메시지 스타일 */
+.prayer-toast {
+    position: fixed;
+    top: -100px; /* 초기 위치 (화면 밖) */
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.85), rgba(0, 0, 0, 0.85));
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10001; /* 팝업보다 위에 표시 */
+    transition: top 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+    display: flex;
+    align-items: center;
+    font-family: 'Pretendard', sans-serif;
+    opacity: 0; /* 초기 투명도 */
+}
+
+.prayer-toast.show {
+    top: 20px; /* 최종 위치 (화면 상단) */
+    opacity: 1; /* 표시될 때 투명도 */
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.toast-icon {
+    font-size: 24px;
+}
+
+.toast-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.toast-main {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.toast-sub {
+    font-size: 13px;
+    color: #B0B0B0;
+    margin-top: 2px;
+}
+ 
+
+/* ==========================================================================
+    Country-Specific Popup Styles (Independent)
+    ========================================================================== */
+ .country-popup-content {
+     padding: 8px 12px;
+     font-family: 'Pretendard', sans-serif;
+ }
+ 
+ .country-popup-name {
+     font-size: 16px; /* Increased font size */
+     font-weight: 700;
+     color: #333;
+     display: block;
+     margin-bottom: 5px;
+ }
+ 
+ .country-popup-prayer {
+     font-size: 13px;
+     color: #666;
+ }
+
+/* ==========================================================================
+    Country-Specific Popup Styles (Independent & FINAL)
+    ========================================================================== */
+.fixed-country-marker-icon {
+    background-color: rgba(37, 99, 235, 0.8);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+    font-weight: bold;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    max-width: 280px !important;
+    min-width: 200px !important;
+}
+
+.leaflet-popup-content {
+    margin: 6px 10px !important;
+    padding: 0 !important;
+    font-size: 0.9em;
+}
+
+.country-popup-content {
+    padding: 10px 14px;
+    font-family: 'Pretendard', sans-serif;
+    min-width: 150px;
+}
+
+.country-popup-name {
+    font-size: 15px; /* 가독성 확보 */
+    font-weight: 700;
+    color: #2c3e50;
+    display: block;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #eee;
+}
+
+.country-popup-prayer {
+    font-size: 13px;
+    color: #34495e;
+    line-height: 1.5;
+}
+
+/* 중보기도자 수 표시 스타일 */
+.prayer-count-info {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.prayer-count-info .prayer-icon {
+    margin-right: 6px;
+    font-size: 16px;
+}
+
+.prayer-count-info .prayer-count-number {
+    font-weight: bold;
+    color: #4CAF50;
+    font-size: 16px;
+}
+
+/* 기도 숫자 글로우 애니메이션 */
+@keyframes prayerNumberGlow {
+    0% { text-shadow: 0 0 5px #4CAF50; }
+    50% { text-shadow: 0 0 20px #4CAF50, 0 0 30px #4CAF50; }
+    100% { text-shadow: 0 0 5px #4CAF50; }
+}
+
+.prayer-count-info .prayer-count-number {
+    animation: prayerNumberGlow 1.2s ease-in-out;
+}
+
+/* 숫자 증가 시 스턴 효과 */
+.prayer-count-info .prayer-count-number.stun {
+    animation: prayerNumberGlow 0.7s ease-in-out, shake 0.7s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* 모바일에서 위치 조정 */
+@media (max-width: 768px) {
+    .prayer-count-info {
+        top: 10px;
+        right: 10px;
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    
+    .prayer-count-info .prayer-count-number {
+        font-size: 14px;
+    }
+}
+
+/* 검색 플로팅 라벨 애니메이션 */
+@keyframes searchLabelFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes searchLabelFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.9);
+    }
+}
+
+/* 모바일에서 위치 조정 */
+@media (max-width: 768px) {
+    .prayer-count-info {
+        top: 10px;
+        right: 10px;
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    
+    .prayer-count-info .prayer-count-number {
+        font-size: 14px;
+    }
+}
+
+/* 국가별 선교사 팝업 스타일 */
+.country-popup-content {
+    text-align: center;
+    padding: 8px;
+}
+
+.country-popup-name {
+    font-weight: 600;
+    font-size: 12px;
+    color: #000000 !important; /* 검은색으로 변경 */
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.country-popup-name:hover {
+    color: #1976d2 !important; /* 파란색으로 변경 */
+    text-decoration: underline;
+    text-decoration-color: #1976d2;
+}
+
+.country-popup-prayer {
+    font-size: 11px;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* Leaflet 팝업 내 선교사 이름 스타일 */
+.leaflet-popup-content .missionary-name {
+    font-weight: 600;
+    font-size: 12px;
+    color: #000000 !important;
+    margin-bottom: 2px;
+}
+
+.leaflet-popup-content .missionary-org {
+    font-size: 10px;
+    color: #666;
+}
+
+.leaflet-popup-content .missionary-prayer-topic {
+    font-size: 10px;
+    color: #333;
+    line-height: 1.3;
+    margin-top: 4px;
+    padding: 4px 6px;
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 3px;
+    border-left: 2px solid #4CAF50;
+}
+
+/* 선교사별 개별 마커 스타일 */
+.missionary-individual-marker {
+    background: transparent;
+    border: none;
+}
+
+.missionary-marker-icon {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    border: 2px solid white;
+    animation: missionaryMarkerPulse 2s infinite;
+}
+
+@keyframes missionaryMarkerPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    50% {
+        transform: scale(1.2);
+        box-shadow: 0 4px 16px rgba(76, 175, 80, 0.5);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+}
+
+/* 선교사별 팝업 스타일 */
+.missionary-popup-content {
+    text-align: center;
+    padding: 8px 10px;
+    min-width: 180px;
+    font-size: 0.85em;
+}
+
+.missionary-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.missionary-popup-name {
+    font-weight: 700;
+    font-size: 12px;
+    color: #000000 !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.missionary-popup-name:hover {
+    color: #1976d2 !important;
+    text-decoration: underline;
+    text-decoration-color: #1976d2;
+}
+
+.missionary-popup-country {
+    font-size: 11px;
+    color: #666;
+    font-weight: 500;
+}
+
+.missionary-popup-prayer {
+    font-size: 10px;
+    color: #333;
+    line-height: 1.3;
+    background: rgba(76, 175, 80, 0.1);
+    padding: 6px;
+    border-radius: 4px;
+    border-left: 2px solid #4CAF50;
+    text-align: left;
+}
+
+/* 중보기도자 수 표시 스타일 */
+.prayer-count-info {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.prayer-count-info .prayer-icon {
+    margin-right: 6px;
+    font-size: 16px;
+}
+
+.prayer-count-info .prayer-count-number {
+    font-weight: bold;
+    color: #4CAF50;
+    font-size: 16px;
+}
+
+/* 기도 숫자 글로우 애니메이션 */
+@keyframes prayerNumberGlow {
+    0% { text-shadow: 0 0 5px #4CAF50; }
+    50% { text-shadow: 0 0 20px #4CAF50, 0 0 30px #4CAF50; }
+    100% { text-shadow: 0 0 5px #4CAF50; }
+}
+
+.prayer-count-info .prayer-count-number {
+    animation: prayerNumberGlow 1.2s ease-in-out;
+}
+
+/* 숫자 증가 시 스턴 효과 */
+.prayer-count-info .prayer-count-number.stun {
+    animation: prayerNumberGlow 0.7s ease-in-out, shake 0.7s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* 지도 가이드 텍스트 스타일 */
+#mapGuide {
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    width: 100%;
+    max-width: 800px;
+    min-width: 400px;
+    text-align: center;
+    z-index: 1000;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    white-space: pre-line;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#mapGuide:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 모바일에서 위치 조정 */
+@media (max-width: 768px) {
+    .prayer-count-info {
+        top: 10px;
+        right: 10px;
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    
+    .prayer-count-info .prayer-count-number {
+        font-size: 14px;
+    }
+    
+    #mapGuide {
+        display: none; /* 모바일에서 완전히 숨김 */
+    }
+}

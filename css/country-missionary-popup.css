@@ -1,0 +1,721 @@
+/* ==========================================================================
+   국가별 선교사 리스트 팝업 (심플 글래스모피즘 스타일)
+   ========================================================================== */
+
+.country-missionary-popup {
+    position: absolute; /* 필요에 따라 relative, fixed 등으로 변경 */
+    z-index: 420; /* 국가별 선교사 리스트 (권장값) */
+    width: 180px !important; /* 200px에서 180px로 더 축소 */
+    max-height: 350px; /* 400px에서 350px로 축소 */
+    overflow-y: auto; /* 내용이 많으면 스크롤 */
+    background: rgba(255, 255, 255, 0.95); /* 배경 투명도 조정 (더 가볍게) */
+    border: 1px solid rgba(255, 255, 255, 0.4); /* 테두리 강조 */
+    border-radius: 14px; /* 16px에서 14px로 축소 */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* 그림자 축소 */
+    backdrop-filter: blur(18px); /* 핵심 글래스모피즘 효과 (미세 조정) */
+    -webkit-backdrop-filter: blur(18px);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 16px; /* 20px에서 16px로 축소 */
+    animation: country-popup-fade-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; /* 애니메이션 속도 미세 조정 */
+    transition: all 0.2s ease-out; /* 호버/상태 변화 트랜지션 단순화 */
+    max-height: 80vh;
+}
+
+@keyframes country-popup-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.98);
+        filter: blur(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes country-popup-fade-out {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+}
+
+.country-missionary-popup.closing {
+    animation: country-popup-fade-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.country-missionary-popup .country-header {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 10px에서 8px로 축소 */
+    margin-bottom: 12px; /* 15px에서 12px로 축소 */
+    padding-bottom: 8px; /* 10px에서 8px로 축소 */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06); /* 구분선 색상 미세 조정 */
+}
+
+.country-missionary-popup .country-flag {
+    width: 20px; /* 24px에서 20px로 축소 */
+    height: 20px; /* 24px에서 20px로 축소 */
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); /* 국기 그림자 축소 */
+    border: 1px solid rgba(255, 255, 255, 0.6); /* 국기 테두리 미세 조정 */
+}
+
+.country-missionary-popup .country-name {
+    font-size: 14px; /* 16px에서 14px로 축소 */
+    font-weight: 600; /* 폰트 굵기 미세 조정 */
+    color: #1f2937;
+    line-height: 1.3;
+}
+
+.country-missionary-popup .missionary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* 6px에서 4px로 축소 */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.country-missionary-popup .missionary-list-item {
+    display: flex;
+    flex-direction: row; /* 세로에서 가로로 변경 */
+    align-items: center; /* 세로 중앙 정렬 */
+    justify-content: space-between; /* 양쪽 끝 정렬 */
+    padding: 6px 0; /* 8px에서 6px로 축소 */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03); /* 목록 구분선 더 연하게 */
+    cursor: pointer;
+    transition: background 0.15s ease; /* 호버 트랜지션 속도 조정 */
+    border-radius: 4px;
+}
+
+.country-missionary-popup .missionary-info {
+    display: flex;
+    align-items: center;
+    gap: 4px; /* 선교사 이름과 도시 이름 사이 간격 */
+    flex: 1; /* 남은 공간 모두 차지 */
+}
+
+.country-missionary-popup .missionary-list-item:last-child {
+    border-bottom: none;
+}
+
+.country-missionary-popup .missionary-list-item:hover {
+    background: rgba(0, 0, 0, 0.02); /* 호버 배경색 더 연하게 */
+    border-radius: 4px; /* 호버 시 둥근 모서리 미세 조정 */
+}
+
+.country-missionary-popup .missionary-name {
+    font-weight: 500; /* 폰트 굵기 미세 조정 */
+    font-size: 11px; /* 12px에서 11px로 축소 */
+    color: #374151;
+    white-space: nowrap; /* 줄바꿈 방지 */
+}
+
+.country-missionary-popup .missionary-city {
+    color: #6b7280;
+    font-weight: 400;
+    font-size: 9px; /* 10px에서 9px로 축소 */
+    margin-top: 0; /* 상단 여백 제거 */
+    white-space: nowrap; /* 줄바꿈 방지 */
+}
+
+/* 닫기 버튼 */
+.country-missionary-popup .close-btn {
+    position: absolute;
+    top: 6px; /* 8px에서 6px로 축소 */
+    right: 6px; /* 8px에서 6px로 축소 */
+    background: none;
+    border: none;
+    font-size: 16px; /* 18px에서 16px로 축소 */
+    color: #6b7280;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    width: 20px; /* 24px에서 20px로 축소 */
+    height: 20px; /* 24px에서 20px로 축소 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.country-missionary-popup .close-btn:hover {
+    color: #374151;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   반응형 디자인
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .country-missionary-popup {
+        width: 160px !important; /* 180px에서 160px로 더 축소 */
+        max-height: 300px; /* 350px에서 300px로 축소 */
+        padding: 14px; /* 16px에서 14px로 축소 */
+    }
+    
+    .country-missionary-popup .country-flag {
+        width: 18px; /* 20px에서 18px로 축소 */
+        height: 18px; /* 20px에서 18px로 축소 */
+    }
+    
+    .country-missionary-popup .country-name {
+        font-size: 13px; /* 14px에서 13px로 축소 */
+    }
+    
+    .country-missionary-popup .missionary-info {
+        gap: 2px; /* 3px에서 2px로 축소 */
+    }
+    
+    .country-missionary-popup .missionary-name {
+        font-size: 10px; /* 11px에서 10px로 축소 */
+    }
+    
+    .country-missionary-popup .missionary-city {
+        font-size: 8px; /* 9px에서 8px로 축소 */
+    }
+}
+
+/* ==========================================================================
+   다크 모드 지원
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .country-missionary-popup {
+        background: rgba(31, 41, 55, 0.95);
+        border-color: rgba(55, 65, 81, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .country-missionary-popup .country-name,
+    .country-missionary-popup .missionary-name {
+        color: #f3f4f6;
+    }
+    
+    .country-missionary-popup .missionary-city {
+        color: #9ca3af;
+    }
+    
+    .country-missionary-popup .close-btn {
+        color: #9ca3af;
+    }
+    
+    .country-missionary-popup .close-btn:hover {
+        color: #f3f4f6;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .country-missionary-popup .country-header {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    .country-missionary-popup .missionary-list-item {
+        border-bottom-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .country-missionary-popup .missionary-list-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* ==========================================================================
+   접근성 및 모션 감소 지원
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .country-missionary-popup {
+        animation: none;
+        transition: none;
+    }
+    
+    .country-missionary-popup .missionary-list-item {
+        transition: none;
+    }
+}
+
+/* 포커스 스타일 */
+.country-missionary-popup:focus-within {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   플로팅 리스트 팝업 스타일 (국가별 선교사 목록)
+   ========================================================================== */
+
+.floating-list-popup {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 320px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1000;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    animation: country-popup-fade-in 0.3s ease-out;
+}
+
+.floating-list-popup .popup-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px 12px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.floating-list-popup .country-flag {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.floating-list-popup .country-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    flex: 1;
+}
+
+.floating-list-popup .close-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #6b7280;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.floating-list-popup .close-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #374151;
+}
+
+.floating-list-popup .missionary-list {
+    padding: 8px 0;
+    max-height: calc(80vh - 60px); /* 헤더 높이 제외 */
+    overflow-y: auto;
+}
+
+.floating-list-popup .missionary-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.floating-list-popup .missionary-item:last-child {
+    border-bottom: none;
+}
+
+.floating-list-popup .missionary-item:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.floating-list-popup .missionary-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    flex: 1;
+}
+
+.floating-list-popup .missionary-city {
+    font-size: 11px;
+    color: #6b7280;
+    margin-left: 8px;
+}
+
+/* 스크롤바 스타일링 */
+.floating-list-popup .missionary-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.floating-list-popup .missionary-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.floating-list-popup .missionary-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.floating-list-popup .missionary-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .floating-list-popup {
+        max-width: 280px;
+        max-height: 70vh;
+    }
+    
+    .floating-list-popup .popup-header {
+        padding: 10px 12px;
+    }
+    
+    .floating-list-popup .missionary-item {
+        padding: 6px 12px;
+    }
+    
+    .floating-list-popup .missionary-name {
+        font-size: 12px;
+    }
+    
+    .floating-list-popup .missionary-city {
+        font-size: 10px;
+    }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+    .floating-list-popup {
+        background: rgba(31, 41, 55, 0.95);
+        border-color: rgba(55, 65, 81, 0.4);
+    }
+    
+    .floating-list-popup .popup-header {
+        background: rgba(31, 41, 55, 0.9);
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    .floating-list-popup .country-name,
+    .floating-list-popup .missionary-name {
+        color: #f3f4f6;
+    }
+    
+    .floating-list-popup .missionary-city {
+        color: #9ca3af;
+    }
+    
+    .floating-list-popup .close-btn {
+        color: #9ca3af;
+    }
+    
+    .floating-list-popup .close-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #f3f4f6;
+    }
+    
+    .floating-list-popup .missionary-item {
+        border-bottom-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .floating-list-popup .missionary-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* ==========================================================================
+   CML 컨테이너 스타일 (CountryMissionaryList)
+   ========================================================================== */
+
+.cml-container {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 320px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1000;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    animation: country-popup-fade-in 0.3s ease-out;
+}
+
+.cml-container .cml-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px 12px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.cml-container .cml-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.cml-container .cml-flag {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.cml-container .cml-close-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #6b7280;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.cml-container .cml-close-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #374151;
+}
+
+.cml-container .cml-content {
+    padding: 8px 0;
+    max-height: calc(80vh - 60px); /* 헤더 높이 제외 */
+    overflow-y: auto;
+}
+
+.cml-container .cml-stats {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #6b7280;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    margin-bottom: 8px;
+}
+
+.cml-container .cml-stats .cml-count {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.cml-container .cml-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cml-container .cml-item {
+    margin: 0;
+}
+
+.cml-container .cml-item-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.cml-container .cml-item-content:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.cml-container .cml-item:last-child .cml-item-content {
+    border-bottom: none;
+}
+
+.cml-container .cml-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.cml-container .cml-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cml-container .cml-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cml-container .cml-location {
+    font-size: 11px;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cml-container .cml-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.cml-container .cml-action-btn {
+    background: none;
+    border: none;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    color: #6b7280;
+    transition: all 0.2s ease;
+}
+
+.cml-container .cml-action-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #374151;
+}
+
+.cml-container .cml-empty {
+    padding: 20px 16px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.cml-container .cml-empty i {
+    font-size: 24px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+}
+
+.cml-container .cml-empty h4 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: #374151;
+}
+
+.cml-container .cml-empty p {
+    margin: 0;
+    font-size: 12px;
+}
+
+/* 스크롤바 스타일링 */
+.cml-container .cml-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cml-container .cml-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.cml-container .cml-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.cml-container .cml-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .cml-container {
+        max-width: 280px;
+        max-height: 70vh;
+    }
+    
+    .cml-container .cml-header {
+        padding: 10px 12px;
+    }
+    
+    .cml-container .cml-item-content {
+        padding: 6px 12px;
+    }
+    
+    .cml-container .cml-name {
+        font-size: 12px;
+    }
+    
+    .cml-container .cml-location {
+        font-size: 10px;
+    }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+    .cml-container {
+        background: rgba(31, 41, 55, 0.95);
+        border-color: rgba(55, 65, 81, 0.4);
+    }
+    
+    .cml-container .cml-header {
+        background: rgba(31, 41, 55, 0.9);
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    .cml-container .cml-header h3,
+    .cml-container .cml-name,
+    .cml-container .cml-stats .cml-count {
+        color: #f3f4f6;
+    }
+    
+    .cml-container .cml-location,
+    .cml-container .cml-stats {
+        color: #9ca3af;
+    }
+    
+    .cml-container .cml-close-btn,
+    .cml-container .cml-action-btn {
+        color: #9ca3af;
+    }
+    
+    .cml-container .cml-close-btn:hover,
+    .cml-container .cml-action-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #f3f4f6;
+    }
+    
+    .cml-container .cml-item-content {
+        border-bottom-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .cml-container .cml-item-content:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+}

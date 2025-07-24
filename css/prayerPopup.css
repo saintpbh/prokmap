@@ -1,0 +1,814 @@
+/**
+ * 기도 팝업 모듈 v2.0 CSS
+ * 모던 글래스모피즘 디자인
+ */
+
+/* ==========================================================================
+   애니메이션 정의
+   ========================================================================== */
+
+@keyframes prayer-popup-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes prayer-popup-fade-out {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-15px) scale(0.95);
+        filter: blur(4px);
+    }
+}
+
+@keyframes prayer-btn-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+}
+
+@keyframes prayer-btn-success {
+    0% {
+        transform: scale(1);
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+    50% {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #10b981, #047857);
+    }
+    100% {
+        transform: scale(1);
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+}
+
+@keyframes prayer-btn-error {
+    0% {
+        transform: scale(1);
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+    25% {
+        transform: scale(0.95);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+}
+
+/* ==========================================================================
+   메인 팝업 컨테이너
+   ========================================================================== */
+
+.prayer-popup-v2 {
+    position: absolute;
+    z-index: 2001 !important;
+    width: 280px;
+    min-height: 120px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 8px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    animation: prayer-popup-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.prayer-popup-v2.popup-closing {
+    animation: prayer-popup-fade-out 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 꼬리표 (말풍선 꼬리) */
+.prayer-popup-v2::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 40px;
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 12px solid rgba(255, 255, 255, 0.3);
+    filter: blur(1px);
+}
+
+.prayer-popup-v2::before {
+    content: '';
+    position: absolute;
+    bottom: -11px;
+    left: 41px;
+    width: 0;
+    height: 0;
+    border-left: 11px solid transparent;
+    border-right: 11px solid transparent;
+    border-top: 11px solid rgba(255, 255, 255, 0.9);
+    z-index: 1;
+}
+
+/* 호버 효과 */
+.prayer-popup-v2:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        0 12px 24px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ==========================================================================
+   닫기 버튼
+   ========================================================================== */
+
+.popup-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    transition: all 0.2s ease;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+}
+
+.popup-close-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    color: #374151;
+    transform: scale(1.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.popup-close-btn:active {
+    transform: scale(0.95);
+}
+
+.popup-close-btn:active {
+    transform: scale(0.95);
+}
+
+/* ==========================================================================
+   헤더 섹션
+   ========================================================================== */
+
+.prayer-popup-v2 .popup-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 18px 20px 12px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.prayer-popup-v2 .popup-avatar {
+    flex-shrink: 0 !important;
+}
+
+.prayer-popup-v2 .popup-info {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.popup-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.popup-flag {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.popup-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.popup-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.3;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.popup-location {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   콘텐츠 섹션
+   ========================================================================== */
+
+.popup-content {
+    padding: 12px 20px 16px 20px;
+    position: relative;
+}
+
+.popup-prayer-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.popup-prayer-text {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.5;
+    font-weight: 500;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 4.5em;
+}
+
+/* ==========================================================================
+   액션 버튼
+   ========================================================================== */
+
+.popup-action {
+    padding: 0 20px 20px 20px;
+}
+
+.prayer-action-btn {
+    width: 100%;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.prayer-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.prayer-action-btn:hover::before {
+    left: 100%;
+}
+
+.prayer-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.prayer-action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.prayer-action-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.prayer-icon {
+    font-size: 16px;
+    animation: prayer-btn-pulse 2s ease-in-out infinite;
+}
+
+.prayer-text {
+    font-weight: 600;
+}
+
+/* 버튼 상태별 스타일 */
+.prayer-action-btn.prayer-clicked {
+    transform: scale(0.98);
+}
+
+.prayer-action-btn.prayer-loading {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    animation: prayer-btn-pulse 1s ease-in-out infinite;
+}
+
+.prayer-action-btn.prayer-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    animation: prayer-btn-success 0.6s ease-in-out;
+}
+
+.prayer-action-btn.prayer-error {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    animation: prayer-btn-error 0.6s ease-in-out;
+}
+
+/* ==========================================================================
+   반응형 디자인
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .prayer-popup-v2 {
+        width: 260px;
+        min-height: 110px;
+    }
+    
+    .popup-header {
+        padding: 16px 18px 10px 18px;
+        gap: 10px;
+    }
+    
+    .popup-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .popup-name {
+        font-size: 15px;
+    }
+    
+    .popup-content {
+        padding: 10px 18px 14px 18px;
+    }
+    
+    .popup-action {
+        padding: 0 18px 18px 18px;
+    }
+    
+    .prayer-action-btn {
+        height: 36px;
+        font-size: 12px;
+    }
+}
+
+/* ==========================================================================
+   다크 모드 지원
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .prayer-popup-v2 {
+        background: rgba(17, 24, 39, 0.9);
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.3),
+            0 8px 16px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    .prayer-popup-v2:hover {
+        box-shadow: 
+            0 25px 50px rgba(0, 0, 0, 0.4),
+            0 12px 24px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .popup-name {
+        color: #f9fafb;
+    }
+    
+    .popup-location {
+        color: #9ca3af;
+    }
+    
+    .popup-prayer-text {
+        color: #d1d5db;
+    }
+    
+    .popup-close-btn {
+        background: rgba(17, 24, 39, 0.8);
+        color: #9ca3af;
+    }
+    
+    .popup-close-btn:hover {
+        background: rgba(17, 24, 39, 0.95);
+        color: #f3f4f6;
+    }
+}
+
+/* ==========================================================================
+   접근성 및 모션 감소 지원
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .prayer-popup-v2 {
+        animation: none;
+        transition: none;
+    }
+    
+    .prayer-popup-v2:hover {
+        transform: none;
+    }
+    
+    .prayer-action-btn {
+        transition: none;
+    }
+    
+    .prayer-action-btn:hover {
+        transform: none;
+    }
+    
+    .prayer-icon {
+        animation: none;
+    }
+    
+    .popup-close-btn {
+        transition: none;
+    }
+    
+    .popup-close-btn:hover {
+        transform: none;
+    }
+}
+
+/* 포커스 스타일 */
+.prayer-popup-v2:focus-within {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.prayer-action-btn:focus {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+.popup-close-btn:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   기도손 애니메이션 (실시간 공유 애니메이션) - minimal-prayer-popup.css에서 이동
+   ========================================================================== */
+
+.prayer-hand-animation {
+    position: absolute;
+    z-index: 10000;
+    font-size: 24px;
+    pointer-events: none;
+    user-select: none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+}
+
+/* 기도손 애니메이션 키프레임 */
+@keyframes prayer-hand-rise {
+    0% {
+        transform: translateY(0px) scale(0.8);
+        opacity: 0;
+    }
+    10% {
+        transform: translateY(-10px) scale(1);
+        opacity: 1;
+    }
+    90% {
+        transform: translateY(-80px) scale(0.6);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-100px) scale(0.4);
+        opacity: 0;
+    }
+}
+
+/* 기도손 펄스 효과 */
+@keyframes prayer-hand-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+    }
+    50% {
+        filter: drop-shadow(0 0 16px rgba(59, 130, 246, 0.9));
+    }
+}
+
+/* 애니메이션 클래스 적용 */
+.prayer-hand-animation.animated {
+    animation: prayer-hand-rise 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
+               prayer-hand-pulse 1s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   기도 안내 팝업 (타이틀바 아래) - minimal-prayer-popup.css에서 이동
+   ========================================================================== */
+
+.prayer-notification {
+    position: fixed;
+    top: 60px; /* 타이틀바 아래 위치 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.prayer-notification.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+    visibility: hidden;
+}
+
+.prayer-notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    visibility: visible;
+}
+
+.prayer-notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 24px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.prayer-notification .prayer-icon {
+    font-size: 20px;
+    animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+.prayer-notification .prayer-message {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+}
+
+/* 부드러운 펄스 애니메이션 */
+@keyframes gentle-pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+}
+
+/* 슬라이드 인 애니메이션 */
+@keyframes slide-in-down {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* 슬라이드 아웃 애니메이션 */
+@keyframes slide-out-up {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+    .prayer-notification-content {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: #475569;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    
+    .prayer-notification .prayer-message {
+        color: #f1f5f9;
+    }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .prayer-notification {
+        top: 50px;
+        left: 20px;
+        right: 20px;
+        transform: none;
+    }
+    
+    .prayer-notification.hidden {
+        transform: translateY(-20px);
+    }
+    
+    .prayer-notification.show {
+        transform: translateY(0);
+    }
+    
+    .prayer-notification-content {
+        padding: 14px 20px;
+    }
+    
+    .prayer-notification .prayer-message {
+        font-size: 14px;
+    }
+}
+
+/* 접근성 개선 */
+@media (prefers-reduced-motion: reduce) {
+    .prayer-notification {
+        transition: none;
+    }
+    
+    .prayer-notification .prayer-icon {
+        animation: none;
+    }
+}
+
+/* ==========================================================================
+   기도 요청 섹션 스타일
+   ========================================================================== */
+
+.prayer-requests-section {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.prayer-requests-section .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.prayer-requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.prayer-request-item {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease;
+}
+
+.prayer-request-item:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.request-date {
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.request-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.request-content .info-icon {
+    font-size: 12px;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.content-text {
+    font-size: 13px;
+    line-height: 1.4;
+    color: #374151;
+    word-break: break-word;
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+    .prayer-requests-section {
+        background: rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .prayer-request-item {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .prayer-request-item:hover {
+        background: rgba(0, 0, 0, 0.4);
+    }
+    
+    .request-date {
+        color: #9ca3af;
+    }
+    
+    .content-text {
+        color: #e5e7eb;
+    }
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+    .prayer-requests-section {
+        padding: 12px;
+        margin-top: 16px;
+    }
+    
+    .prayer-request-item {
+        padding: 10px;
+    }
+    
+    .content-text {
+        font-size: 12px;
+    }
+}
+
+/* 접근성 개선 */
+@media (prefers-reduced-motion: reduce) {
+    .prayer-request-item {
+        transition: none;
+    }
+    
+    .prayer-request-item:hover {
+        transform: none;
+    }
+}

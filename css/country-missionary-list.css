@@ -1,0 +1,382 @@
+/* 국가별 선교사 리스트 독립 디자인 */
+/* 고유한 클래스명으로 다른 스타일과 격리 */
+
+.cml-container {
+    position: absolute; /* 마커 위에 위치하도록 absolute 설정 */
+    width: 320px; /* 400px에서 320px로 축소 */
+    max-width: 400px;
+    max-height: 60vh; /* 80vh에서 60vh로 축소 */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 16px; /* 20px에서 16px로 축소 */
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2);
+    z-index: 1000;
+    overflow: hidden;
+    animation: cml-fadeIn 0.3s ease-out;
+    font-family: 'Inter', 'Pretendard', sans-serif;
+    /* 기본 상태: 보임 */
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    /* 위치는 JavaScript에서 동적으로 설정됨 */
+}
+
+.cml-header {
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+    color: white;
+    padding: 16px 20px; /* 20px 25px에서 16px 20px로 축소 */
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cml-header h3 {
+    margin: 0;
+    font-size: 1.2rem; /* 1.4rem에서 1.2rem으로 축소 */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 10px에서 8px로 축소 */
+}
+
+.cml-header .cml-flag {
+    width: 24px;
+    height: 16px;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cml-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 28px; /* 32px에서 28px로 축소 */
+    height: 28px; /* 32px에서 28px로 축소 */
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 14px; /* 16px에서 14px로 축소 */
+}
+
+.cml-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* 기도 메시지 스타일 */
+.cml-prayer-message {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    animation: cml-prayer-fadeIn 0.3s ease-out;
+}
+
+.cml-prayer-message i {
+    font-size: 1rem;
+    color: #fff;
+}
+
+.cml-prayer-message span {
+    flex: 1;
+}
+
+@keyframes cml-prayer-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cml-content {
+    padding: 0;
+    max-height: calc(80vh - 80px);
+    overflow-y: auto;
+}
+
+.cml-stats {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 12px 20px; /* 15px 25px에서 12px 20px로 축소 */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem; /* 0.9rem에서 0.85rem으로 축소 */
+    color: #6c757d;
+}
+
+.cml-stats .cml-count {
+    font-weight: 600;
+    color: #4A90E2;
+}
+
+.cml-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.cml-item {
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.cml-item:last-child {
+    border-bottom: none;
+}
+
+.cml-item:hover {
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.05) 0%, rgba(74, 144, 226, 0.02) 100%);
+}
+
+.cml-item-content {
+    padding: 14px 20px; /* 18px 25px에서 14px 20px로 축소 */
+    display: flex;
+    align-items: center;
+    gap: 12px; /* 15px에서 12px로 축소 */
+    cursor: pointer;
+    position: relative;
+}
+
+.cml-avatar {
+    width: 40px; /* 48px에서 40px로 축소 */
+    height: 40px; /* 48px에서 40px로 축소 */
+    border-radius: 10px; /* 12px에서 10px로 축소 */
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem; /* 1.2rem에서 1rem으로 축소 */
+    box-shadow: 0 3px 8px rgba(74, 144, 226, 0.3); /* 그림자 축소 */
+    flex-shrink: 0;
+}
+
+.cml-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cml-name {
+    font-size: 1rem; /* 1.1rem에서 1rem으로 축소 */
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 3px; /* 4px에서 3px로 축소 */
+    line-height: 1.3;
+    transition: color 0.2s ease;
+}
+
+.cml-item:hover .cml-name {
+    color: #4A90E2;
+}
+
+.cml-location {
+    font-size: 0.85rem; /* 0.9rem에서 0.85rem으로 축소 */
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 4px; /* 5px에서 4px로 축소 */
+}
+
+.cml-location i {
+    font-size: 0.8rem;
+    color: #4A90E2;
+}
+
+.cml-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.cml-item:hover .cml-actions {
+    opacity: 1;
+}
+
+.cml-action-btn {
+    background: rgba(74, 144, 226, 0.1);
+    border: 1px solid rgba(74, 144, 226, 0.2);
+    color: #4A90E2;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cml-action-btn:hover {
+    background: rgba(74, 144, 226, 0.2);
+    border-color: rgba(74, 144, 226, 0.3);
+    transform: translateY(-1px);
+}
+
+.cml-prayer-btn {
+    background: linear-gradient(135deg, #7ED321 0%, #6BC011 100%);
+    color: white;
+    border: none;
+}
+
+.cml-prayer-btn:hover {
+    background: linear-gradient(135deg, #6BC011 0%, #5AA010 100%);
+}
+
+.cml-empty {
+    padding: 40px 25px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.cml-empty i {
+    font-size: 3rem;
+    color: #dee2e6;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.cml-empty h4 {
+    margin: 0 0 10px 0;
+    color: #495057;
+}
+
+.cml-empty p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* 스크롤바 스타일링 */
+.cml-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cml-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.cml-content::-webkit-scrollbar-thumb {
+    background: rgba(74, 144, 226, 0.3);
+    border-radius: 3px;
+}
+
+.cml-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(74, 144, 226, 0.5);
+}
+
+/* 애니메이션 */
+@keyframes cml-fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -100%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -100%) scale(1);
+    }
+}
+
+@keyframes cml-fadeOut {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -100%) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -100%) scale(0.9);
+    }
+}
+
+.cml-container.closing {
+    animation: cml-fadeOut 0.3s ease-in forwards;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .cml-container {
+        width: 280px; /* 350px에서 280px로 축소 */
+        max-height: 70vh; /* 85vh에서 70vh로 축소 */
+    }
+    
+    .cml-header {
+        padding: 12px 16px; /* 15px 20px에서 12px 16px로 축소 */
+    }
+    
+    .cml-header h3 {
+        font-size: 1.1rem; /* 1.2rem에서 1.1rem으로 축소 */
+    }
+    
+    .cml-item-content {
+        padding: 12px 16px; /* 15px 20px에서 12px 16px로 축소 */
+        gap: 10px; /* 12px에서 10px로 축소 */
+    }
+    
+    .cml-avatar {
+        width: 36px; /* 40px에서 36px로 축소 */
+        height: 36px; /* 40px에서 36px로 축소 */
+        font-size: 0.9rem; /* 1rem에서 0.9rem으로 축소 */
+    }
+    
+    .cml-name {
+        font-size: 0.95rem; /* 1rem에서 0.95rem으로 축소 */
+    }
+    
+    .cml-actions {
+        opacity: 1;
+        flex-direction: column;
+        gap: 3px; /* 4px에서 3px로 축소 */
+    }
+    
+    .cml-action-btn {
+        padding: 3px 6px; /* 4px 8px에서 3px 6px로 축소 */
+        font-size: 0.65rem; /* 0.7rem에서 0.65rem으로 축소 */
+    }
+}
+
+/* 접근성 개선 */
+.cml-container:focus-within {
+    outline: 2px solid #4A90E2;
+    outline-offset: 2px;
+}
+
+.cml-item-content:focus {
+    outline: none;
+    background: rgba(74, 144, 226, 0.1);
+}
+
+/* 로딩 상태 */
+.cml-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.cml-loading i {
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+} 

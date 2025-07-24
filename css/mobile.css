@@ -1,0 +1,1006 @@
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e2e5ea 0%, #273c75 60%, #030814 100%);
+    background-attachment: fixed;
+    position: relative;
+    overflow-x: hidden;
+}
+body::before {
+    content: '';
+    position: fixed;
+    z-index: 0;
+    left: 0; top: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+body.mobile-mode {
+    overflow: hidden;
+    background: 
+        linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.6) 0%, 
+            rgba(118, 75, 162, 0.5) 25%, 
+            rgba(240, 147, 251, 0.4) 50%, 
+            rgba(245, 87, 108, 0.5) 75%, 
+            rgba(79, 172, 254, 0.6) 100%),
+        linear-gradient(45deg, 
+            rgba(102, 126, 234, 0.2) 0%, 
+            rgba(118, 75, 162, 0.15) 25%, 
+            rgba(240, 147, 251, 0.1) 50%, 
+            rgba(245, 87, 108, 0.15) 75%, 
+            rgba(79, 172, 254, 0.2) 100%),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" fill="%23ffffff" opacity="0.03"><path d="M50,50 L950,50 L950,450 L50,450 Z M100,100 L900,100 L900,400 L100,400 Z M150,150 L850,150 L850,350 L150,350 Z M200,200 L800,200 L800,300 L200,300 Z M250,250 L750,250 L750,250 L250,250 Z M300,300 L700,300 L700,300 L300,300 Z M350,350 L650,350 L650,350 L350,350 Z M400,400 L600,400 L600,400 L400,400 Z M450,450 L550,450 L550,450 L450,450 Z M500,500 L500,500 L500,500 L500,500 Z M550,550 L450,550 L450,550 L550,550 Z M600,600 L400,600 L400,600 L600,600 Z M650,650 L350,650 L350,650 L650,650 Z M700,700 L300,700 L300,700 L700,700 Z M750,750 L250,750 L250,750 L750,750 Z M800,800 L200,800 L200,800 L800,800 Z M850,850 L150,850 L150,850 L850,850 Z M900,900 L100,900 L100,900 L900,900 Z M950,950 L50,950 L50,950 L950,950 Z"/><path d="M50,50 L950,50 M50,100 L950,100 M50,150 L950,150 M50,200 L950,200 M50,250 L950,250 M50,300 L950,300 M50,350 L950,350 M50,400 L950,400 M50,450 L950,450"/><path d="M50,50 L50,450 M100,50 L100,450 M150,50 L150,450 M200,50 L200,450 M250,50 L250,450 M300,50 L300,450 M350,50 L350,450 M400,50 L400,450 M450,50 L450,450 M500,50 L500,450 M550,50 L550,450 M600,50 L600,450 M650,50 L650,450 M700,50 L700,450 M750,50 L750,450 M800,50 L800,450 M850,50 L850,450 M900,50 L900,450 M950,50 L950,450"/><circle cx="120" cy="120" r="8"/><circle cx="280" cy="140" r="6"/><circle cx="450" cy="130" r="10"/><circle cx="620" cy="150" r="7"/><circle cx="780" cy="125" r="9"/><circle cx="920" cy="135" r="5"/><circle cx="150" cy="180" r="7"/><circle cx="320" cy="200" r="8"/><circle cx="480" cy="190" r="6"/><circle cx="650" cy="210" r="9"/><circle cx="820" cy="185" r="7"/><circle cx="950" cy="195" r="8"/><circle cx="180" cy="240" r="6"/><circle cx="350" cy="260" r="9"/><circle cx="520" cy="250" r="7"/><circle cx="680" cy="270" r="8"/><circle cx="850" cy="245" r="6"/><circle cx="980" cy="255" r="7"/><circle cx="200" cy="300" r="8"/><circle cx="370" cy="320" r="7"/><circle cx="540" cy="310" r="9"/><circle cx="710" cy="330" r="6"/><circle cx="880" cy="305" r="8"/><circle cx="100" cy="340" r="7"/><circle cx="270" cy="360" r="6"/><circle cx="440" cy="350" r="8"/><circle cx="610" cy="370" r="9"/><circle cx="780" cy="345" r="7"/><circle cx="950" cy="355" r="6"/><circle cx="120" cy="390" r="8"/><circle cx="290" cy="410" r="7"/><circle cx="460" cy="400" r="6"/><circle cx="630" cy="420" r="8"/><circle cx="800" cy="395" r="9"/><circle cx="970" cy="405" r="7"/></svg>');
+    background-size: cover, cover, 100% 100%;
+    background-attachment: fixed;
+    position: relative;
+}
+
+body.mobile-mode::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+#mobile-missionary-swiper {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    background: transparent;
+    display: block;
+}
+
+.swiper {
+    width: 100vw;
+    height: 100vh;
+}
+
+.swiper-slide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 2rem 0;
+    margin: 0;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.missionary-card {
+    width: 90%;
+    max-width: 400px;
+    height: 70vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    box-sizing: border-box;
+    padding: 1.5rem 1.5rem;
+    box-shadow: 
+        0 20px 40px rgba(0,0,0,0.15),
+        0 8px 16px rgba(0,0,0,0.1),
+        0 4px 8px rgba(0,0,0,0.05),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+    border-radius: 28px;
+    overflow: hidden;
+}
+
+.missionary-card::before {
+    content: '';
+    position: absolute; left:0; right:0; top:0; height: 44%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.0) 100%);
+    z-index: 0;
+    border-radius: 28px 28px 0 0;
+    pointer-events: none;
+}
+.missionary-card > * { position: relative; z-index: 1; }
+.missionary-info-header {
+    width: 100%;
+    margin-bottom: 0.8rem;
+    position: relative;
+    z-index: 2;
+}
+.missionary-avatar {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    border: 4px solid rgba(255,255,255,0.7);
+    position: relative;
+    z-index: 4;
+    margin-bottom: 0.8rem;
+}
+.missionary-name {
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #fff !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0.4rem;
+}
+.missionary-location {
+    font-size: 1.1rem;
+    color: #fff !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0.8rem;
+}
+.sent-year, .organization {
+    color: #fff !important;
+    font-weight: 500;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+}
+.prayer-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: none !important;
+    border: none !important;
+    text-align: center;
+    font-size: 1.18rem;
+    width: 100%;
+    flex: 1;
+    margin-top: auto;
+    color: #fff !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+}
+.prayer-section * {
+    text-align: center !important;
+}
+.prayer-btn {
+    box-shadow: 0 8px 24px rgba(52, 152, 212, 0.18), 0 4px 8px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border: 2.5px solid #fff;
+    position: relative;
+    z-index: 3;
+    margin-bottom: 0.8rem;
+}
+
+.missionary-info-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 1rem 0 1.5rem 0;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.missionary-info-row .emoji {
+    font-size: 1.2em;
+    margin-right: 0.18em;
+    vertical-align: middle;
+}
+
+.missionary-info-row.vertical {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0.8rem 0 1.2rem 0;
+    width: 100%;
+}
+
+body.mobile-mode #map,
+body.mobile-mode #titleLogo,
+body.mobile-mode #mapGuide,
+body.mobile-mode #missionary-table-country,
+body.mobile-mode #missionary-table-presbytery,
+body.mobile-mode #detailPopupContainer,
+body.mobile-mode #detailPopup,
+body.mobile-mode #country-exit-btn,
+body.mobile-mode #presbytery-exit-btn,
+body.mobile-mode #sidebar-panel,
+body.mobile-mode #sidebar-overlay {
+    display: none !important;
+}
+
+.glass-overlay {
+    border-radius: 28px !important;
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 1;
+    pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.missionary-avatar,
+.prayer-btn,
+.prayer-section,
+.missionary-info-header,
+.missionary-name,
+.missionary-location,
+.missionary-info-row {
+    z-index: 2;
+}
+
+.missionary-info-row,
+.missionary-info-row .emoji,
+.missionary-info-row.vertical {
+    color: #fff !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+}
+
+.swiper-slide:last-child::after {
+    content: '';
+    display: block;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.10));
+    border-radius: 0 0 28px 28px;
+}
+
+.next-card-indicator {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    z-index: 1001;
+    font-size: 2.2rem;
+    color: #b3c6ff;
+    opacity: 0.85;
+    pointer-events: none;
+    animation: globe-glow 1.8s ease-in-out infinite alternate;
+    text-shadow: 0 0 12px #b3c6ff, 0 0 24px #7d5095;
+}
+
+@keyframes globe-glow {
+    0% {
+        opacity: 0.5;
+        text-shadow: 0 0 4px #b3c6ff, 0 0 8px #7d5095;
+    }
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 16px #b3c6ff, 0 0 32px #7d5095;
+    }
+    100% {
+        opacity: 0.5;
+        text-shadow: 0 0 4px #b3c6ff, 0 0 8px #7d5095;
+    }
+}
+
+.bottom-hint-image {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    z-index: 1001;
+    width: 90vw;
+    max-width: 340px;
+    pointer-events: none;
+}
+.bottom-hint-image img {
+    width: 100%;
+    border-radius: 0 0 28px 28px;
+    box-shadow: 0 8px 32px rgba(30, 42, 90, 0.18);
+}
+
+.mobile-titlebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 70px;
+    background: rgba(30, 34, 60, 0.32);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.mobile-titlebar-inner {
+    width: 100vw;
+    max-width: 480px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 1rem;
+    gap: 0.7rem;
+}
+.mobile-titlebar-logo {
+    height: 28px;
+    width: 28px;
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+}
+.mobile-titlebar-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    flex: none;
+    text-align: left;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.close-mobile-swiper {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 1003;
+    padding: 0.2em;
+    flex-shrink: 0;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    transition: background 0.2s;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+.close-mobile-swiper:active {
+    background: rgba(255,255,255,0.08);
+}
+
+#mobile-missionary-swiper .swiper {
+    padding-top: 56px;
+    height: calc(100vh - 56px);
+}
+
+@media (max-width: 900px) {
+  #titleLogo {
+    display: none !important;
+  }
+}
+
+/* 모바일 검색 컨테이너 */
+.mobile-search-container {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    padding: 0.8rem;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.mobile-search-container:focus-within {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transform: translateX(-50%) scale(1.02);
+}
+
+.mobile-search-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.mobile-search-icon {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-left: 0.5rem;
+}
+
+#mobile-missionary-search {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    padding: 0.5rem 0;
+    outline: none;
+    font-family: inherit;
+}
+
+#mobile-missionary-search::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.mobile-search-clear {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    margin-right: 0.5rem;
+}
+
+.mobile-search-clear:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.mobile-search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    margin-top: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    display: none;
+}
+
+.mobile-search-results-dropdown.show {
+    display: block;
+}
+
+.mobile-search-result-item {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    color: #333;
+}
+
+.mobile-search-result-item:last-child {
+    border-bottom: none;
+}
+
+.mobile-search-result-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.mobile-search-result-item .missionary-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.3rem;
+}
+
+.mobile-search-result-item .missionary-location {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* 모바일 UI 컨트롤 */
+#mobile-ui-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 1000;
+}
+
+#mobile-ui-controls sl-icon-button {
+    --sl-color-primary-600: rgba(255, 255, 255, 0.9);
+    --sl-color-primary-700: rgba(255, 255, 255, 1);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    transition: all 0.3s ease;
+}
+
+#mobile-ui-controls sl-icon-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* 모바일 가이드 메시지 */
+.mobile-map-guide {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 1rem;
+    color: white;
+    font-size: 0.9rem;
+    text-align: center;
+    line-height: 1.5;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* 모바일 뉴스바 */
+.mobile-news-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.8rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1001;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-news-content {
+    flex: 1;
+}
+
+.mobile-news-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.mobile-news-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.mobile-news-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 모바일 기도 토스트 */
+.mobile-prayer-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(76, 175, 80, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    padding: 1rem 1.5rem;
+    color: white;
+    z-index: 1002;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    opacity: 0;
+}
+
+.mobile-prayer-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.mobile-toast-content {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.mobile-toast-icon {
+    font-size: 1.5rem;
+}
+
+.mobile-toast-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-toast-main {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.mobile-toast-sub {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* 모바일 종료 버튼 */
+.mobile-exit-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+    display: none;
+}
+
+.mobile-exit-btn.show {
+    display: block;
+}
+
+/* 모바일 테이블 오버레이 */
+.mobile-country-table-overlay,
+.mobile-presbytery-table-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 999;
+    display: none;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.mobile-country-table-overlay.show,
+.mobile-presbytery-table-overlay.show {
+    display: block;
+}
+
+/* 모바일 첫화면(랜딩) 스타일 */
+.mobile-landing {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #667eea 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  box-sizing: border-box;
+  animation: fadeIn 0.8s;
+  position: relative;
+}
+
+.mobile-landing::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mobile-landing > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 상단 바 */
+.mobile-landing-topbar {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1rem 1.2rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mobile-landing-topbar-content {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  max-width: 400px;
+  justify-content: center;
+}
+
+.mobile-landing-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  background: white;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mobile-landing-title {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  white-space: nowrap;
+}
+
+.mobile-landing-intro {
+  font-size: 1.05rem;
+  color: #ffffff;
+  text-align: center;
+  margin: 1.5rem 1.2rem 1.5rem 1.2rem;
+  line-height: 1.5;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.mobile-landing-main-btn {
+  width: 100%;
+  max-width: 340px;
+  background: linear-gradient(90deg, #ff6b6b 0%, #ee5a24 100%);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 30px;
+  padding: 1rem 0;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.mobile-landing-main-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(255, 107, 107, 0.4);
+}
+.mobile-landing-main-btn:active {
+  background: linear-gradient(90deg, #ee5a24 0%, #ff6b6b 100%);
+  transform: translateY(0) scale(0.98);
+}
+.mobile-landing-sub-btns {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.mobile-landing-sub-btn {
+  background: rgba(255,255,255,0.25);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.mobile-landing-sub-btn:hover {
+  background: rgba(255,255,255,0.35);
+  transform: translateY(-1px);
+}
+.mobile-landing-sub-btn:active {
+  background: rgba(255,255,255,0.4);
+  transform: translateY(0);
+}
+.mobile-landing-illust {
+  margin: 1.2rem 0 0.7rem 0;
+  display: flex;
+  justify-content: center;
+}
+.mobile-landing-illust img {
+  filter: brightness(1.2) contrast(1.1);
+}
+.mobile-landing-verse {
+  font-size: 0.98rem;
+  color: #ffffff;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.7rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.mobile-landing-news {
+  font-size: 0.95rem;
+  color: #ffffff;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1.1rem;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.mobile-landing-feature-cards {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.feature-card {
+  background: rgba(255,255,255,0.25);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 16px;
+  padding: 0.7rem 1.1rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 0.2rem;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+.feature-card:hover {
+  background: rgba(255,255,255,0.35);
+  transform: translateY(-1px);
+}
+.mobile-landing-bottom-nav {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.5rem 0 0.2rem 0;
+  z-index: 1002;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
+  border-top: 1px solid rgba(255,255,255,0.3);
+}
+.nav-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.nav-btn.active, .nav-btn:active {
+  background: rgba(255,255,255,0.3);
+  color: #ffe082;
+  transform: scale(1.05);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 첫화면 진입 시 기존 지도/본문 숨김 처리 (JS에서 제어) */
+#main-app-content { display: none; }
+
+/* 기본 정보 섹션 */
+.mobile-landing-info {
+  padding: 2rem 1.2rem;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.mobile-landing-date {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.mobile-landing-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.stat-content {
+  font-size: 0.95rem;
+  color: #f0f0f0;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.mobile-prayer-count-info {
+  margin: 12px 0 18px 0;
+  padding: 12px 18px;
+  background: rgba(255,255,255,0.35);
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  font-size: 1.13em;
+  color: #333;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  animation: prayerBarBreath 2.8s ease-in-out infinite;
+}
+.mobile-prayer-count-info .prayer-count-number {
+  font-weight: bold;
+  color: #4f46e5;
+  font-size: 1.18em;
+  margin: 0 2px;
+  text-shadow: 0 0 8px #b3bcf5, 0 0 16px #a5b4fc;
+  animation: prayerNumberGlow 1.2s;
+}
+.mobile-prayer-count-info .prayer-icon {
+  font-size: 1.3em;
+  margin-right: 6px;
+  text-shadow: 0 0 6px #fbbf24, 0 0 12px #fde68a;
+}
+
+@keyframes prayerBarBreath {
+  0% {
+    box-shadow: 0 0 12px 4px rgba(255,255,255,0.45), 0 0 0px 0 rgba(255,255,255,0.0);
+  }
+  50% {
+    box-shadow: 0 0 32px 12px rgba(255,255,255,0.85), 0 0 0px 0 rgba(255,255,255,0.0);
+  }
+  100% {
+    box-shadow: 0 0 12px 4px rgba(255,255,255,0.45), 0 0 0px 0 rgba(255,255,255,0.0);
+  }
+}
+@keyframes prayerNumberGlow {
+  0% {
+    text-shadow: 0 0 0px #fff, 0 0 0px #4f46e5;
+  }
+  30% {
+    text-shadow: 0 0 16px #fff, 0 0 32px #4f46e5, 0 0 48px #a5b4fc;
+  }
+  100% {
+    text-shadow: 0 0 8px #b3bcf5, 0 0 16px #a5b4fc;
+  }
+}
+
+@keyframes prayerNumberStun {
+  0% { transform: scale(1); }
+  20% { transform: scale(1.35) rotate(-8deg); text-shadow: 0 0 32px #fff, 0 0 48px #4f46e5; }
+  40% { transform: scale(1.18) rotate(6deg); }
+  60% { transform: scale(1.25) rotate(-4deg); }
+  100% { transform: scale(1); }
+}
+.mobile-prayer-count-info .prayer-count-number.stun {
+  animation: prayerNumberStun 0.7s cubic-bezier(.23,1.12,.62,1.01);
+} 

@@ -1,0 +1,63 @@
+/* 중보기도자 수 표시 스타일 */
+.prayer-count-info {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.prayer-count-info .prayer-icon {
+    margin-right: 6px;
+    font-size: 16px;
+}
+
+.prayer-count-info .prayer-count-number {
+    font-weight: bold;
+    color: #4CAF50;
+    font-size: 16px;
+}
+
+/* 기도 숫자 글로우 애니메이션 */
+@keyframes prayerNumberGlow {
+    0% { text-shadow: 0 0 5px #4CAF50; }
+    50% { text-shadow: 0 0 20px #4CAF50, 0 0 30px #4CAF50; }
+    100% { text-shadow: 0 0 5px #4CAF50; }
+}
+
+.prayer-count-info .prayer-count-number {
+    animation: prayerNumberGlow 1.2s ease-in-out;
+}
+
+/* 숫자 증가 시 스턴 효과 */
+.prayer-count-info .prayer-count-number.stun {
+    animation: prayerNumberGlow 0.7s ease-in-out, shake 0.7s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .prayer-count-info {
+        top: 10px;
+        right: 10px;
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    
+    .prayer-count-info .prayer-count-number {
+        font-size: 14px;
+    }
+} 

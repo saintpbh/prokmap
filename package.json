@@ -1,0 +1,45 @@
+{
+  "name": "gijang-missionary-map",
+  "version": "2.0.0",
+  "description": "기장선교지도 - 전 세계 선교사 정보 관리 시스템",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "live-server --port=8000 --open=/",
+    "build": "echo '빌드 스크립트 준비 중'",
+    "test": "echo '테스트 스크립트 준비 중'",
+    "lint": "echo '린트 스크립트 준비 중'",
+    "deploy": "firebase deploy",
+    "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore.js"
+  },
+  "keywords": [
+    "missionary",
+    "map",
+    "prayer",
+    "newsletter",
+    "firebase",
+    "google-maps"
+  ],
+  "author": "기장선교지도 개발팀",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {
+    "firebase": "^10.14.1",
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gijang-missionary/map.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gijang-missionary/map/issues"
+  },
+  "homepage": "https://gijang-missionary-map.web.app"
+}
