@@ -5,14 +5,14 @@
 function createFloatingListPopup({ flagUrl, country, missionaryList }) {
     const wrapper = document.createElement('div');
     wrapper.className = 'floating-list-popup';
-    
+
     const missionaryItems = missionaryList.map(missionary => `
         <div class="missionary-item" onclick="showMissionaryDetail('${missionary.name}')">
             <span class="missionary-name">${missionary.name}</span>
             <span class="missionary-city">${missionary.city || ''}</span>
         </div>
     `).join('');
-    
+
     wrapper.innerHTML = `
         <div class="popup-header">
             <img src="${flagUrl}" alt="${country} 국기" class="country-flag">
@@ -23,7 +23,7 @@ function createFloatingListPopup({ flagUrl, country, missionaryList }) {
             ${missionaryItems}
         </div>
     `;
-    
+
     return wrapper;
 }
 
@@ -31,7 +31,7 @@ function createFloatingListPopup({ flagUrl, country, missionaryList }) {
 function createFloatingNamePopup({ name, city, ministry }) {
     const wrapper = document.createElement('div');
     wrapper.className = 'floating-name-popup';
-    
+
     wrapper.innerHTML = `
         <div class="popup-content">
             <h3>${name}</h3>
@@ -40,7 +40,7 @@ function createFloatingNamePopup({ name, city, ministry }) {
             <button class="close-btn" onclick="closeFloatingPopup()">×</button>
         </div>
     `;
-    
+
     return wrapper;
 }
 
@@ -48,22 +48,36 @@ function createFloatingNamePopup({ name, city, ministry }) {
 function closeFloatingPopup() {
     const popups = document.querySelectorAll('.floating-list-popup, .floating-name-popup');
     popups.forEach(popup => popup.remove());
+
+    // 배경 오버레이 숨김
+    if (window.MissionaryMap && typeof window.MissionaryMap.hideBackdrop === 'function') {
+        window.MissionaryMap.hideBackdrop();
+    }
+
+    // 기도 팝업 재개
+    if (window.MissionaryMap && typeof window.MissionaryMap.resumePrayerRotation === 'function') {
+        window.MissionaryMap.resumePrayerRotation();
+    }
 }
 
 // 선교사 상세 정보 표시
 function showMissionaryDetail(missionaryName) {
+    // 플로팅 팝업 제거 (자동 닫기)
+    document.querySelectorAll('.floating-list-popup').forEach(popup => popup.remove());
+    document.querySelectorAll('.floating-popup').forEach(popup => popup.remove());
+
     // 상세 팝업 표시 로직
     if (window.showDetailPopup) {
         // elements 객체 생성 또는 가져오기
         const elements = {
-            detailPopup: document.getElementById('detail-popup') || 
-                        document.querySelector('.detail-popup') ||
-                        document.createElement('div'),
-            mapContainer: document.getElementById('map') || 
-                         document.querySelector('.map-container') ||
-                         document.body
+            detailPopup: document.getElementById('detail-popup') ||
+                document.querySelector('.detail-popup') ||
+                document.createElement('div'),
+            mapContainer: document.getElementById('map') ||
+                document.querySelector('.map-container') ||
+                document.body
         };
-        
+
         // detailPopup이 새로 생성된 경우 스타일 설정
         if (!elements.detailPopup.id && !elements.detailPopup.className) {
             elements.detailPopup.id = 'detail-popup';
@@ -80,23 +94,26 @@ function showMissionaryDetail(missionaryName) {
             `;
             document.body.appendChild(elements.detailPopup);
         }
-        
+
         // MissionaryMap에서 선교사 정보 가져오기
         const missionaryInfo = {};
         if (window.MissionaryMap && window.MissionaryMap.state && window.MissionaryMap.state.missionaries) {
             // missionaryName이 문자열인지 확인
             const searchName = typeof missionaryName === 'string' ? missionaryName.trim() : String(missionaryName || '').trim();
-            
-            const missionary = window.MissionaryMap.state.missionaries.find(m => 
+
+            const missionary = window.MissionaryMap.state.missionaries.find(m =>
                 m.name && typeof m.name === 'string' && m.name.trim() === searchName
             );
             if (missionary) {
                 missionaryInfo[missionaryName] = missionary;
             }
         }
-        
+
         // showDetailPopup 호출
         window.showDetailPopup(missionaryName, null, missionaryInfo, elements);
+
+        // 배경 오버레이 유지 (디테일 팝업도 오버레이 사용)
+        // 오버레이는 이미 showFloatingListPopup에서 표시됨
     } else {
         console.error('showDetailPopup 함수를 찾을 수 없습니다.');
     }
@@ -107,14 +124,14 @@ function getMissionaryPrayerTopic(missionaryName) {
     if (window.MissionaryMap?.state?.missionaries) {
         // missionaryName이 문자열인지 확인
         const searchName = typeof missionaryName === 'string' ? missionaryName.trim() : String(missionaryName || '').trim();
-        
-        const missionary = window.MissionaryMap.state.missionaries.find(m => 
+
+        const missionary = window.MissionaryMap.state.missionaries.find(m =>
             m.name && typeof m.name === 'string' && m.name.trim() === searchName
         );
-        
+
         if (missionary) {
             if (missionary.summary && missionary.summary.trim() !== '') {
-                return missionary.summary.length > 60 ? 
+                return missionary.summary.length > 60 ?
                     missionary.summary.substring(0, 60) + '...' : missionary.summary;
             }
             return missionary.prayer || '현지 사역과 복음 전파를 위해 기도해 주세요.';
@@ -131,7 +148,7 @@ let isProcessingQueue = false;
 function showPrayerNotification(missionaryName) {
     // 큐에 추가
     prayerNotificationQueue.push(missionaryName);
-    
+
     // 큐 처리 시작
     if (!isProcessingQueue) {
         processNotificationQueue();
@@ -144,32 +161,32 @@ function processNotificationQueue() {
         isProcessingQueue = false;
         return;
     }
-    
+
     isProcessingQueue = true;
     const missionaryName = prayerNotificationQueue.shift();
-    
+
     const notification = document.getElementById('prayer-notification');
     const messageElement = notification?.querySelector('.prayer-message');
-    
+
     if (!notification || !messageElement) {
         console.warn('기도 안내 팝업 요소를 찾을 수 없습니다.');
         // 다음 큐 처리
         setTimeout(() => processNotificationQueue(), 100);
         return;
     }
-    
+
     // 메시지 설정
     messageElement.textContent = `${missionaryName} 선교사님을 위해 기도합니다!`;
-    
+
     // 기존 타이머가 있으면 제거
     if (notification.hideTimer) {
         clearTimeout(notification.hideTimer);
     }
-    
+
     // 팝업 표시
     notification.classList.remove('hidden');
     notification.classList.add('show');
-    
+
     // 1.5초 후 자동 숨김 (빠른 순환을 위해 시간 단축)
     notification.hideTimer = setTimeout(() => {
         hidePrayerNotification();
@@ -184,7 +201,7 @@ function hidePrayerNotification() {
     if (notification) {
         notification.classList.remove('show');
         notification.classList.add('hidden');
-        
+
         // 타이머 정리
         if (notification.hideTimer) {
             clearTimeout(notification.hideTimer);

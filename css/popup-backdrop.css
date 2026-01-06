@@ -1,0 +1,24 @@
+/* 배경 오버레이 스타일 */
+.popup-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    /* 팝업보다 아래 */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.popup-backdrop.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-backdrop.hidden {
+    opacity: 0;
+    visibility: hidden;
+}

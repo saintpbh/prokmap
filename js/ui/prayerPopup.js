@@ -32,6 +32,7 @@ class PrayerPopupManager {
         }
 
         this.isRunning = true;
+        this.isPaused = false;
         this.currentIndex = 0;
         
         // 첫 번째 팝업 즉시 표시
@@ -70,6 +71,9 @@ class PrayerPopupManager {
         }
         this.isPaused = true;
         console.log('기도 팝업 일시정지');
+        
+        // 현재 표시 중인 팝업 닫기
+        this.closeCurrentPopup();
     }
 
     // 재개
@@ -117,6 +121,8 @@ class PrayerPopupManager {
         
         if (isInDetailMode) {
             console.log('국가별/노회별 파송현황 모드: 기도 팝업 재개 건너뜀');
+            // 현재 표시 중인 팝업도 닫기
+            this.closeCurrentPopup();
             return;
         }
         
@@ -229,6 +235,18 @@ class PrayerPopupManager {
     // 다음 기도 팝업 표시
     showNextPrayerPopup() {
         if (this.missionaries.length === 0) return;
+        
+        // 국가별/노회별 파송현황 모드에서는 팝업 표시하지 않음
+        const isInDetailMode = window.missionaryMapInstance && 
+                             (window.missionaryMapInstance.state.fixedCountry || 
+                              window.missionaryMapInstance.state.fixedPresbytery);
+        
+        if (isInDetailMode) {
+            console.log('국가별/노회별 파송현황 모드: 기도 팝업 표시 건너뜀');
+            // 다음 인덱스로 이동만 수행
+            this.currentIndex = (this.currentIndex + 1) % this.missionaries.length;
+            return;
+        }
         
         // 인비주얼 상태라면 팝업 표시하지 않음
         if (!this.isVisible) {

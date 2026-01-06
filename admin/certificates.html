@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>증명서 발급 - 선교사 관리 시스템</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <header class="admin-header">
+        <h1><i class="fas fa-globe"></i> 선교사 관리 시스템</h1>
+        <div class="user-info">
+            <span class="user-email" id="userEmail">loading...</span>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
+                <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
+                <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="supporters.html"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+                <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+                <li><a href="certificates.html" class="active"><i class="fas fa-certificate"></i> 증명서 발급</a></li>
+                <li><a href="communications.html"><i class="fas fa-envelope"></i> 연락하기</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📜 증명서 발급</h3>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">선교사 검색 *</label>
+                    <input type="text" id="missionarySearch" class="form-input" placeholder="선교사 이름을 입력하세요">
+                    <div id="searchResults" style="margin-top: 10px;"></div>
+                </div>
+
+                <div id="certificateForm" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">증명서 종류 *</label>
+                        <select id="certificateType" class="form-select">
+                            <option value="">선택하세요</option>
+                            <option value="employment">재직증명서</option>
+                            <option value="dispatch">파송증명서</option>
+                            <option value="career">경력증명서</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">언어 *</label>
+                        <div style="display: flex; gap: 20px;">
+                            <label><input type="radio" name="language" value="ko" checked> 국문</label>
+                            <label><input type="radio" name="language" value="en"> 영문</label>
+                        </div>
+                    </div>
+
+                    <button id="generateBtn" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> 증명서 발급
+                    </button>
+                </div>
+
+                <div id="previewArea" class="card" style="margin-top: 2rem; display: none;">
+                    <h4>미리보기</h4>
+                    <div id="certificatePreview"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+
+    <script>
+        let selectedMissionary = null;
+        let missionaries = [];
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && adminAuth.allowedEmails.includes(user.email)) {
+                setTimeout(initCertificatePage, 500);
+            }
+        });
+
+        async function initCertificatePage() {
+            missionaries = await firebaseDB.getMissionaries();
+
+            // 검색 기능
+            document.getElementById('missionarySearch').addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                if (query.length < 2) {
+                    document.getElementById('searchResults').innerHTML = '';
+                    return;
+                }
+
+                const results = missionaries.filter(m =>
+                    m.name.toLowerCase().includes(query)
+                );
+
+                displaySearchResults(results);
+            });
+
+            // 증명서 생성 버튼
+            document.getElementById('generateBtn').addEventListener('click', generateCertificate);
+        }
+
+        function displaySearchResults(results) {
+            const container = document.getElementById('searchResults');
+
+            if (results.length === 0) {
+                container.innerHTML = '<p style="color: #999;">검색 결과가 없습니다.</p>';
+                return;
+            }
+
+            container.innerHTML = results.map(m => `
+                <div class="card" style="padding: 1rem; margin-bottom: 0.5rem; cursor: pointer;" 
+                     onclick="selectMissionary('${m.id}')">
+                    <strong>${m.name}</strong> - ${m.country || '정보없음'} (${m.presbytery || '정보없음'})
+                </div>
+            `).join('');
+        }
+
+        function selectMissionary(id) {
+            selectedMissionary = missionaries.find(m => m.id === id);
+            document.getElementById('certificateForm').style.display = 'block';
+            document.getElementById('searchResults').innerHTML = `
+                <div class="card" style="padding: 1rem; background: #e3f2fd;">
+                    선택됨: <strong>${selectedMissionary.name}</strong>
+                </div>
+            `;
+        }
+
+        function generateCertificate() {
+            if (!selectedMissionary) {
+                alert('선교사를 선택해주세요.');
+                return;
+            }
+
+            const type = document.getElementById('certificateType').value;
+            const language = document.querySelector('input[name="language"]:checked').value;
+
+            if (!type) {
+                alert('증명서 종류를 선택해주세요.');
+                return;
+            }
+
+            // 간단한 미리보기 표시
+            const preview = document.getElementById('certificatePreview');
+            const previewArea = document.getElementById('previewArea');
+
+            preview.innerHTML = `
+                <div style="border: 2px solid #333; padding: 3rem; text-align: center;">
+                    <h2>${language === 'ko' ? getCertificateTitle(type) : getCertificateTitleEn(type)}</h2>
+                    <br><br>
+                    <p>${language === 'ko' ? '성명' : 'Name'}: <strong>${selectedMissionary.name}</strong></p>
+                    <p>${language === 'ko' ? '파송지' : 'Mission Field'}: <strong>${selectedMissionary.country || ''}, ${selectedMissionary.city || ''}</strong></p>
+                    <p>${language === 'ko' ? '소속' : 'Organization'}: <strong>${selectedMissionary.organization || '한국기독교장로회'}</strong></p>
+                    <p>${language === 'ko' ? '파송일' : 'Dispatch Date'}: <strong>${selectedMissionary.sent_date || '정보없음'}</strong></p>
+                    <br><br>
+                    <p>${language === 'ko' ? '발급일' : 'Issue Date'}: ${new Date().toLocaleDateString('ko-KR')}</p>
+                    <p>${language === 'ko' ? '발급기관: 한국기독교장로회 국제협력선교' : 'Issuer: PROK International Cooperation Mission'}</p>
+                </div>
+                <br>
+                <p style="text-align: center; color: #666;">
+                    * PDF 생성 기능은 추후 구현 예정입니다. 현재는 화면 캡처하여 사용하세요.
+                </p>
+            `;
+
+            previewArea.style.display = 'block';
+        }
+
+        function getCertificateTitle(type) {
+            switch (type) {
+                case 'employment': return '재직증명서';
+                case 'dispatch': return '파송증명서';
+                case 'career': return '경력증명서';
+                default: return '증명서';
+            }
+        }
+
+        function getCertificateTitleEn(type) {
+            switch (type) {
+                case 'employment': return 'Certificate of Employment';
+                case 'dispatch': return 'Certificate of Dispatch';
+                case 'career': return 'Certificate of Career';
+                default: return 'Certificate';
+            }
+        }
+    </script>
+</body>
+
+</html>

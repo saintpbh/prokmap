@@ -2,21 +2,16 @@
 
 #detailPopup {
     position: fixed;
-    z-index: 2002 !important; /* 일반적인 팝업 레벨 */
+    z-index: 2002 !important;
+    /* 일반적인 팝업 레벨 */
     display: none;
-    max-width: 400px;
-    min-width: 320px;
-    border-radius: 20px;
-    overflow: hidden;
-    backdrop-filter: blur(20px);
-    box-shadow: 
-        0 20px 60px rgba(0, 0, 0, 0.15),
-        0 8px 32px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    /* 배경 클릭 방지, 자식 요소는 pointer-events: auto로 설정 */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: scale(0.9) translateY(20px);
-    opacity: 0;
 }
 
 #detailPopup.animate-in {
@@ -37,9 +32,14 @@
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 16px;
     overflow: hidden;
-    position: relative;
+    position: fixed;
+    /* absolute에서 fixed로 변경 */
+    pointer-events: auto;
+    /* 클릭 가능하도록 설정 */
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
     animation: detail-popup-fade-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    max-width: 400px;
+    width: 90vw;
 }
 
 @keyframes detail-popup-fade-in {
@@ -47,6 +47,7 @@
         opacity: 0;
         transform: translateY(20px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -56,8 +57,10 @@
 /* 닫기 버튼 - 더 정제된 스타일 */
 .close-btn-modern {
     position: absolute;
-    top: 20px; /* 위치 조정 */
-    right: 20px; /* 위치 조정 */
+    top: 20px;
+    /* 위치 조정 */
+    right: 20px;
+    /* 위치 조정 */
     z-index: 10;
     background: rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -252,4 +255,4 @@
 .toast-sub {
     font-size: 12px;
     opacity: 0.9;
-} 
+}

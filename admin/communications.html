@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>연락하기 - 선교사 관리 시스템</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <header class="admin-header">
+        <h1><i class="fas fa-globe"></i> 선교사 관리 시스템</h1>
+        <div class="user-info">
+            <span class="user-email" id="userEmail">loading...</span>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
+                <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
+                <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="supporters.html"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+                <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+                <li><a href="certificates.html"><i class="fas fa-certificate"></i> 증명서 발급</a></li>
+                <li><a href="communications.html" class="active"><i class="fas fa-envelope"></i> 연락하기</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📧 그룹 연락하기</h3>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">그룹 선택 *</label>
+                    <select id="groupSelect" class="form-select" multiple size="5">
+                        <option value="all">전체 선교사</option>
+                    </select>
+                    <small style="color: #666;">Ctrl/Cmd 키를 누른 채로 여러 그룹을 선택할 수 있습니다.</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">연락 방법 *</label>
+                    <div style="display: flex; gap: 20px;">
+                        <label><input type="radio" name="contactMethod" value="email" checked> 📧 메일</label>
+                        <label><input type="radio" name="contactMethod" value="kakao" disabled> 💬 카카오톡 (준비 중)</label>
+                        <label><input type="radio" name="contactMethod" value="sms" disabled> 📱 문자 (준비 중)</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">제목 *</label>
+                    <input type="text" id="messageSubject" class="form-input" placeholder="메시지 제목을 입력하세요">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">메시지 내용 *</label>
+                    <textarea id="messageContent" class="form-textarea" rows="10"
+                        placeholder="메시지 내용을 입력하세요..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <div class="card" style="background: #f8f9fa; padding: 1rem;">
+                        <strong>수신 대상</strong>
+                        <p id="recipientCount" style="margin: 0.5rem 0 0 0; color: #666;">그룹을 선택하면 수신 대상이 표시됩니다.</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button id="previewBtn" class="btn" style="background: #95a5a6; color: white;">
+                        <i class="fas fa-eye"></i> 미리보기
+                    </button>
+                    <button id="sendBtn" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> 발송하기
+                    </button>
+                </div>
+            </div>
+
+            <!-- 발송 내역 -->
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title">📋 최근 발송 내역</h3>
+                </div>
+                <div id="communicationHistory">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+
+    <script>
+        let groups = [];
+        let missionaries = [];
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && adminAuth.allowedEmails.includes(user.email)) {
+                setTimeout(initCommunicationPage, 500);
+            }
+        });
+
+        async function initCommunicationPage() {
+            // 그룹 및 선교사 데이터 로드
+            missionaries = await firebaseDB.getMissionaries();
+            await loadGroups();
+
+            // 그룹 선택 이벤트
+            document.getElementById('groupSelect').addEventListener('change', updateRecipientCount);
+
+            // 미리보기 버튼
+            document.getElementById('previewBtn').addEventListener('click', previewMessage);
+
+            // 발송 버튼
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+
+            // 발송 내역 로드
+            loadCommunicationHistory();
+        }
+
+        async function loadGroups() {
+            try {
+                const db = firebase.database();
+                const snapshot = await db.ref('groups').once('value');
+                const groupsData = snapshot.val();
+
+                const select = document.getElementById('groupSelect');
+
+                if (groupsData) {
+                    Object.keys(groupsData).forEach(key => {
+                        const group = groupsData[key];
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = `${group.name} (${(group.members || []).length}명)`;
+                        select.appendChild(option);
+                        groups.push({ id: key, ...group });
+                    });
+                }
+            } catch (error) {
+                console.error('그룹 로드 실패:', error);
+            }
+        }
+
+        function updateRecipientCount() {
+            const selected = Array.from(document.getElementById('groupSelect').selectedOptions);
+            let totalRecipients = 0;
+
+            if (selected.some(opt => opt.value === 'all')) {
+                totalRecipients = missionaries.length;
+            } else {
+                const selectedGroups = selected.map(opt => opt.value);
+                const memberSet = new Set();
+
+                selectedGroups.forEach(groupId => {
+                    const group = groups.find(g => g.id === groupId);
+                    if (group && group.members) {
+                        group.members.forEach(m => memberSet.add(m));
+                    }
+                });
+
+                totalRecipients = memberSet.size;
+            }
+
+            document.getElementById('recipientCount').textContent =
+                `총 ${totalRecipients}명에게 발송됩니다.`;
+        }
+
+        function previewMessage() {
+            const subject = document.getElementById('messageSubject').value;
+            const content = document.getElementById('messageContent').value;
+
+            if (!subject || !content) {
+                alert('제목과 내용을 입력해주세요.');
+                return;
+            }
+
+            const preview = `
+━━━━━━━━━━━━━━━━━━━━
+제목: ${subject}
+━━━━━━━━━━━━━━━━━━━━
+
+${content}
+
+━━━━━━━━━━━━━━━━━━━━
+발신: 한국기독교장로회 국제협력선교
+            `.trim();
+
+            alert(preview);
+        }
+
+        async function sendMessage() {
+            const subject = document.getElementById('messageSubject').value;
+            const content = document.getElementById('messageContent').value;
+            const method = document.querySelector('input[name="contactMethod"]:checked').value;
+
+            if (!subject || !content) {
+                alert('제목과 내용을 입력해주세요.');
+                return;
+            }
+
+            if (!confirm('발송하시겠습니까?')) {
+                return;
+            }
+
+            // Firebase에 발송 기록 저장
+            try {
+                const db = firebase.database();
+                const selected = Array.from(document.getElementById('groupSelect').selectedOptions);
+                const groupIds = selected.map(opt => opt.value);
+
+                await db.ref('communications').push({
+                    subject,
+                    content,
+                    method,
+                    groups: groupIds,
+                    sentBy: firebase.auth().currentUser.email,
+                    sentAt: new Date().toISOString(),
+                    status: 'pending'
+                });
+
+                alert('발송 예약이 완료되었습니다.\n\n※ 실제 발송 기능은 추후 구현 예정입니다.\n현재는 발송 기록만 저장됩니다.');
+
+                // 폼 초기화
+                document.getElementById('messageSubject').value = '';
+                document.getElementById('messageContent').value = '';
+
+                // 발송 내역 새로고침
+                loadCommunicationHistory();
+            } catch (error) {
+                console.error('발송 실패:', error);
+                alert('발송 중 오류가 발생했습니다.');
+            }
+        }
+
+        async function loadCommunicationHistory() {
+            const container = document.getElementById('communicationHistory');
+
+            try {
+                const db = firebase.database();
+                const snapshot = await db.ref('communications')
+                    .orderByChild('sentAt')
+                    .limitToLast(10)
+                    .once('value');
+
+                const data = snapshot.val();
+
+                if (!data) {
+                    container.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">발송 내역이 없습니다.</p>';
+                    return;
+                }
+
+                const communications = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                })).reverse();
+
+                container.innerHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>발송일</th>
+                                <th>제목</th>
+                                <th>방법</th>
+                                <th>발송자</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${communications.map(c => `
+                                <tr>
+                                    <td>${AdminUtils.formatDate(c.sentAt)}</td>
+                                    <td>${c.subject}</td>
+                                    <td>${c.method === 'email' ? '📧 메일' : c.method}</td>
+                                    <td>${c.sentBy}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('발송 내역 로드 실패:', error);
+                container.innerHTML = '<p style="text-align: center; color: #f00; padding: 2rem;">데이터 로드 실패</p>';
+            }
+        }
+    </script>
+</body>
+
+</html>

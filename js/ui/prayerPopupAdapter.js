@@ -13,7 +13,7 @@ class PrayerPopupAdapter {
     // 초기화
     init() {
         if (this.isInitialized) return;
-        
+
         // 새로운 PrayerPopupManager 인스턴스 생성
         if (typeof PrayerPopupManager !== 'undefined') {
             this.prayerManager = new PrayerPopupManager();
@@ -71,50 +71,31 @@ class PrayerPopupAdapter {
 let floatingPrayerManager = null;
 
 // 페이지 로드 시 자동으로 새로운 모듈 활성화
+// window.prayerPopupManager는 prayerPopup.js에서 이미 생성됨
 document.addEventListener('DOMContentLoaded', () => {
-    // 새로운 모듈이 로드되었는지 확인
-    if (typeof PrayerPopupManager !== 'undefined') {
-        console.log('새로운 기도 팝업 모듈 v2.0이 활성화되었습니다!');
-        
-        // 기존 floatingPrayerManager를 새로운 어댑터로 교체
-        if (window.floatingPrayerManager) {
-            console.log('기존 기도 팝업 매니저를 새로운 모듈로 교체합니다.');
+    // window.prayerPopupManager가 이미 존재하는지 확인
+    if (window.prayerPopupManager) {
+        console.log('기도 팝업 모듈 v2.0이 정상적으로 로드되었습니다.');
+
+        // 어댑터는 필요시에만 생성 (호환성 유지)
+        if (!window.floatingPrayerManager) {
+            floatingPrayerManager = new PrayerPopupAdapter();
+            window.floatingPrayerManager = floatingPrayerManager;
+            console.log('기도 팝업 어댑터 초기화 완료');
         }
-        
-        // 새로운 어댑터 인스턴스 생성
-        floatingPrayerManager = new PrayerPopupAdapter();
-        window.floatingPrayerManager = floatingPrayerManager;
-        
-        console.log('기도 팝업 모듈 v2.0 적용 완료');
     } else {
-        console.warn('새로운 기도 팝업 모듈이 로드되지 않았습니다. 기존 시스템을 사용합니다.');
+        console.warn('기도 팝업 모듈이 로드되지 않았습니다.');
     }
 });
 
-// 기존 전역 함수들 재정의
-function startPrayerRotation() {
-    if (!floatingPrayerManager) {
-        floatingPrayerManager = new PrayerPopupAdapter();
-    }
-    floatingPrayerManager.startRotation();
-}
-
-function stopPrayerRotation() {
-    if (floatingPrayerManager) {
-        floatingPrayerManager.stopRotation();
-    }
-}
-
-function isPrayerRotationActive() {
-    return floatingPrayerManager ? floatingPrayerManager.isActive() : false;
-}
+// 전역 함수들은 prayerPopup.js에서 정의됨 (중복 방지)
 
 // 기존 createMinimalPrayerPopup 함수 대체
 function createMinimalPrayerPopup({ flagUrl, name, country, missionary }) {
     if (!floatingPrayerManager) {
         floatingPrayerManager = new PrayerPopupAdapter();
     }
-    
+
     if (floatingPrayerManager.prayerManager) {
         return floatingPrayerManager.prayerManager.createPrayerPopup({
             flagUrl,
@@ -124,7 +105,7 @@ function createMinimalPrayerPopup({ flagUrl, name, country, missionary }) {
             missionary
         });
     }
-    
+
     // 폴백: 기본 팝업 생성
     return createFallbackPrayerPopup({ flagUrl, name, country, missionary });
 }
@@ -133,9 +114,9 @@ function createMinimalPrayerPopup({ flagUrl, name, country, missionary }) {
 function createFallbackPrayerPopup({ flagUrl, name, country, missionary }) {
     const wrapper = document.createElement('div');
     wrapper.className = 'minimal-prayer-popup';
-    
+
     let prayer = getMissionaryPrayerTopic(name);
-    
+
     wrapper.innerHTML = `
         <div class="close-button" title="기도 팝업 닫기">×</div>
         <div class="profile-section">
@@ -156,7 +137,7 @@ function createFallbackPrayerPopup({ flagUrl, name, country, missionary }) {
 
     // 이벤트 리스너 추가
     addFallbackEventListeners(wrapper, { name, country, missionary });
-    
+
     return wrapper;
 }
 
@@ -168,26 +149,26 @@ function addFallbackEventListeners(wrapper, missionaryData) {
             floatingPrayerManager.pause();
         }
     });
-    
+
     wrapper.addEventListener('mouseleave', () => {
         if (floatingPrayerManager) {
             floatingPrayerManager.resume();
         }
     });
-    
+
     // 닫기 버튼 클릭
     const closeButton = wrapper.querySelector('.close-button');
     if (closeButton) {
         closeButton.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             wrapper.style.animation = 'minimal-fade-out 0.3s ease-out forwards';
-            
+
             setTimeout(() => {
                 if (floatingPrayerManager) {
                     floatingPrayerManager.closeCurrentPopup();
-                    
+
                     if (floatingPrayerManager.isActive()) {
                         floatingPrayerManager.resume();
                         floatingPrayerManager.showNextPrayerPopup();
@@ -196,14 +177,14 @@ function addFallbackEventListeners(wrapper, missionaryData) {
             }, 300);
         });
     }
-    
+
     // 기도손 클릭
     const prayerIcon = wrapper.querySelector('.prayer-icon');
     if (prayerIcon) {
         prayerIcon.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             if (window.handlePrayerClick) {
                 try {
                     const success = await window.handlePrayerClick(missionaryData);
@@ -221,13 +202,13 @@ function addFallbackEventListeners(wrapper, missionaryData) {
 // 기존 함수들 유지 (호환성)
 function getMissionaryPrayerTopic(missionaryName) {
     if (window.MissionaryMap?.state?.missionaries) {
-        const missionary = window.MissionaryMap.state.missionaries.find(m => 
+        const missionary = window.MissionaryMap.state.missionaries.find(m =>
             m.name && m.name.trim() === missionaryName.trim()
         );
-        
+
         if (missionary) {
             if (missionary.summary && missionary.summary.trim() !== '') {
-                return missionary.summary.length > 60 ? 
+                return missionary.summary.length > 60 ?
                     missionary.summary.substring(0, 60) + '...' : missionary.summary;
             }
             return missionary.prayer || '현지 사역과 복음 전파를 위해 기도해 주세요.';

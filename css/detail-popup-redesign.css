@@ -1,0 +1,522 @@
+/* 선교사 디테일 팝업 - 트렌디하고 신뢰감 있는 디자인 */
+
+/* 전역 변수 */
+:root {
+    --popup-primary: #667eea;
+    --popup-secondary: #764ba2;
+    --popup-accent: #f093fb;
+    --popup-success: #4ade80;
+    --popup-text-dark: #1f2937;
+    --popup-text-light: #6b7280;
+    --popup-bg: rgba(255, 255, 255, 0.98);
+    --popup-border: rgba(255, 255, 255, 0.3);
+}
+
+/* 팝업 배경 오버레이 */
+.detail-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 1099;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.detail-popup-overlay.visible {
+    opacity: 1;
+}
+
+/* 메인 팝업 컨테이너 */
+.detail-popup-modern {
+    position: fixed;
+    /* 초기 위치는 JS에서 계산하여 설정하므로 여기서는 제거하거나 0으로 둡니다.
+       visibility: hidden 상태로 시작하여 위치 계산 전 깜빡임을 방지합니다. */
+    left: 0;
+    top: 0;
+    z-index: 1100;
+    width: 350px;
+    /* 사용자 요청대로 크기 축소 */
+    max-width: 90vw;
+    max-height: 85vh;
+    /* 높이 제한도 약간 줄임 */
+    background: var(--popup-bg);
+    border-radius: 20px;
+    /* 라운드 약간 축소 */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--popup-border);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    /* 애니메이션은 JS에서 클래스로 제어 */
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* JS에서 위치 확정 후 추가할 클래스 */
+.detail-popup-modern.visible {
+    opacity: 1;
+}
+
+/* 페이드인 애니메이션 (JS에서 클래스 추가 시 실행) */
+@keyframes popupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 닫기 버튼 */
+.detail-popup-modern .close-btn-modern {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    color: var(--popup-text-dark);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-popup-modern .close-btn-modern:hover {
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 헤더 섹션 - 그라데이션 배경 */
+.detail-popup-modern .popup-header {
+    background: linear-gradient(135deg, var(--popup-primary) 0%, var(--popup-secondary) 100%);
+    padding: 20px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 프로필 사진 */
+.detail-popup-modern .missionary-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* 선교사 이름 */
+.detail-popup-modern .missionary-name {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.detail-popup-modern .missionary-location {
+    font-size: 13px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.95);
+    /* 밝은 흰색으로 변경 */
+    font-weight: 500;
+    /* 조금 더 선명하게 */
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    /* 미세한 그림자 추가 */
+}
+
+/* 기도 버튼 */
+.detail-popup-modern .prayer-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.85);
+    /* 배경 불투명도 높임 */
+    backdrop-filter: blur(4px);
+    border: none;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    /* 슬라이더 이미지보다 위에 표시 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.detail-popup-modern .prayer-btn:hover {
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.detail-popup-modern .prayer-btn.prayed {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 2px solid #4caf50;
+}
+
+/* 사역사진 슬라이더 */
+.ministry-photos-slider {
+    background: #f8f9fa;
+    padding: 0;
+    position: relative;
+}
+
+.slider-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    /* 높이 축소 */
+    overflow: hidden;
+}
+
+/* 팝업 본문 */
+.detail-popup-modern .popup-body {
+    padding: 16px;
+    max-height: calc(85vh - 270px);
+    /* 헤더+슬라이더 높이를 고려하여 조정 */
+    overflow-y: auto;
+}
+
+/* 정보 그리드 - 2열 고정 */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* 강제 2열 */
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.info-item:last-child {
+    grid-column: span 2;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    /* 세로 중앙 정렬 */
+    gap: 8px;
+    padding: 8px 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.info-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.info-label {
+    font-size: 11px;
+    color: var(--popup-text-light);
+    margin-bottom: 2px;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--popup-text-dark);
+}
+
+.info-item:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.info-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-label {
+    font-size: 12px;
+    color: var(--popup-text-light);
+    margin-bottom: 4px;
+}
+
+.info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--popup-text-dark);
+}
+
+/* 섹션 타이틀 */
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--popup-text-dark);
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 기도제목 섹션 */
+.prayer-section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-radius: 12px;
+    border-left: 4px solid var(--popup-primary);
+}
+
+.prayer-content {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--popup-text-dark);
+    margin: 0;
+}
+
+/* 뉴스레터 섹션 */
+.newsletter-section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.newsletter-summary {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--popup-text-dark);
+}
+
+/* 하단 액션 버튼 그룹 */
+.popup-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+}
+
+/* 뉴스레터 버튼 스타일 */
+.newsletter-btn {
+    background: #f1f3f5;
+    color: var(--popup-text-dark);
+    border: 1px solid #e9ecef;
+}
+
+.newsletter-btn:hover:not(.disabled) {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.newsletter-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f8f9fa;
+}
+
+/* 문의하기 버튼 스타일 */
+.inquiry-btn {
+    background: linear-gradient(135deg, var(--popup-primary) 0%, var(--popup-secondary) 100%);
+    color: white;
+    width: auto;
+    /* 기존 width 100% 덮어쓰기 */
+    margin-top: 0;
+    /* 기존 마진 제거 */
+}
+
+.inquiry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-icon {
+    font-size: 16px;
+}
+
+/* 문의하기 모달 */
+.inquiry-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 1200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.inquiry-modal.visible {
+    display: flex;
+}
+
+.inquiry-modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    animation: modalSlideUp 0.3s ease;
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.inquiry-modal h3 {
+    margin: 0 0 20px 0;
+    font-size: 22px;
+    color: var(--popup-text-dark);
+}
+
+.inquiry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--popup-text-dark);
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--popup-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.form-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-submit {
+    background: var(--popup-primary);
+    color: white;
+    border: none;
+}
+
+.btn-submit:hover {
+    background: var(--popup-secondary);
+    transform: translateY(-2px);
+}
+
+.btn-cancel {
+    background: white;
+    color: var(--popup-text-dark);
+    border: 1px solid #e5e7eb;
+}
+
+.btn-cancel:hover {
+    background: #f8f9fa;
+}
+
+/* 반응형 */
+@media (max-width: 600px) {
+    .detail-popup-modern {
+        width: 95vw;
+        max-height: 95vh;
+    }
+
+    .detail-popup-modern .missionary-name {
+        font-size: 20px;
+    }
+
+    .slider-container {
+        height: 220px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}

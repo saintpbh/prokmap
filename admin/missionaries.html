@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선교사 관리 - 선교사 관리 시스템</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        .search-filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .filter-select {
+            min-width: 150px;
+        }
+
+        #map {
+            height: 300px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-buttons button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fas fa-globe"></i> 선교사 관리 시스템</h1>
+        <div class="user-info">
+            <span class="user-email" id="userEmail">loading...</span>
+            <button id="logoutBtn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i> 로그아웃
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="missionaries.html" class="active"><i class="fas fa-users"></i> 선교사 관리</a></li>
+                <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
+                <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="supporters.html"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+                <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">👥 선교사 목록</h3>
+                    <button class="btn btn-primary" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i> 선교사 추가
+                    </button>
+                </div>
+
+                <!-- Search & Filter -->
+                <div class="search-filter-bar">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" class="form-input" placeholder="이름, 국가, 도시 검색...">
+                    </div>
+                    <select id="countryFilter" class="form-select filter-select">
+                        <option value="">전체 국가</option>
+                    </select>
+                    <select id="presbyteryFilter" class="form-select filter-select">
+                        <option value="">전체 노회</option>
+                    </select>
+                    <select id="statusFilter" class="form-select filter-select">
+                        <option value="">전체 상태</option>
+                        <option value="active">활동 중</option>
+                        <option value="vacation">휴가</option>
+                        <option value="returned">귀국</option>
+                    </select>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+                        <input type="checkbox" id="showArchived" onchange="applyFilters()">
+                        아카이브된 선교사 표시
+                    </label>
+                </div>
+
+                <!-- Table -->
+                <div id="missionariesTable">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="missionaryModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="modalTitle">선교사 추가</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+
+            <form id="missionaryForm">
+                <input type="hidden" id="missionaryId">
+
+                <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--primary-color);">📋 기본 정보</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">이름 *</label>
+                        <input type="text" id="name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">영문명</label>
+                        <input type="text" id="englishName" class="form-input">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">국가 *</label>
+                        <input type="text" id="country" class="form-input" required list="countryList">
+                        <datalist id="countryList"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">도시</label>
+                        <input type="text" id="city" class="form-input">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">노회</label>
+                        <input type="text" id="presbytery" class="form-input" list="presbyteryList">
+                        <datalist id="presbyteryList"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">소속 기관</label>
+                        <input type="text" id="organization" class="form-input">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">파송일</label>
+                        <input type="date" id="sentDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">상태</label>
+                        <select id="status" class="form-select">
+                            <option value="active">활동 중</option>
+                            <option value="vacation">휴가</option>
+                            <option value="returned">귀국</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--primary-color);">📍 위치 정보</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">위도</label>
+                        <input type="number" step="0.0001" id="lat" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">경도</label>
+                        <input type="number" step="0.0001" id="lng" class="form-input">
+                    </div>
+                </div>
+                <div id="map"></div>
+                <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">💡 지도를 클릭하여 위치를 설정할 수 있습니다</p>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--primary-color);">📞 연락처</h4>
+                <div class="form-group">
+                    <label class="form-label">이메일</label>
+                    <input type="email" id="email" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">현지 전화번호</label>
+                    <input type="tel" id="localPhone" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">현지 주소</label>
+                    <input type="text" id="localAddress" class="form-input">
+                </div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--primary-color);">📷 사진</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">가족사진</label>
+                        <input type="file" id="familyPhoto" class="form-input" accept="image/*">
+                        <div id="familyPhotoPreview" style="margin-top: 0.5rem;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">사역사진</label>
+                        <input type="file" id="ministryPhoto" class="form-input" accept="image/*">
+                        <div id="ministryPhotoPreview" style="margin-top: 0.5rem;"></div>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--primary-color);">📎 관련 서류</h4>
+                <div class="form-group">
+                    <label class="form-label">파일 업로드 (PDF, 이미지, 문서 등)</label>
+                    <input type="file" id="documentFile" class="form-input" multiple>
+                    <small style="color: #666;">여러 파일을 선택할 수 있습니다</small>
+                </div>
+                <div id="uploadedFiles" style="margin-top: 1rem;"></div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--primary-color);">🙏 기도 제목</h4>
+                <div class="form-group">
+                    <label class="form-label">현재 기도 제목</label>
+                    <textarea id="prayerTopic" class="form-textarea" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">기도 요청 (기본)</label>
+                    <textarea id="prayer" class="form-textarea" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">최근 소식 요약</label>
+                    <textarea id="summary" class="form-textarea" rows="3"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn" onclick="AdminUtils.closeModal('missionaryModal')"
+                        style="background: #95a5a6; color: white;">
+                        취소
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> 저장
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+
+    <!-- Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <script src="js/missionaries.js"></script>
+</body>
+
+</html>

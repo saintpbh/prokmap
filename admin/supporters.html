@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>후원자 관리 - 선교사 관리 시스템</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <header class="admin-header">
+        <h1><i class="fas fa-globe"></i> 선교사 관리 시스템</h1>
+        <div class="user-info">
+            <span class="user-email" id="userEmail">loading...</span>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
+                <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
+                <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="supporters.html" class="active"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+                <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">💰 후원자 목록</h3>
+                    <button class="btn btn-primary" onclick="openAddSupporterModal()">
+                        <i class="fas fa-plus"></i> 후원자 추가
+                    </button>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <input type="text" id="searchSupporter" class="form-input" placeholder="이름, 교회, 전화번호 검색..."
+                        onkeyup="searchSupporters()">
+                </div>
+
+                <div id="supportersList">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Supporter Modal -->
+    <div id="supporterModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 id="supporterModalTitle">후원자 추가</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+
+            <form id="supporterForm">
+                <input type="hidden" id="supporterId">
+
+                <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--primary-color);">📋 기본 정보</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">이름 *</label>
+                        <input type="text" id="supporterName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">교회</label>
+                        <input type="text" id="church" class="form-input">
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 1rem; color: var(--primary-color);">📞 연락처</h4>
+                <div class="form-group">
+                    <label class="form-label">전화번호</label>
+                    <input type="tel" id="supporterPhone" class="form-input" placeholder="010-1234-5678">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">이메일</label>
+                    <input type="email" id="supporterEmail" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">주소</label>
+                    <input type="text" id="supporterAddress" class="form-input">
+                </div>
+
+                <h4 style="margin-top: 1rem; margin-bottom: 1rem; color: var(--primary-color);">💵 후원 정보</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">월 후원 금액</label>
+                        <input type="number" id="monthlyAmount" class="form-input" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">주민등록번호 (연말정산용)</label>
+                        <input type="text" id="residentNumber" class="form-input" placeholder="000000-0000000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">후원 선교사 선택</label>
+                    <select id="supportedMissionaries" class="form-select" multiple size="5">
+                        <!-- 선교사 목록이 동적으로 채워짐 -->
+                    </select>
+                    <small style="color: #666;">Ctrl 키를 누른 채 클릭하여 여러 선교사를 선택할 수 있습니다</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">비고</label>
+                    <textarea id="supporterNotes" class="form-textarea" rows="3"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn" onclick="AdminUtils.closeModal('supporterModal')"
+                        style="background: #95a5a6; color: white;">
+                        취소
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> 저장
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/supporters.js"></script>
+</body>
+
+</html>

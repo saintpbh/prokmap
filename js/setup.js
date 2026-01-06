@@ -1,6 +1,6 @@
 // setup.js - 설정 및 뉴스레터 업로드 모달 관리 (Shoelace 기반)
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // UI 컨트롤 버튼 컨테이너를 항상 표시하도록 강제합니다.
     const uiControls = document.getElementById('ui-controls');
     if (uiControls) {
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- 전체화면 기능 구현 ---
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
-    
+
     // 전체화면 진입
     const enterFullscreen = () => {
         if (document.documentElement.requestFullscreen) {
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.documentElement.msRequestFullscreen();
         }
     };
-    
+
     // 전체화면 종료
     const exitFullscreen = () => {
         if (document.exitFullscreen) {
@@ -36,11 +36,11 @@ document.addEventListener('DOMContentLoaded', function() {
             document.msExitFullscreen();
         }
     };
-    
+
     // 전체화면 상태 변경 감지
     const handleFullscreenChange = () => {
         const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
-        
+
         if (isFullscreen) {
             fullscreenBtn.classList.add('hidden');
             exitFullscreenBtn.classList.remove('hidden');
@@ -49,20 +49,124 @@ document.addEventListener('DOMContentLoaded', function() {
             exitFullscreenBtn.classList.add('hidden');
         }
     };
-    
+
     // 이벤트 리스너 설정
     if (fullscreenBtn) {
         fullscreenBtn.addEventListener('click', enterFullscreen);
     }
-    
+
     if (exitFullscreenBtn) {
         exitFullscreenBtn.addEventListener('click', exitFullscreen);
     }
-    
+
     // 전체화면 상태 변경 감지
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    // --- 기도팝업 순환 토글 버튼 기능 ---
+    const initPrayerToggle = () => {
+        const prayerToggleBtn = document.getElementById('prayer-toggle-btn');
+        if (!prayerToggleBtn) {
+            console.log('기도팝업 토글 버튼을 찾을 수 없습니다.');
+            return;
+        }
+
+        // 초기 상태 설정 (로컬 스토리지에서 불러오기)
+        const isPrayerEnabled = localStorage.getItem('prayer-popup-enabled') !== 'false';
+        updatePrayerToggleButton(isPrayerEnabled);
+
+        // Debounce를 위한 변수
+        let isProcessing = false;
+
+        // 클릭 이벤트 리스너
+        prayerToggleBtn.addEventListener('click', () => {
+            if (isProcessing) {
+                console.log('기도 팝업 토글 처리 중... 클릭 무시');
+                return;
+            }
+
+            isProcessing = true;
+
+            const currentState = prayerToggleBtn.classList.contains('off');
+            const newState = !currentState;
+
+            togglePrayerPopup(newState);
+            updatePrayerToggleButton(newState);
+
+            // 로컬 스토리지에 상태 저장
+            localStorage.setItem('prayer-popup-enabled', newState.toString());
+
+            // 300ms 후 다시 클릭 가능하도록
+            setTimeout(() => {
+                isProcessing = false;
+            }, 300);
+        });
+
+        console.log('기도팝업 토글 버튼 초기화 완료');
+    };
+
+    // 기도팝업 토글 기능
+    const togglePrayerPopup = (enabled) => {
+        if (!window.prayerPopupManager) {
+            console.log('기도팝업 매니저를 찾을 수 없습니다.');
+            return;
+        }
+
+        if (enabled) {
+            // 기도팝업 활성화
+            if (window.prayerPopupManager.isRunning) {
+                window.prayerPopupManager.resume();
+                console.log('기도팝업 순환 재개됨');
+            } else {
+                window.prayerPopupManager.startRotation();
+                console.log('기도팝업 순환 시작됨');
+            }
+        } else {
+            // 기도팝업 비활성화
+            window.prayerPopupManager.pause();
+            window.prayerPopupManager.closeCurrentPopup();
+            console.log('기도팝업 순환 일시정지됨');
+        }
+    };
+
+    // 토글 버튼 UI 업데이트
+    const updatePrayerToggleButton = (enabled) => {
+        const prayerToggleBtn = document.getElementById('prayer-toggle-btn');
+        if (!prayerToggleBtn) return;
+
+        if (enabled) {
+            prayerToggleBtn.classList.remove('off');
+            prayerToggleBtn.classList.add('on');
+            prayerToggleBtn.title = '기도팝업 순환 끄기';
+        } else {
+            prayerToggleBtn.classList.remove('on');
+            prayerToggleBtn.classList.add('off');
+            prayerToggleBtn.title = '기도팝업 순환 켜기';
+        }
+    };
+
+    // 기도팝업 상태 모니터링 및 버튼 업데이트
+    const monitorPrayerPopupStatus = () => {
+        if (!window.prayerPopupManager) return;
+
+        const isRunning = window.prayerPopupManager.isRunning && !window.prayerPopupManager.isPaused;
+        const isInDetailMode = window.missionaryMapInstance &&
+            (window.missionaryMapInstance.state.fixedCountry ||
+                window.missionaryMapInstance.state.fixedPresbytery);
+
+        // 국가별/노회별 모드에서는 버튼을 비활성화 상태로 표시
+        if (isInDetailMode) {
+            updatePrayerToggleButton(false);
+        } else {
+            // 현재 실제 상태에 따라 버튼 업데이트
+            const shouldBeEnabled = localStorage.getItem('prayer-popup-enabled') !== 'false';
+            updatePrayerToggleButton(shouldBeEnabled && isRunning);
+        }
+    };
+
+    // 주기적으로 기도팝업 상태 확인 (5초마다)
+    setInterval(monitorPrayerPopupStatus, 5000);
 
     // --- 이벤트 리스너 설정 (Shoelace 맞춤) ---
 
@@ -90,13 +194,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // 테이블 토글 초기화 (현재 HTML에 토글 요소가 없으므로 비활성화)
     const initTableToggles = () => {
         console.log('setup.js: 테이블 토글 초기화 시작');
-        
+
         // 현재 HTML에 토글 요소가 없으므로 초기화하지 않음
         console.log('setup.js: 토글 요소가 HTML에 없어 초기화를 건너뜁니다.');
-        
+
         console.log('setup.js: 테이블 토글 초기화 완료');
     };
-    
+
     // DOM 준비 확인 및 초기화 (토글 요소가 없으므로 단순화)
     const waitForTablesAndInit = () => {
         // 테이블 요소들이 존재하는지만 확인
@@ -105,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const element = document.getElementById(id);
             return element && element.style;
         });
-        
+
         if (allExist) {
             console.log('setup.js: 테이블 요소들이 준비되었습니다.');
             initTableToggles();
@@ -113,10 +217,10 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('setup.js: 일부 테이블 요소가 아직 준비되지 않았습니다.');
         }
     };
-    
+
     // 1초 후 초기화 시작
     setTimeout(waitForTablesAndInit, 1000);
-    
+
     // 중보기도자 수 기능 초기화
     const initPrayerCount = () => {
         if (window.MissionaryMap && window.MissionaryMap.initPrayerCount) {
@@ -126,10 +230,10 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(initPrayerCount, 500);
         }
     };
-    
+
     // 2초 후 중보기도자 수 기능 초기화
     setTimeout(initPrayerCount, 2000);
-    
+
     // 자동재생 모드 설정
     const autoplayGroup = document.getElementById('autoplay-mode-group');
     if (autoplayGroup) {
@@ -143,11 +247,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // 각종 설정값 적용 (Input)
     const setupInput = (id, storageKey, callback) => {
         const input = document.getElementById(id);
-        if(!input) {
+        if (!input) {
             console.log(`setup.js: ${id} 요소를 찾을 수 없습니다.`);
             return;
         }
@@ -157,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
             callback?.(input.value);
         });
     };
-    
+
     setupInput('news-interval-input', 'news-check-interval');
     setupInput('news-speed-input', 'news-speed', (value) => {
         if (window.setNewsSpeed) {
@@ -196,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     const newsBgColor = document.getElementById('news-bg-color');
     if (newsBgColor) {
         newsBgColor.value = localStorage.getItem('news-bg-color') || '#1a73ff';
@@ -209,53 +313,53 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // 뉴스레터 업로드 기능
     const newsletterUploadBtn = document.getElementById('newsletter-upload-btn');
     const newsletterLinkBtn = document.getElementById('newsletter-link-btn');
     const missionaryNameInput = document.getElementById('missionary-name-input');
     const missionaryPrayerInput = document.getElementById('missionary-prayer-input');
     const missionaryDateInput = document.getElementById('missionary-date-input');
-    
+
     if (newsletterUploadBtn) {
         newsletterUploadBtn.addEventListener('click', async () => {
             const fileInput = document.getElementById('newsletter-pdf');
             const name = missionaryNameInput?.value?.trim();
             const prayer = missionaryPrayerInput?.value?.trim();
             const date = missionaryDateInput?.value;
-            
+
             if (!name) {
                 alert('선교사 이름을 입력해주세요.');
                 return;
             }
-            
+
             if (!fileInput.files[0]) {
                 alert('PDF 파일을 선택해주세요.');
                 return;
             }
-            
+
             const file = fileInput.files[0];
             if (file.type !== 'application/pdf') {
                 alert('PDF 파일만 업로드 가능합니다.');
                 return;
             }
-            
+
             try {
                 // 로딩 상태 표시
                 newsletterUploadBtn.disabled = true;
                 newsletterUploadBtn.textContent = '업로드 중...';
-                
+
                 // Firebase Storage에 업로드 (간단한 구현)
                 const storageRef = window.firebase?.storage?.ref();
                 if (!storageRef) {
                     throw new Error('Firebase Storage가 초기화되지 않았습니다.');
                 }
-                
+
                 const fileName = `newsletters/${name}_${Date.now()}.pdf`;
                 const fileRef = storageRef.child(fileName);
                 const snapshot = await fileRef.put(file);
                 const downloadURL = await snapshot.ref.getDownloadURL();
-                
+
                 // Firebase Database에 정보 저장
                 const db = window.firebase?.database();
                 if (db) {
@@ -267,15 +371,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         uploadedAt: new Date().toISOString()
                     });
                 }
-                
+
                 alert('뉴스레터가 성공적으로 업로드되었습니다.');
-                
+
                 // 입력 필드 초기화
                 if (fileInput) fileInput.value = '';
                 if (missionaryNameInput) missionaryNameInput.value = '';
                 if (missionaryPrayerInput) missionaryPrayerInput.value = '';
                 if (missionaryDateInput) missionaryDateInput.value = '';
-                
+
             } catch (error) {
                 console.error('뉴스레터 업로드 실패:', error);
                 alert('업로드에 실패했습니다: ' + error.message);
@@ -285,21 +389,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     if (newsletterLinkBtn) {
         newsletterLinkBtn.addEventListener('click', async () => {
             const name = missionaryNameInput?.value?.trim();
             const prayer = missionaryPrayerInput?.value?.trim();
             const date = missionaryDateInput?.value;
-            
+
             if (!name) {
                 alert('선교사 이름을 입력해주세요.');
                 return;
             }
-            
+
             const link = prompt('뉴스레터 외부 링크를 입력해주세요:');
             if (!link) return;
-            
+
             try {
                 // Firestore에 링크 정보 저장
                 const firestore = window.firebase?.firestore();
@@ -316,14 +420,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     throw new Error('Firestore가 초기화되지 않았습니다.');
                 }
-                
+
                 alert('뉴스레터 링크가 성공적으로 저장되었습니다.');
-                
+
                 // 입력 필드 초기화
                 if (missionaryNameInput) missionaryNameInput.value = '';
                 if (missionaryPrayerInput) missionaryPrayerInput.value = '';
                 if (missionaryDateInput) missionaryDateInput.value = '';
-                
+
             } catch (error) {
                 // 권한 오류는 일반적인 상황이므로 별도 처리
                 if (error.code === 'permission-denied') {
@@ -336,4 +440,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // 기도팝업 토글 버튼 초기화
+    initPrayerToggle();
 }); 

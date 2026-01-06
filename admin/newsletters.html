@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴스레터 관리 - 선교사 관리 시스템</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <header class="admin-header">
+        <h1><i class="fas fa-globe"></i> 선교사 관리 시스템</h1>
+        <div class="user-info">
+            <span class="user-email" id="userEmail">loading...</span>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
+                <li><a href="newsletters.html" class="active"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
+                <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="supporters.html"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📰 뉴스레터 업로드</h3>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">선교사 선택 *</label>
+                    <select id="missionarySelect" class="form-select" required>
+                        <option value="">선교사를 선택하세요</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">뉴스레터 제목</label>
+                    <input type="text" id="newsletterTitle" class="form-input" placeholder="예: 2026년 1월 소식">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">요약 (기도 팝업용) *</label>
+                    <textarea id="newsletterSummary" class="form-textarea" rows="3"
+                        placeholder="짧은 요약을 입력하세요 (80자 이내 권장)" maxlength="200"></textarea>
+                    <small style="color: #666;">이 요약은 기도 팝업에 표시됩니다</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">📷 사역사진 (최대 3장)</label>
+                    <input type="file" id="ministryPhotos" class="form-input" accept="image/*" multiple>
+                    <small style="color: #666;">선교사 상세 정보에 표시될 사역사진 3장까지 선택 가능</small>
+                    <div id="ministryPhotosPreview"
+                        style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">PDF 파일 업로드</label>
+                    <input type="file" id="pdfFile" class="form-input" accept=".pdf">
+                    <small style="color: #666;">PDF 파일만 업로드 가능합니다</small>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button id="uploadBtn" class="btn btn-success">
+                        <i class="fas fa-upload"></i> 업로드
+                    </button>
+                    <button class="btn" onclick="clearForm()" style="background: #95a5a6; color: white;">
+                        초기화
+                    </button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title">📋 업로드된 뉴스레터</h3>
+                </div>
+                <div id="newslettersList">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+    <script>
+        let missionaries = [];
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && adminAuth.allowedEmails.includes(user.email)) {
+                setTimeout(initNewsletterPage, 500);
+            }
+        });
+
+        async function initNewsletterPage() {
+            await loadMissionaries();
+            document.getElementById('uploadBtn').addEventListener('click', uploadNewsletter);
+        }
+
+        async function loadMissionaries() {
+            missionaries = await firebaseDB.getMissionaries();
+            const select = document.getElementById('missionarySelect');
+            select.innerHTML = '<option value="">선교사를 선택하세요</option>' +
+                missionaries.map(m => `<option value="${m.id}:${m.name}">${m.name} (${m.country})</option>`).join('');
+        }
+
+        async function uploadNewsletter() {
+            const missionaryData = document.getElementById('missionarySelect').value;
+            const title = document.getElementById('newsletterTitle').value.trim();
+            const summary = document.getElementById('newsletterSummary').value.trim();
+            const photoFiles = document.getElementById('ministryPhotos').files;
+
+            if (!missionaryData || !summary) {
+                AdminUtils.showToast('선교사와 요약을 입력해주세요.', 'error');
+                return;
+            }
+
+            if (photoFiles.length > 3) {
+                AdminUtils.showToast('사역사진은 최대 3장까지 업로드 가능합니다.', 'error');
+                return;
+            }
+
+            const [missionaryId, missionaryName] = missionaryData.split(':');
+
+            try {
+                // PDF 파일 업로드
+                const pdfFile = document.getElementById('pdfFile').files[0];
+                let pdfUrl = '';
+
+                if (pdfFile) {
+                    const storage = firebase.storage();
+                    const pdfRef = storage.ref().child(`newsletters/${missionaryId}/${Date.now()}_${pdfFile.name}`);
+                    await pdfRef.put(pdfFile);
+                    pdfUrl = await pdfRef.getDownloadURL();
+                }
+
+                // 사역사진 업로드
+                const photoUrls = [];
+                for (let i = 0; i < photoFiles.length; i++) {
+                    const file = photoFiles[i];
+                    const timestamp = Date.now();
+                    const storage = firebase.storage();
+                    const storageRef = storage.ref();
+                    const photoRef = storageRef.child(`missionaries/${missionaryId}/ministry_${timestamp}_${i}.jpg`);
+
+                    await photoRef.put(file);
+                    const downloadURL = await photoRef.getDownloadURL();
+                    photoUrls.push(downloadURL);
+                }
+
+                // 선교사 데이터 업데이트 (요약, 사진, PDF URL 저장)
+                const updateData = {
+                    summary: summary,
+                    latestNewsletterDate: new Date().toISOString().split('T')[0]
+                };
+
+                if (photoUrls.length > 0) {
+                    updateData.ministryPhotos = photoUrls;
+                }
+
+                if (pdfUrl) {
+                    updateData.newsletterUrl = pdfUrl;
+                    updateData.NewsLetter = pdfUrl; // 레거시 지원
+                }
+
+                await firebaseDB.updateMissionary(missionaryId, updateData);
+
+                AdminUtils.showToast('뉴스레터가 업로드되었습니다!', 'success');
+                clearForm();
+            } catch (error) {
+                console.error('업로드 오류:', error);
+                AdminUtils.showToast('업로드 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('missionarySelect').value = '';
+            document.getElementById('newsletterTitle').value = '';
+            document.getElementById('newsletterSummary').value = '';
+            document.getElementById('ministryPhotos').value = '';
+            document.getElementById('ministryPhotosPreview').innerHTML = '';
+            document.getElementById('pdfFile').value = '';
+        }
+
+        // 사역사진 미리보기
+        document.getElementById('ministryPhotos').addEventListener('change', (e) => {
+            const files = e.target.files;
+            const preview = document.getElementById('ministryPhotosPreview');
+            preview.innerHTML = '';
+
+            if (files.length > 3) {
+                AdminUtils.showToast('최대 3장까지만 선택 가능합니다.', 'error');
+                e.target.value = '';
+                return;
+            }
+
+            for (let i = 0; i < Math.min(files.length, 3); i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.innerHTML += `<img src="${e.target.result}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+
+</html>

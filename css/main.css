@@ -17,4 +17,106 @@
 /* Features 모듈 */
 @import 'features/prayer-count.css';
 
-/* 추가 모듈들은 필요에 따라 계속 추가 예정 */ 
+/* 추가 모듈들은 필요에 따라 계속 추가 예정 */
+
+/* 기도팝업 순환 토글 버튼 - 아이폰 스타일 */
+.prayer-toggle-container {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    z-index: 1000;
+}
+
+.prayer-toggle-btn {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: #e5e5ea;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.prayer-toggle-btn::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.prayer-toggle-btn.on {
+    background: #34c759;
+}
+
+.prayer-toggle-btn.on::before {
+    transform: translateX(20px);
+}
+
+.prayer-toggle-btn.off {
+    background: #e5e5ea;
+}
+
+.prayer-toggle-btn.off::before {
+    transform: translateX(0);
+}
+
+.prayer-toggle-btn:hover {
+    transform: scale(1.05);
+}
+
+.prayer-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+/* 툴팁 스타일 */
+.prayer-toggle-btn::after {
+    content: attr(title);
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.prayer-toggle-btn:hover::after {
+    opacity: 1;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .prayer-toggle-container {
+        bottom: 80px;
+        right: 20px;
+    }
+
+    .prayer-toggle-btn {
+        width: 40px;
+        height: 22px;
+    }
+
+    .prayer-toggle-btn::before {
+        width: 18px;
+        height: 18px;
+    }
+
+    .prayer-toggle-btn.on::before {
+        transform: translateX(18px);
+    }
+}

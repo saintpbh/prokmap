@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대시보드 - 선교사 관리 시스템</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fas fa-globe"></i> 선교사 관리 시스템</h1>
+        <div class="user-info">
+            <span class="user-email" id="userEmail">loading...</span>
+            <button id="logoutBtn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i> 로그아웃
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="index.html" class="active">
+                        <i class="fas fa-chart-line"></i>
+                        대시보드
+                    </a>
+                </li>
+                <li>
+                    <a href="missionaries.html">
+                        <i class="fas fa-users"></i>
+                        선교사 관리
+                    </a>
+                </li>
+                <li>
+                    <a href="newsletters.html">
+                        <i class="fas fa-newspaper"></i>
+                        뉴스레터 관리
+                    </a>
+                </li>
+                <li>
+                    <a href="prayers.html">
+                        <i class="fas fa-praying-hands"></i>
+                        기도 제목
+                    </a>
+                </li>
+                <li>
+                    <a href="supporters.html">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        후원자 관리
+                    </a>
+                </li>
+                <li>
+                    <a href="groups.html">
+                        <i class="fas fa-layer-group"></i>
+                        그룹 관리
+                    </a>
+                </li>
+                <li>
+                    <a href="certificates.html">
+                        <i class="fas fa-certificate"></i>
+                        증명서 발급
+                    </a>
+                </li>
+                <li>
+                    <a href="communications.html">
+                        <i class="fas fa-envelope"></i>
+                        연락하기
+                    </a>
+                </li>
+                <li>
+                    <a href="inquiries.html">
+                        <i class="fas fa-question-circle"></i>
+                        문의 관리
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h2 style="margin-bottom: 2rem;">📊 대시보드</h2>
+
+            <!-- Stats Cards -->
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">전체 선교사</p>
+                            <h3 style="font-size: 2rem; color: #4A90E2;" id="totalMissionaries">-</h3>
+                        </div>
+                        <i class="fas fa-users" style="font-size: 3rem; color: #4A90E2; opacity: 0.2;"></i>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">파송 국가</p>
+                            <h3 style="font-size: 2rem; color: #7ED321;" id="totalCountries">-</h3>
+                        </div>
+                        <i class="fas fa-globe" style="font-size: 3rem; color: #7ED321; opacity: 0.2;"></i>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">노회 수</p>
+                            <h3 style="font-size: 2rem; color: #F5A623;" id="totalPresbyteries">-</h3>
+                        </div>
+                        <i class="fas fa-church" style="font-size: 3rem; color: #F5A623; opacity: 0.2;"></i>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">활동 중</p>
+                            <h3 style="font-size: 2rem; color: #9B59B6;" id="activeMissionaries">-</h3>
+                        </div>
+                        <i class="fas fa-check-circle" style="font-size: 3rem; color: #9B59B6; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Newsletters (Last 3 months) -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📰 최근 3개월 뉴스레터</h3>
+                    <button class="btn btn-primary" onclick="window.location.href='newsletters.html'">
+                        <i class="fas fa-plus"></i> 뉴스레터 업로드
+                    </button>
+                </div>
+                <div id="recentNewsletters">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Recent Prayer Requests (Latest 10) -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🙏 최근 기도요청 (10명)</h3>
+                    <button class="btn btn-primary" onclick="window.location.href='prayers.html'">
+                        <i class="fas fa-praying-hands"></i> 전체 보기
+                    </button>
+                </div>
+                <div id="recentPrayerRequests">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Recent Updates -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📝 최근 업데이트</h3>
+                    <button class="btn btn-primary" onclick="window.location.href='missionaries.html'">
+                        <i class="fas fa-plus"></i> 선교사 추가
+                    </button>
+                </div>
+                <div id="recentUpdates">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="window.location.href='missionaries.html'"
+                    style="padding: 1.5rem;">
+                    <i class="fas fa-user-plus" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                    선교사 추가
+                </button>
+                <button class="btn btn-success" onclick="window.location.href='newsletters.html'"
+                    style="padding: 1.5rem;">
+                    <i class="fas fa-file-upload" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                    뉴스레터 업로드
+                </button>
+                <button class="btn" onclick="window.location.href='../index.html'" target="_blank"
+                    style="padding: 1.5rem; background: #9B59B6; color: white;">
+                    <i class="fas fa-external-link-alt"
+                        style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                    지도 보기
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="../js/firebase-config.js"></script>
+
+    <!-- Admin Common Script -->
+    <script src="js/common.js"></script>
+
+    <script>
+        // 대시보드 초기화
+        async function initDashboard() {
+            try {
+                // 통계 로드
+                const stats = await firebaseDB.getStats();
+                document.getElementById('totalMissionaries').textContent = stats.total;
+                document.getElementById('totalCountries').textContent = stats.countries;
+                document.getElementById('totalPresbyteries').textContent = stats.presbyteries;
+                document.getElementById('activeMissionaries').textContent = stats.active;
+
+                // 선교사 데이터 가져오기
+                const missionaries = await firebaseDB.getMissionaries();
+
+                // 최근 3개월 뉴스레터 로드 (summary 있는 선교사들)
+                const threeMonthsAgo = new Date();
+                threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+                const recentNewsletters = missionaries
+                    .filter(m => m.summary && m.latestNewsletterDate)
+                    .filter(m => new Date(m.latestNewsletterDate) >= threeMonthsAgo)
+                    .sort((a, b) => new Date(b.latestNewsletterDate) - new Date(a.latestNewsletterDate))
+                    .slice(0, 10);
+
+                displayRecentNewsletters(recentNewsletters);
+
+                // 최근 기도요청 10명 (summary 또는 prayerTopic이 있는 선교사들)
+                const prayerRequests = missionaries
+                    .filter(m => m.summary || m.prayerTopic)
+                    .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
+                    .slice(0, 10);
+
+                displayPrayerRequests(prayerRequests);
+
+                // 최근 업데이트 로드
+                const recent = missionaries
+                    .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
+                    .slice(0, 5);
+
+                const recentUpdatesEl = document.getElementById('recentUpdates');
+                if (recent.length === 0) {
+                    recentUpdatesEl.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">최근 업데이트가 없습니다.</p>';
+                } else {
+                    recentUpdatesEl.innerHTML = `
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>이름</th>
+                                    <th>국가</th>
+                                    <th>노회</th>
+                                    <th>마지막 업데이트</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${recent.map(m => `
+                                    <tr>
+                                        <td><strong>${m.name}</strong></td>
+                                        <td>${m.country || '-'}</td>
+                                        <td>${m.presbytery || '-'}</td>
+                                        <td>${AdminUtils.formatDate(m.updatedAt)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error('대시보드 로드 오류:', error);
+                AdminUtils.showToast('데이터를 불러오는 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 최근 뉴스레터 표시
+        function displayRecentNewsletters(newsletters) {
+            const el = document.getElementById('recentNewsletters');
+            if (!el) return;
+
+            if (newsletters.length === 0) {
+                el.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">최근 3개월 뉴스레터가 없습니다.</p>';
+                return;
+            }
+
+            el.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+                    ${newsletters.map(m => `
+                        <div class="card" style="cursor: pointer; transition: transform 0.2s; padding: 1rem;" onclick="viewNewsletterDetail('${m.id}')">
+                            <div style="display: flex; align-items: start; gap: 0.75rem;">
+                                <i class="fas fa-newspaper" style="font-size: 2rem; color: #4A90E2;"></i>
+                                <div style="flex: 1;">
+                                    <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem;">${m.name}</h4>
+                                    <p style="margin: 0; font-size: 0.85rem; color: #666;">${m.country || ''}</p>
+                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.75rem; color: #999;">${AdminUtils.formatDate(m.latestNewsletterDate)}</p>
+                                </div>
+                            </div>
+                            <p style="margin: 0.75rem 0 0 0; font-size: 0.85rem; color: #555; line-height: 1.4;">${m.summary?.substring(0, 60) || ''}${m.summary?.length > 60 ? '...' : ''}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // 최근 기도요청 표시
+        function displayPrayerRequests(requests) {
+            const el = document.getElementById('recentPrayerRequests');
+            if (!el) return;
+
+            if (requests.length === 0) {
+                el.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">기도요청이 없습니다.</p>';
+                return;
+            }
+
+            el.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>이름</th>
+                            <th>선교지</th>
+                            <th>기도제목</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${requests.map(m => `
+                            <tr>
+                                <td><strong>${m.name}</strong></td>
+                                <td>${m.country || '-'}${m.city ? ` / ${m.city}` : ''}</td>
+                                <td style="max-width: 300px;">${m.summary || m.prayerTopic || '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // 뉴스레터 상세보기
+        function viewNewsletterDetail(missionaryId) {
+            // 선교사 상세 페이지로 이동하거나 모달 표시
+            window.location.href = `missionaries.html?id=${missionaryId}`;
+        }
+
+        // Firebase Auth 준비 후 대시보드 초기화
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && adminAuth.allowedEmails.includes(user.email)) {
+                setTimeout(initDashboard, 500);
+            }
+        });
+    </script>
+</body>
+
+</html>

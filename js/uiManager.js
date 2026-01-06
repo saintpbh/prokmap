@@ -1,7 +1,7 @@
 // public/js/uiManager.js
 const UIManager = {
     elements: {},
-    
+
     // DOM 요소들을 지연 로딩으로 초기화
     initElements() {
         // DOM이 완전히 로드될 때까지 대기
@@ -9,7 +9,7 @@ const UIManager = {
             document.addEventListener('DOMContentLoaded', () => this.initElements());
             return;
         }
-        
+
         this.elements = {
             mapContainer: document.getElementById('map'),
             detailPopup: document.getElementById('detailPopup'),
@@ -28,16 +28,16 @@ const UIManager = {
             sidebarClose: document.querySelector('.sidebar-close'),
             sidebarSearch: document.querySelector('.sidebar-search sl-input'),
         };
-        
 
-        
+
+
         // 중요한 요소들의 존재 여부 확인 및 폴백 처리
         const criticalElements = ['mapContainer', 'detailPopup', 'sidebarPanel', 'sidebarTitle', 'sidebarList'];
         const missingElements = criticalElements.filter(elementName => !this.elements[elementName]);
-        
+
         if (missingElements.length > 0) {
             console.warn(`중요한 요소들이 누락되었습니다: ${missingElements.join(', ')}`);
-            
+
             // 누락된 요소들을 생성하거나 폴백 처리
             if (!this.elements.detailPopup) {
                 console.log('detailPopup 요소를 생성합니다.');
@@ -47,7 +47,7 @@ const UIManager = {
                 document.body.appendChild(detailPopup);
                 this.elements.detailPopup = detailPopup;
             }
-            
+
             if (!this.elements.sidebarPanel) {
                 console.log('sidebar-panel 요소를 생성합니다.');
                 const sidebarPanel = document.createElement('div');
@@ -76,15 +76,15 @@ const UIManager = {
                 this.elements.sidebarClose = document.querySelector('.sidebar-close');
             }
         }
-        
+
     },
-    
+
     // 이 UI 매니저를 초기화하고 필요한 참조를 설정합니다.
     initialize(mapController, dataManager) {
         // 참조 설정
         this.mapController = mapController;
         this.dataManager = dataManager;
-        
+
         // DOM이 완전히 로드된 후 초기화
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
@@ -121,15 +121,15 @@ const UIManager = {
         if (this.elements.presbyteryTable) {
             this.elements.presbyteryTable.style.display = 'block';
         }
-        
+
         // 종료 버튼 숨기기
         if (this.elements.presbyteryExitBtn) {
             this.elements.presbyteryExitBtn.classList.remove('visible');
         }
-        
+
         // 전체 보기로 복원
         this.mapController.exitPresbyteryView();
-        
+
 
     },
 
@@ -139,15 +139,15 @@ const UIManager = {
         if (this.elements.countryTable) {
             this.elements.countryTable.style.display = 'block';
         }
-        
+
         // 종료 버튼 숨기기
         if (this.elements.countryExitBtn) {
             this.elements.countryExitBtn.classList.remove('visible');
         }
-        
+
         // 전체 보기로 복원
         this.mapController.exitCountryView();
-        
+
 
     },
 
@@ -165,7 +165,7 @@ const UIManager = {
         }).join('');
         this.elements.countryTable.innerHTML = `<div style="font-weight:bold;font-size:1.15em;margin-bottom:6px;text-align:center;">국가별 파송현황</div>
             <table><thead><tr><th></th><th>국가</th><th>인원</th></tr></thead><tbody>${tableRows}</tbody></table>`;
-        
+
         // 국가 클릭 시 사이드바 열기 이벤트 추가
         this.elements.countryTable.querySelectorAll('.country-click').forEach(cell => {
             cell.addEventListener('click', (e) => {
@@ -187,7 +187,7 @@ const UIManager = {
             </tr>`).join('');
         this.elements.presbyteryTable.innerHTML = `<div style="font-weight:bold;font-size:1.15em;margin-bottom:6px;text-align:center;">노회별 파송현황</div>
             <table><thead><tr><th>노회</th><th>인원</th></tr></thead><tbody>${tableRows}</tbody></table>`;
-        
+
         // 노회 클릭 시 사이드바 열기 이벤트 추가
         this.elements.presbyteryTable.querySelectorAll('.presbytery-click').forEach(cell => {
             cell.addEventListener('click', (e) => {
@@ -210,7 +210,7 @@ const UIManager = {
 
             // 팝업 내용을 HTML 문자열로 생성
             let popupHTML = `${flag}<b>${country}</b><br>`;
-            
+
             // 선교사 이름 목록 HTML 생성
             stats.names.forEach(name => {
                 const info = this.dataManager.getMissionaryInfo(name) || {};
@@ -218,7 +218,7 @@ const UIManager = {
                 const recentIcon = isRecent ? ' <span class="recent-badge" title="최근 소식">📰✨</span>' : '';
                 const boldClass = isRecent ? ' recent-bold' : '';
                 const entryClass = autoplayMode === 'fixed' ? `missionary-entry${boldClass}` : `popup-list ${boldClass}`;
-                
+
                 // 선교사 ID를 data 속성에 추가 (마커 매핑용)
                 const missionaryId = info._id || `missionary_${name}`;
                 popupHTML += `<div class="${entryClass}" data-name="${name}" data-missionary-id="${missionaryId}" style="cursor: pointer;"><div class="missionary-name">${name}${recentIcon}</div></div>`;
@@ -259,7 +259,7 @@ const UIManager = {
                     this.mapController.state.isPaused = true;
                 }
                 this.mapController.state.isByAutoRotate = false;
-                
+
                 if (this.mapController.state.autoplayMode === 'fixed') {
                     this.mapController.startPrayerTopicRotation(popup);
                 }
@@ -275,11 +275,13 @@ const UIManager = {
         });
 
         this.mapController.setMarkers('global', newMarkers);
-        
+
         console.log('UIManager: renderGlobalMarkers 완료, 마커 수:', newMarkers.length);
     },
-    
+
     showDetailPopup(name, latlngArray) {
+        console.log('[UIManager] showDetailPopup 호출:', name, latlngArray);
+
         // 모바일: Swiper 기반 카드 UI로 전환
         if (window.innerWidth <= 600 && window.showMobileMissionarySwiper) {
             // 최근 소식 순 정렬(내림차순)
@@ -291,8 +293,24 @@ const UIManager = {
             window.showMobileMissionarySwiper(missionaries);
             return;
         }
-        // 데스크탑: 기존 모던 팝업
-        this.showModernDetailPopup(name, latlngArray);
+
+        // 데스크탑: window.showDetailPopup 직접 호출 (detailPopup.js의 함수)
+        if (window.showDetailPopup && typeof window.showDetailPopup === 'function') {
+            const missionaryInfo = this.dataManager.state.missionaryInfo || {};
+            const элементы = {
+                detailPopup: this.elements.detailPopup || document.getElementById('detailPopup'),
+                mapContainer: this.elements.mapContainer || document.getElementById('map')
+            };
+
+            console.log('[UIManager] window.showDetailPopup 호출 중...', { name, latlngArray, elements: элементы });
+
+            // detailPopup.js의 전역 함수 호출
+            window.showDetailPopup(name, latlngArray, missionaryInfo, элементы);
+        } else {
+            console.error('[UIManager] window.showDetailPopup 함수를 찾을 수 없습니다.');
+            // 폴백: 모던 팝업 시도
+            this.showModernDetailPopup(name, latlngArray);
+        }
     },
 
     showModernDetailPopup(name, latlngArray) {
@@ -307,14 +325,14 @@ const UIManager = {
                 return;
             }
         }
-        
+
         const elements = {
             detailPopup: this.elements.detailPopup,
             mapContainer: this.elements.mapContainer,
         };
-        
+
         const missionaryInfo = this.dataManager.state.missionaryInfo;
-        
+
         // 새로운 detailPopup 모듈 사용
         if (window.showDetailPopup) {
             window.showDetailPopup(name, latlngArray, missionaryInfo, elements);
@@ -322,7 +340,7 @@ const UIManager = {
             // 폴백: 테스트 디자인 기반 상세 팝업 생성
             this.createTestStyleDetailPopup(name, latlngArray);
         }
-        
+
         this.mapController.state.currentDetailPopup = elements.detailPopup;
     },
 
@@ -403,14 +421,14 @@ const UIManager = {
         // 팝업을 지도 컨테이너에 추가
         if (this.elements.mapContainer) {
             this.elements.mapContainer.appendChild(popup);
-            
+
             // 팝업 위치 설정 (화면 중앙)
             const rect = popup.getBoundingClientRect();
             popup.style.position = 'absolute';
             popup.style.left = `${(window.innerWidth - rect.width) / 2}px`;
             popup.style.top = `${(window.innerHeight - rect.height) / 2}px`;
             popup.style.zIndex = '1000';
-            
+
             this.mapController.state.currentDetailPopup = popup;
         }
     },
@@ -426,24 +444,24 @@ const UIManager = {
                 return;
             }
 
-        // CommonUtils 사용으로 중복 함수 제거
+            // CommonUtils 사용으로 중복 함수 제거
 
-        const card = document.createElement('div');
-        card.className = 'detail-popup-card';
+            const card = document.createElement('div');
+            card.className = 'detail-popup-card';
 
-        let pdfButton = '';
-        if (info.NewsLetter && info.NewsLetter.trim()) {
-            pdfButton = `<sl-button variant="primary" size="small" class="newsletter-button" data-newsurl="${info.NewsLetter.trim()}">
+            let pdfButton = '';
+            if (info.NewsLetter && info.NewsLetter.trim()) {
+                pdfButton = `<sl-button variant="primary" size="small" class="newsletter-button" data-newsurl="${info.NewsLetter.trim()}">
                             <sl-icon slot="prefix" name="file-earmark-text"></sl-icon>
                             뉴스레터 보기
                          </sl-button>`;
-        }
+            }
 
-        const city = info.city && info.city.trim() ? info.city.trim() : '';
-        const location = city ? `${info.country} · ${city}` : info.country;
-        const imgSrc = info.image && info.image.trim() ? info.image.trim() : window.CommonUtils.createAvatarSVG(name, 600);
+            const city = info.city && info.city.trim() ? info.city.trim() : '';
+            const location = city ? `${info.country} · ${city}` : info.country;
+            const imgSrc = info.image && info.image.trim() ? info.image.trim() : window.CommonUtils.createAvatarSVG(name, 600);
 
-        card.innerHTML = `
+            card.innerHTML = `
             <div class="detail-cover">
                 <img src="${imgSrc}" alt="${name}" onerror="this.src='${window.CommonUtils.createAvatarSVG(name, 600)}';">
                 <div class="cover-overlay">
@@ -465,18 +483,18 @@ const UIManager = {
             <div class="detail-popup-footer">${pdfButton}</div>
         `;
 
-        this.elements.detailPopupContainer.appendChild(card);
-        this.mapController.state.currentDetailPopup = card;
+            this.elements.detailPopupContainer.appendChild(card);
+            this.mapController.state.currentDetailPopup = card;
 
-        card.querySelector('.close-detail-popup').addEventListener('click', () => this.closeDetailPopup());
-        const newsBtn = card.querySelector('.newsletter-button');
-        if (newsBtn && window.showNewsletter) {
-            newsBtn.addEventListener('click', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                window.showNewsletter(newsBtn.dataset.newsurl);
-            });
-        }
-        this.mapController.positionPopup(latlngArray);
+            card.querySelector('.close-detail-popup').addEventListener('click', () => this.closeDetailPopup());
+            const newsBtn = card.querySelector('.newsletter-button');
+            if (newsBtn && window.showNewsletter) {
+                newsBtn.addEventListener('click', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    window.showNewsletter(newsBtn.dataset.newsurl);
+                });
+            }
+            this.mapController.positionPopup(latlngArray);
         } catch (error) {
             console.error('상세 팝업 표시 중 오류 발생:', error);
             if (window.CommonUtils && window.CommonUtils.showToast) {
@@ -495,7 +513,7 @@ const UIManager = {
             }
             this.mapController.state.currentDetailPopup = null;
         }
-        
+
         // 레거시 컨테이너에 남아있을 수 있는 자식 요소 제거
         if (this.elements.detailPopupContainer) {
             while (this.elements.detailPopupContainer.firstChild) {
@@ -513,7 +531,7 @@ const UIManager = {
     createFloatingElement(item, point, extraClass = '') {
         const floatingEl = document.createElement('div');
         floatingEl.className = `floating-missionary ${extraClass}`;
-        
+
         const prayerTopic = item.prayer || '현지 정착과 건강을 위해 기도해주세요.';
         const isRecent = window.isRecent(item.lastUpdate);
         const recentClass = isRecent ? 'recent' : '';
@@ -559,7 +577,7 @@ const UIManager = {
         if (!this.elements.sidebarTitle || !this.elements.sidebarPanel || !this.elements.sidebarList) {
             console.error('사이드바 요소들이 초기화되지 않았습니다. 다시 초기화를 시도합니다.');
             this.initElements();
-            
+
             // 재시도
             setTimeout(() => {
                 if (this.elements.sidebarTitle && this.elements.sidebarPanel && this.elements.sidebarList) {
@@ -570,56 +588,56 @@ const UIManager = {
             }, 100);
             return;
         }
-        
+
         // 사이드바 열기 시 기도 팝업 순회 일시정지
         if (this.mapController && this.mapController.pausePrayerRotation) {
             this.mapController.pausePrayerRotation();
         }
-        
+
         this.elements.sidebarTitle.textContent = title;
         this.renderSidebarList(missionaries);
         this.elements.sidebarPanel.classList.add('open');
         this.elements.sidebarOverlay.classList.add('show');
-        
+
         // 이벤트 리스너 추가
         this.elements.sidebarClose.addEventListener('click', () => this.closeSidebar());
         this.elements.sidebarOverlay.addEventListener('click', () => this.closeSidebar());
-        
+
         // 검색 기능 - Shoelace input 이벤트
         if (this.elements.sidebarSearch) {
             // 기존 이벤트 리스너 제거
             this.elements.sidebarSearch.removeEventListener('sl-input', this._searchHandler);
-            
+
             // 새로운 이벤트 리스너 추가
             this._searchHandler = (e) => {
                 this.filterSidebarList(e.target.value, missionaries);
             };
             this.elements.sidebarSearch.addEventListener('sl-input', this._searchHandler);
         }
-        
+
         console.log('사이드바 열기 완료:', title, missionaries.length, '명의 선교사');
     },
 
     closeSidebar() {
         this.elements.sidebarPanel.classList.remove('open');
         this.elements.sidebarOverlay.classList.remove('show');
-        
+
         // 활성 상태 제거
         document.querySelectorAll('.sidebar-missionary-item.active').forEach(item => {
             item.classList.remove('active');
         });
-        
+
         // 검색 입력 초기화
         if (this.elements.sidebarSearch) {
             this.elements.sidebarSearch.value = '';
         }
-        
+
         // 이벤트 리스너 정리
         if (this._searchHandler) {
             this.elements.sidebarSearch.removeEventListener('sl-input', this._searchHandler);
             this._searchHandler = null;
         }
-        
+
         // 사이드바 닫기 시 전체보기 모드일 때만 기도 팝업 순회 재개
         if (this.mapController && this.mapController.resumePrayerRotation && !this.mapController.state.fixedCountry) {
             this.mapController.resumePrayerRotation();
@@ -633,7 +651,7 @@ const UIManager = {
             const city = missionary.city && missionary.city.trim() ? missionary.city.trim() : '';
             const location = city ? `${missionary.country} · ${city}` : missionary.country;
             const avatarText = missionary.name.charAt(0);
-            
+
             return `
                 <div class="sidebar-missionary-item" data-name="${missionary.name}">
                     <div class="sidebar-missionary-avatar">${avatarText}</div>
@@ -651,9 +669,9 @@ const UIManager = {
                 </div>
             `;
         }).join('');
-        
+
         this.elements.sidebarList.innerHTML = listHTML;
-        
+
         // 클릭 이벤트 추가
         this.elements.sidebarList.querySelectorAll('.sidebar-missionary-item').forEach(item => {
             item.addEventListener('click', (e) => {
@@ -661,10 +679,10 @@ const UIManager = {
                 document.querySelectorAll('.sidebar-missionary-item.active').forEach(activeItem => {
                     activeItem.classList.remove('active');
                 });
-                
+
                 // 현재 아이템 활성화
                 item.classList.add('active');
-                
+
                 const name = item.dataset.name;
                 const missionary = missionaries.find(m => m.name === name);
                 if (missionary) {
@@ -673,86 +691,73 @@ const UIManager = {
                         console.error('mapController가 초기화되지 않았습니다.');
                         return;
                     }
-                    
+
                     // getLatLng 메서드가 있는지 확인
                     if (typeof this.mapController.getLatLng !== 'function') {
                         console.error('mapController.getLatLng 메서드가 없습니다.');
                         return;
                     }
-                    
+
                     const latlng = this.mapController.getLatLng(missionary, missionary.country);
-                    
+
                     // 지도가 있는지 확인
                     if (!this.mapController.map) {
                         console.error('mapController.map이 초기화되지 않았습니다.');
                         return;
                     }
-                    
-                    // 국가별/노회별 보기 모드에서 이름 팝업들 숨기기
+
+                    // 국가별/노회별 보기 모드에서 이름 팝업들 완전히 숨기기
                     if (this.mapController.state.fixedCountry || this.mapController.state.fixedPresbytery) {
-                        const namePopups = document.querySelectorAll('.missionary-name-popup.circular');
+                        const namePopups = document.querySelectorAll('.missionary-name-popup');
                         namePopups.forEach(popup => {
-                            popup.style.opacity = '0';
-                            popup.style.transition = 'opacity 0.3s ease';
+                            popup.style.display = 'none';
                         });
-                        console.log('[사이드바] 국가별/노회별 보기: 이름 팝업들 숨김');
+                        console.log('[사이드바] 국가별/노회별 보기: 이름 팝업들 완전히 숨김');
                     }
-                    
-                    // 해당 선교사의 국가로 지도 이동 (더 부드럽게)
-                    this.mapController.map.flyTo(latlng, Math.max(this.mapController.map.getZoom(), 6), { 
-                        animate: true, 
+
+                    // 해당 선교사의 위치로 지도 이동 (부드럽게)
+                    this.mapController.map.flyTo(latlng, Math.max(this.mapController.map.getZoom(), 6), {
+                        animate: true,
                         duration: 1.5,
                         easeLinearity: 0.25
                     });
-                    
-                    // 지도 이동 후 상세 팝업 표시 (약간의 지연)
-                    setTimeout(() => {
+
+                    // 지도 이동 완료 이벤트 리스너 추가
+                    const onMoveEnd = () => {
+                        // 이벤트 리스너 제거 (한 번만 실행)
+                        this.mapController.map.off('moveend', onMoveEnd);
+
+                        // 상세 팝업 표시
                         console.log('[사이드바] 선교사 클릭 → 상세 팝업:', name, latlng);
                         this.showDetailPopup(name, latlng);
-                        
-                        // 국가별/노회별 보기 모드에서 이름 팝업들 다시 보이기
+
+                        // 국가별/노회별 보기 모드에서 이름 팝업들 위치 재계산 및 다시 표시
                         if (this.mapController.state.fixedCountry || this.mapController.state.fixedPresbytery) {
-                            const namePopups = document.querySelectorAll('.missionary-name-popup.circular');
-                            namePopups.forEach(popup => {
-                                popup.style.opacity = '1';
-                            });
-                            console.log('[사이드바] 국가별/노회별 보기: 이름 팝업들 다시 표시');
-                        }
-                        
-                        // 해당 마커에 포커스 효과 추가
-                        if (this.mapController.markerClusterGroup) {
-                            // 클러스터 내 마커들 중 해당 선교사 마커 찾기
-                            this.mapController.markerClusterGroup.eachLayer(marker => {
-                                // 안전한 체크: getPopup 메서드와 팝업 존재 여부 확인
-                                if (marker && marker.getPopup && typeof marker.getPopup === 'function') {
-                                    const popup = marker.getPopup();
-                                    if (popup && popup.getContent && typeof popup.getContent === 'function') {
-                                        const popupContent = popup.getContent();
-                                        if (popupContent && popupContent.includes(name)) {
-                                            // 마커에 포커스 효과 추가 (null 체크 추가)
-                                            const markerElement = marker.getElement();
-                                            if (markerElement) {
-                                                markerElement.classList.add('marker-focused');
-                                                setTimeout(() => {
-                                                    const element = marker.getElement();
-                                                    if (element) {
-                                                        element.classList.remove('marker-focused');
-                                                    }
-                                                }, 2000);
-                                            }
-                                        }
-                                    }
+                            setTimeout(() => {
+                                // 이름 팝업들 위치 재계산
+                                if (this.mapController.updateNamePopupPositions) {
+                                    this.mapController.updateNamePopupPositions();
                                 }
-                            });
+
+                                // 이름 팝업들 다시 표시
+                                const namePopups = document.querySelectorAll('.missionary-name-popup');
+                                namePopups.forEach(popup => {
+                                    popup.style.display = '';
+                                });
+                                console.log('[사이드바] 국가별/노회별 보기: 이름 팝업들 다시 표시');
+                            }, 100);
                         }
-                    }, 800);
+                    };
+
+                    // moveend 이벤트 리스너 등록
+                    this.mapController.map.on('moveend', onMoveEnd);
                 }
             });
         });
     },
 
     filterSidebarList(searchTerm, allMissionaries) {
-        const filtered = allMissionaries.filter(missionary => 
+        const filtered = allMissionaries.filter(missionary =>
             missionary.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (missionary.country && missionary.country.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (missionary.city && missionary.city.toLowerCase().includes(searchTerm.toLowerCase())) ||
