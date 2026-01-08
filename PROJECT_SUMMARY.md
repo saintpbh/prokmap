@@ -103,6 +103,7 @@ PcWeb/
     │       - `missionary/`: 선교사 관리 모듈
     │       - `newsletter/`: 뉴스레터 업로드 모듈
     │       - `supporter/`: 후원자 관리 모듈
+    │       - `prayer/`: 기도 제목 관리 모듈
     ├── common.js: (Legacy) 기존 페이지용 공통 스크립트
     ├── missionaries.js: (Legacy) 기존 선교사 관리 스크립트
     └── supporters.js: (Legacy) 기존 후원자 관리 스크립트
