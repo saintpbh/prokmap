@@ -88,66 +88,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-    <!-- Firebase Config -->
     <script src="../js/firebase-config.js"></script>
 
-    <!-- Admin Common Script -->
-    <script src="js/common.js"></script>
-
-    <script>
-        // 초기화 및 리스너 설정
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user && adminAuth.allowedEmails.includes(user.email)) {
-                initEmergencyAlertListener();
-            }
-        });
-
-        function initEmergencyAlertListener() {
-            const db = firebase.database();
-            db.ref('settings/emergencyAlert').on('value', snapshot => {
-                const alertText = snapshot.val();
-                const statusEl = document.getElementById('alertStatus');
-                const textEl = document.getElementById('currentAlertText');
-                const inputEl = document.getElementById('emergencyAlertInput');
-
-                if (alertText) {
-                    statusEl.style.display = 'block';
-                    textEl.textContent = alertText;
-                    inputEl.value = alertText;
-                } else {
-                    statusEl.style.display = 'none';
-                    // inputEl.value = ''; // 입력창은 비우지 않음 (재송출 편의를 위해)
-                }
-            });
-        }
-
-        async function broadcastAlert() {
-            const text = document.getElementById('emergencyAlertInput').value.trim();
-            if (!text) {
-                AdminUtils.showToast('공지할 내용을 입력해주세요.', 'warning');
-                return;
-            }
-
-            try {
-                await firebase.database().ref('settings/emergencyAlert').set(text);
-                AdminUtils.showToast('긴급 알림이 즉시 송출되었습니다.', 'success');
-            } catch (error) {
-                console.error('알림 송출 오류:', error);
-                AdminUtils.showToast('알림 송출에 실패했습니다.', 'error');
-            }
-        }
-
-        async function clearAlert() {
-            try {
-                await firebase.database().ref('settings/emergencyAlert').remove();
-                AdminUtils.showToast('긴급 알림이 해제되었습니다.', 'success');
-            } catch (error) {
-                console.error('알림 해제 오류:', error);
-                AdminUtils.showToast('알림 해제에 실패했습니다.', 'error');
-            }
-        }
-    </script>
+    <!-- App Entry Point -->
+    <script type="module" src="js/core/app-init.js"></script>
+    <script type="module" src="js/modules/alert/main.js"></script>
 </body>
 
 </html>
