@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>후원 내역 업로드 - 선교사 관리 시스템</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: #e9ecef;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .summary-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-item strong {
+            display: block;
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-item span {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fas fa-file-invoice-dollar"></i> 후원 내역 업로드</h1>
+        <div class="user-info">
+            <span id="userEmail"></span>
+            <button onclick="adminAuth.logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
+                <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
+                <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="report-upload.html"><i class="fas fa-file-alt"></i> 소식 일괄 등록</a></li>
+                <li><a href="prok-integration.html"><i class="fas fa-share-square"></i> 총회 게시판 업로드</a></li>
+                <li><a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> 긴급 알림 송출</a></li>
+                <li><a href="supporters.html" class="active"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+                <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+                <li><a href="certificates.html"><i class="fas fa-certificate"></i> 증명서 발급</a></li>
+                <li><a href="communications.html"><i class="fas fa-envelope"></i> 연락하기</a></li>
+                <li><a href="inquiries.html"><i class="fas fa-question-circle"></i> 문의 관리</a></li>
+                <li><a href="admins.html"><i class="fas fa-user-shield"></i> 관리 권한 설정</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="content-header">
+                <h2>엑셀 파일로 후원 내역 일괄 등록</h2>
+            </div>
+
+            <div class="upload-area" id="dropZone">
+                <i class="fas fa-file-excel" style="font-size: 3rem; color: #2ecc71; margin-bottom: 1rem;"></i>
+                <h3>엑셀 파일을 이곳에 드래그하거나 클릭하여 선택하세요</h3>
+                <p style="color: #666; margin-top: 0.5rem;">.xlsx, .xls 형식 지원</p>
+                <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;">
+            </div>
+
+            <div id="previewSection" style="display: none;">
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <strong>전체 항목</strong>
+                        <span id="totalCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>매칭 성공</strong>
+                        <span id="matchSuccessCount" style="color: #28a745;">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>매칭 실패 (선교사)</strong>
+                        <span id="matchFailMissionaryCount" style="color: #dc3545;">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>매칭 실패 (후원자)</strong>
+                        <span id="matchFailSupporterCount" style="color: #dc3545;">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>총 금액</strong>
+                        <span id="totalAmount">0원</span>
+                    </div>
+                    <div style="flex: 1; text-align: right; align-self: center;">
+                        <button id="uploadBtn" class="btn btn-primary" disabled>
+                            <i class="fas fa-upload"></i> DB에 저장하기
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table preview-table">
+                        <thead>
+                            <tr>
+                                <th>일자</th>
+                                <th>입금자 (엑셀)</th>
+                                <th>매칭 후원자</th>
+                                <th>선교사/프로그램 (엑셀)</th>
+                                <th>매칭 선교사</th>
+                                <th>금액</th>
+                                <th>상태</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTableBody">
+                            <!-- Rows will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <!-- SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/support-upload.js"></script>
+</body>
+
+</html>

@@ -81,52 +81,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // 클릭 이벤트 리스너
         prayerToggleBtn.addEventListener('click', () => {
-            if (isProcessing) {
-                console.log('기도 팝업 토글 처리 중... 클릭 무시');
-                return;
-            }
-
+            if (isProcessing) return;
             isProcessing = true;
 
-            const currentState = prayerToggleBtn.classList.contains('off');
+            const currentState = window.prayerPopupManager.isEnabled;
             const newState = !currentState;
 
-            togglePrayerPopup(newState);
+            window.prayerPopupManager.toggle(newState);
             updatePrayerToggleButton(newState);
 
-            // 로컬 스토리지에 상태 저장
-            localStorage.setItem('prayer-popup-enabled', newState.toString());
+            setTimeout(() => { isProcessing = false; }, 300);
+        });
 
-            // 300ms 후 다시 클릭 가능하도록
-            setTimeout(() => {
-                isProcessing = false;
-            }, 300);
+        // 전역 상태 변경 감지 (다른 모듈에서 변경 시 UI 동기화)
+        window.addEventListener('prayer-cycle-state-changed', (e) => {
+            updatePrayerToggleButton(e.detail.enabled);
         });
 
         console.log('기도팝업 토글 버튼 초기화 완료');
     };
 
-    // 기도팝업 토글 기능
+    // 기도팝업 토글 기능 (사용자 토글에 의한 수동 조작)
     const togglePrayerPopup = (enabled) => {
-        if (!window.prayerPopupManager) {
-            console.log('기도팝업 매니저를 찾을 수 없습니다.');
-            return;
-        }
-
-        if (enabled) {
-            // 기도팝업 활성화
-            if (window.prayerPopupManager.isRunning) {
-                window.prayerPopupManager.resume();
-                console.log('기도팝업 순환 재개됨');
-            } else {
-                window.prayerPopupManager.startRotation();
-                console.log('기도팝업 순환 시작됨');
-            }
-        } else {
-            // 기도팝업 비활성화
-            window.prayerPopupManager.pause();
-            window.prayerPopupManager.closeCurrentPopup();
-            console.log('기도팝업 순환 일시정지됨');
+        if (window.prayerPopupManager) {
+            window.prayerPopupManager.toggle(enabled);
         }
     };
 
@@ -150,18 +128,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const monitorPrayerPopupStatus = () => {
         if (!window.prayerPopupManager) return;
 
-        const isRunning = window.prayerPopupManager.isRunning && !window.prayerPopupManager.isPaused;
+        const isEnabled = window.prayerPopupManager.isEnabled;
         const isInDetailMode = window.missionaryMapInstance &&
             (window.missionaryMapInstance.state.fixedCountry ||
                 window.missionaryMapInstance.state.fixedPresbytery);
 
-        // 국가별/노회별 모드에서는 버튼을 비활성화 상태로 표시
+        // 국가별/노회별 모드에서는 버튼을 비활성화(정지) 상태로 표시하되, 
+        // 사용자 설정(isEnabled)은 유지함 (여기서는 시각적 상태만 업데이트)
         if (isInDetailMode) {
             updatePrayerToggleButton(false);
         } else {
-            // 현재 실제 상태에 따라 버튼 업데이트
-            const shouldBeEnabled = localStorage.getItem('prayer-popup-enabled') !== 'false';
-            updatePrayerToggleButton(shouldBeEnabled && isRunning);
+            // 실제 활성화 여부와 사용자 설정을 모두 고려하여 버튼 상태 결정
+            updatePrayerToggleButton(isEnabled && window.prayerPopupManager.isRunning && !window.prayerPopupManager.isPaused);
         }
     };
 
@@ -355,6 +333,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     throw new Error('Firebase Storage가 초기화되지 않았습니다.');
                 }
 
+                const defaultNewsletterPrayer = window.DataManager?.state?.settings?.phrases?.newsletterDefaultPrayer || '현지 정착과 건강을 위해';
+
                 const fileName = `newsletters/${name}_${Date.now()}.pdf`;
                 const fileRef = storageRef.child(fileName);
                 const snapshot = await fileRef.put(file);
@@ -365,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (db) {
                     await db.ref('newsletters').push({
                         name: name,
-                        prayer: prayer || '현지 정착과 건강을 위해',
+                        prayer: prayer || defaultNewsletterPrayer,
                         date: date || new Date().toISOString().split('T')[0],
                         url: downloadURL,
                         uploadedAt: new Date().toISOString()
@@ -405,12 +385,14 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!link) return;
 
             try {
+                const defaultNewsletterPrayer = window.DataManager?.state?.settings?.phrases?.newsletterDefaultPrayer || '현지 정착과 건강을 위해';
+
                 // Firestore에 링크 정보 저장
                 const firestore = window.firebase?.firestore();
                 if (firestore) {
                     await firestore.collection('newsletters').add({
                         missionaryName: name,
-                        summary: prayer || '현지 정착과 건강을 위해',
+                        summary: prayer || defaultNewsletterPrayer,
                         date: date || new Date().toISOString().split('T')[0],
                         url: link,
                         createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),

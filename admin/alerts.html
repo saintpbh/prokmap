@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>긴급 알림 송출 - 선교사 관리 시스템</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fas fa-globe"></i> 선교사 관리 시스템</h1>
+        <div class="user-info">
+            <span class="user-email" id="userEmail">loading...</span>
+            <button id="logoutBtn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i> 로그아웃
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
+                <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
+                <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="report-upload.html"><i class="fas fa-file-alt"></i> 소식 일괄 등록</a></li>
+                <li><a href="prok-integration.html"><i class="fas fa-share-square"></i> 총회 게시판 업로드</a></li>
+                <li><a href="alerts.html" class="active"><i class="fas fa-exclamation-triangle"></i> 긴급 알림 송출</a></li>
+                <li><a href="supporters.html"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+                <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+                <li><a href="certificates.html"><i class="fas fa-certificate"></i> 증명서 발급</a></li>
+                <li><a href="communications.html"><i class="fas fa-envelope"></i> 연락하기</a></li>
+                <li><a href="inquiries.html"><i class="fas fa-question-circle"></i> 문의 관리</a></li>
+                <li><a href="admins.html"><i class="fas fa-user-shield"></i> 관리 권한 설정</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h2 style="margin-bottom: 2rem;"><i class="fas fa-broadcast-tower"></i> 긴급 알림 송출</h2>
+
+            <div class="card" style="border-left: 5px solid #e74c3c;">
+                <div class="card-header">
+                    <h3 class="card-title">🚨 실시간 긴급 공지 송출</h3>
+                </div>
+                <div style="padding: 1rem;">
+                    <p style="margin-bottom: 1.5rem; color: #666; line-height: 1.6;">
+                        여기에서 입력한 메시지는 메인 지도의 상단 안내 문구 영역에 <strong>크고 눈에 띄게</strong> 즉시 표시됩니다.<br>
+                        비상 상황이나 중요한 안내 사항이 있을 때 사용해 주세요.
+                    </p>
+
+                    <div class="form-group">
+                        <label class="form-label">알림 메시지 내용</label>
+                        <textarea id="emergencyAlertInput" class="form-textarea"
+                            placeholder="송출할 긴급 메시지를 입력하세요... (예: 📢 현지 비상 상황으로 인해 잠시 지도가 업데이트 중입니다.)"
+                            rows="4"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn btn-danger" onclick="broadcastAlert()" style="flex: 2; padding: 1rem;">
+                            <i class="fas fa-broadcast-tower"></i> 실시간 송출 시작
+                        </button>
+                        <button class="btn" onclick="clearAlert()"
+                            style="flex: 1; padding: 1rem; background: #95a5a6; color: white;">
+                            <i class="fas fa-times"></i> 송출 해제 (삭제)
+                        </button>
+                    </div>
+
+                    <div id="alertStatus"
+                        style="margin-top: 2rem; padding: 1.5rem; background: #fff5f5; border: 1px dashed #e74c3c; border-radius: 8px; display: none;">
+                        <h4 style="color: #e74c3c; margin-bottom: 0.5rem;"><i class="fas fa-signal"></i> 현재 방송 중인 내용
+                        </h4>
+                        <div id="currentAlertText" style="font-size: 1.2rem; font-weight: bold; color: #c0392b;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="../js/firebase-config.js"></script>
+
+    <!-- Admin Common Script -->
+    <script src="js/common.js"></script>
+
+    <script>
+        // 초기화 및 리스너 설정
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && adminAuth.allowedEmails.includes(user.email)) {
+                initEmergencyAlertListener();
+            }
+        });
+
+        function initEmergencyAlertListener() {
+            const db = firebase.database();
+            db.ref('settings/emergencyAlert').on('value', snapshot => {
+                const alertText = snapshot.val();
+                const statusEl = document.getElementById('alertStatus');
+                const textEl = document.getElementById('currentAlertText');
+                const inputEl = document.getElementById('emergencyAlertInput');
+
+                if (alertText) {
+                    statusEl.style.display = 'block';
+                    textEl.textContent = alertText;
+                    inputEl.value = alertText;
+                } else {
+                    statusEl.style.display = 'none';
+                    // inputEl.value = ''; // 입력창은 비우지 않음 (재송출 편의를 위해)
+                }
+            });
+        }
+
+        async function broadcastAlert() {
+            const text = document.getElementById('emergencyAlertInput').value.trim();
+            if (!text) {
+                AdminUtils.showToast('공지할 내용을 입력해주세요.', 'warning');
+                return;
+            }
+
+            try {
+                await firebase.database().ref('settings/emergencyAlert').set(text);
+                AdminUtils.showToast('긴급 알림이 즉시 송출되었습니다.', 'success');
+            } catch (error) {
+                console.error('알림 송출 오류:', error);
+                AdminUtils.showToast('알림 송출에 실패했습니다.', 'error');
+            }
+        }
+
+        async function clearAlert() {
+            try {
+                await firebase.database().ref('settings/emergencyAlert').remove();
+                AdminUtils.showToast('긴급 알림이 해제되었습니다.', 'success');
+            } catch (error) {
+                console.error('알림 해제 오류:', error);
+                AdminUtils.showToast('알림 해제에 실패했습니다.', 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>

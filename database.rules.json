@@ -1,0 +1,35 @@
+{
+    "rules": {
+        "admins": {
+            ".read": "auth != null",
+            ".write": "root.child('admins').child(auth.token.email.replace('.', ',')).exists() || (auth != null && (auth.token.email == 'saintpbh@gmail.com' || auth.token.email == 'prok.oikos@gmail.com'))"
+        },
+        "missionaries": {
+            ".read": true,
+            ".write": "root.child('admins').child(auth.token.email.replace('.', ',')).exists() || (auth != null && (auth.token.email == 'saintpbh@gmail.com' || auth.token.email == 'prok.oikos@gmail.com'))",
+            ".indexOn": [
+                "name"
+            ]
+        },
+        "newsletters": {
+            ".read": true,
+            ".write": "root.child('admins').child(auth.token.email.replace('.', ',')).exists() || (auth != null && (auth.token.email == 'saintpbh@gmail.com' || auth.token.email == 'prok.oikos@gmail.com'))"
+        },
+        "prayers": {
+            ".read": true,
+            ".write": "root.child('admins').child(auth.token.email.replace('.', ',')).exists() || (auth != null && (auth.token.email == 'saintpbh@gmail.com' || auth.token.email == 'prok.oikos@gmail.com'))"
+        },
+        "settings": {
+            ".read": true,
+            ".write": "root.child('admins').child(auth.token.email.replace('.', ',')).exists() || (auth != null && (auth.token.email == 'saintpbh@gmail.com' || auth.token.email == 'prok.oikos@gmail.com'))"
+        },
+        "supporters": {
+            ".read": "auth != null",
+            ".write": "root.child('admins').child(auth.token.email.replace('.', ',')).exists() || (auth != null && (auth.token.email == 'saintpbh@gmail.com' || auth.token.email == 'prok.oikos@gmail.com'))"
+        },
+        "emergency_alert": {
+            ".read": true,
+            ".write": "root.child('admins').child(auth.token.email.replace('.', ',')).exists() || (auth != null && (auth.token.email == 'saintpbh@gmail.com' || auth.token.email == 'prok.oikos@gmail.com'))"
+        }
+    }
+}

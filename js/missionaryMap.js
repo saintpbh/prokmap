@@ -71,6 +71,7 @@ window.MissionaryMap = class MissionaryMap {
     }
 
     init() {
+        this.fetchSettings();
         this.initMap();
         this.initEventListeners();
         this.fetchData();
@@ -170,6 +171,72 @@ window.MissionaryMap = class MissionaryMap {
         document.addEventListener('fullscreenchange', () => this.toggleFullscreenButtons());
     }
 
+    fetchSettings() {
+        const db = window.firebase.database();
+
+        // Settings 실시간 리스너 설정
+        db.ref('settings').on('value', snapshot => {
+            const settings = snapshot.val();
+            if (!settings) return;
+
+            console.log('missionaryMap: 시스템 설정 업데이트 수신');
+
+            // Geographic Data 업데이트 (위경도 및 국기)
+            if (settings.geographicData) {
+                const geo = settings.geographicData;
+                Object.keys(geo).forEach(country => {
+                    if (geo[country].lat !== undefined && geo[country].lng !== undefined) {
+                        this.constants.LATLNGS[country] = [geo[country].lat, geo[country].lng];
+                    }
+                    if (geo[country].flag) {
+                        this.constants.COUNTRY_FLAGS[country] = geo[country].flag;
+                    }
+                });
+                console.log('missionaryMap: 지리 데이터(위경도/국기) 동적 업데이트 완료');
+            }
+
+            // Map Config 업데이트
+            if (settings.mapConfig) {
+                Object.assign(this.constants, settings.mapConfig);
+                console.log('missionaryMap: 맵 환경 설정 동적 업데이트 완료');
+            }
+
+            // 긴급 알림 (Emergency Alert) 처리
+            this.handleEmergencyAlert(settings.emergencyAlert);
+
+            // 설정 변경 후 데이터가 이미 있다면 재렌더링 시도
+            if (this.state.missionaries.length > 0) {
+                this.processData(this.state.missionaries);
+                this.renderAll();
+            }
+        });
+    }
+
+    handleEmergencyAlert(alertText) {
+        const instructionArea = document.querySelector('.map-instruction-area') ||
+            document.querySelector('.instruction-text'); // Selector may vary
+
+        // Find or create emergency alert element
+        let alertEl = document.getElementById('emergency-alert-overlay');
+
+        if (alertText) {
+            if (!alertEl) {
+                alertEl = document.createElement('div');
+                alertEl.id = 'emergency-alert-overlay';
+                alertEl.className = 'emergency-alert-active';
+                document.body.appendChild(alertEl);
+            }
+            alertEl.innerHTML = `<span class="alert-icon">⚠️</span> ${alertText}`;
+            alertEl.style.display = 'block';
+
+            // Optional: Hide regular instructions if they interfere
+            if (instructionArea) instructionArea.style.opacity = '0.3';
+        } else {
+            if (alertEl) alertEl.style.display = 'none';
+            if (instructionArea) instructionArea.style.opacity = '1';
+        }
+    }
+
     fetchData() {
         console.log('missionaryMap: Firebase에서 데이터 로딩 시작...');
 
@@ -183,29 +250,52 @@ window.MissionaryMap = class MissionaryMap {
         // missionaries 데이터 실시간 리스너 설정
         db.ref('missionaries').on('value', snapshot => {
             console.log('missionaryMap: missionaries 데이터 실시간 업데이트');
-            const missionaries = [];
+            const rawMissionaries = [];
             snapshot.forEach(child => {
                 const data = child.val();
-                if (data && data.name && data.name.trim() !== '') {
-                    // 모든 필드를 포함하여 데이터 추가
-                    missionaries.push({
+                if (data && data.name && data.name.trim() !== '' && data.isActive !== false) {
+                    rawMissionaries.push({
                         ...data,
-                        _id: child.key, // Firebase 키를 ID로 사용
-                        name: data.name.trim(),
-                        country: data.country || '',
-                        city: data.city || '',
-                        presbytery: data.presbytery || '',
-                        organization: data.organization || '',
-                        lastUpdate: data.lastUpdate || '',
-                        summary: data.summary || '', // 최근 뉴스레터 요약
-                        prayerTopic: data.prayerTopic || '', // 기도제목
-                        lat: data.lat || null,
-                        lng: data.lng || null
+                        _id: child.key,
+                        _normalizedName: window.normalizeName ? window.normalizeName(data.name) : data.name.replace(/\s+/g, '').trim()
                     });
                 }
             });
 
-            console.log(`missionaryMap: ${missionaries.length}명의 선교사 데이터 로드됨`);
+            // 중복 제거 (이름 공백 차이 등 해결)
+            const dedupMap = new Map();
+            rawMissionaries.forEach(item => {
+                const key = item._normalizedName;
+                if (!dedupMap.has(key)) {
+                    dedupMap.set(key, item);
+                } else {
+                    const existing = dedupMap.get(key);
+                    const existingTime = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+                    const itemTime = item.updatedAt ? new Date(item.updatedAt).getTime() : 0;
+
+                    if (itemTime > existingTime) {
+                        console.log(`MissionaryMap: 중복 데이터 감지(${item.name}), 최신 데이터로 교체`);
+                        dedupMap.set(key, item);
+                    }
+                }
+            });
+
+            const missionaries = Array.from(dedupMap.values()).map(data => ({
+                ...data,
+                name: data.name.trim(),
+                country: data.country || '',
+                city: data.city || '',
+                presbytery: data.presbytery || '',
+                organization: data.organization || '',
+                lastUpdate: data.lastUpdate || '',
+                summary: data.summary || '',
+                prayerTopic: data.prayerTopic || '',
+                summaryPrayer: data.summaryPrayer || '',
+                lat: data.lat || null,
+                lng: data.lng || null
+            }));
+
+            console.log(`missionaryMap: ${missionaries.length}명의 선교사 데이터 로드됨 (중복 ${rawMissionaries.length - missionaries.length}명 제외)`);
             console.log('로드된 선교사 목록:', missionaries.map(m => `${m.name} (${m.country})`));
 
             // DataManager에 데이터 동기화 (검색 기능 등이 사용할 수 있도록)
@@ -223,6 +313,19 @@ window.MissionaryMap = class MissionaryMap {
             this.processData(missionaries);
             this.renderAll();
             this.startIntervals();
+
+            // 기도 팝업 매니저에 최신 데이터 전달 (실시간 반영을 위해 추가)
+            if (window.prayerPopupManager && typeof window.prayerPopupManager.updateMissionaries === 'function') {
+                window.prayerPopupManager.updateMissionaries(this.state.missionaries);
+            }
+
+            // 상세 정보창 실시간 리프레시 (열려있는 경우)
+            if (window.refreshDetailPopupIfOpen) {
+                window.refreshDetailPopupIfOpen();
+            }
+            if (window.MobileDetailPopup && window.MobileDetailPopup.refreshIfOpen) {
+                window.MobileDetailPopup.refreshIfOpen();
+            }
         });
 
         // news 데이터 실시간 리스너 설정
@@ -243,6 +346,12 @@ window.MissionaryMap = class MissionaryMap {
         // 선교사 데이터를 최근 뉴스레터 날짜 순으로 정렬
         this.state.missionaries = data.filter(item => item.name && item.country);
 
+        // 통계 객체 초기화 (중복 축적 방지)
+        this.state.missionaryInfo = {};
+        this.state.countryStats = {};
+        this.state.presbyteryStats = {};
+        this.state.presbyteryMembers = {};
+
         // 최근 뉴스레터 날짜 순으로 정렬 (최신이 먼저)
         this.state.missionaries.sort((a, b) => {
             const dateA = a.lastUpdate ? new Date(a.lastUpdate) : new Date(0);
@@ -251,7 +360,11 @@ window.MissionaryMap = class MissionaryMap {
         });
 
         this.state.missionaries.forEach(item => {
-            this.state.missionaryInfo[item.name] = item;
+            // 정렬된 순서(최신순)대로 최초 등록 -> 최신 데이터 유지
+            if (!this.state.missionaryInfo[item.name]) {
+                this.state.missionaryInfo[item.name] = item;
+            }
+
             if (item.country) {
                 this.state.countryStats[item.country] = this.state.countryStats[item.country] || { count: 0, names: [], cities: [] };
                 this.state.countryStats[item.country].count++;
@@ -363,12 +476,16 @@ window.MissionaryMap = class MissionaryMap {
                 const boldClass = isRecent ? ' recent-bold' : '';
                 const entryClass = autoplayMode === 'fixed' ? `missionary-entry${boldClass}` : `popup-list ${boldClass}`;
 
-                // 기도제목을 최근 뉴스레터의 요약 필드에서 가져오기
-                const prayerTopic = info.summary && info.summary.trim() !== ''
-                    ? info.summary
+                // 기도제목 표시 우선순위 로직 변경 (요청사항 반영)
+                // 1. summaryPrayer (맵 순환용 요약 제목)
+                // 2. prayerTopic (현재 기도제목)
+                // 3. summary (뉴스레터 요약 - 레거시)
+
+                let prayerTopic = info.summaryPrayer && info.summaryPrayer.trim() !== ''
+                    ? info.summaryPrayer
                     : (info.prayerTopic && info.prayerTopic.trim() !== ''
                         ? info.prayerTopic
-                        : '');
+                        : (info.summary && info.summary.trim() !== '' ? info.summary : ''));
 
                 // 선교사 ID를 data 속성에 추가 (마커 매핑용)
                 const missionaryId = info._id || `missionary_${name}`;
@@ -909,7 +1026,7 @@ window.MissionaryMap = class MissionaryMap {
                 window.showDetailPopup(
                     missionary.name,
                     latlng,
-                    this.missionaries,
+                    this.state.missionaryInfo,
                     this.elements
                 );
             }
@@ -969,7 +1086,7 @@ window.MissionaryMap = class MissionaryMap {
                     window.showDetailPopup(
                         missionary.name,
                         missionaryLatlng,
-                        this.missionaries,
+                        this.state.missionaryInfo,
                         this.elements
                     );
                 }
@@ -1558,12 +1675,14 @@ window.MissionaryMap = class MissionaryMap {
                 const isRecent = window.isRecent(missionary.lastUpdate);
                 const recentIcon = isRecent ? ' <span class="recent-badge" title="최근 소식">📰✨</span>' : '';
 
-                // 기도제목을 최근 뉴스레터의 요약 필드에서 가져오기 (요약이 있으면 요약, 없으면 기도제목)
-                const prayerTopic = missionary.summary && missionary.summary.trim() !== ''
-                    ? missionary.summary
-                    : (missionary.prayerTopic && missionary.prayerTopic.trim() !== ''
-                        ? missionary.prayerTopic
-                        : '기도제목 정보 없음');
+                // 기도제목 우선순위 변경: prayerTopic > prayer > summary
+                const prayerTopic = (missionary.prayerTopic && missionary.prayerTopic.trim() !== '')
+                    ? missionary.prayerTopic
+                    : (missionary.prayer && missionary.prayer.trim() !== ''
+                        ? missionary.prayer
+                        : (missionary.summary && missionary.summary.trim() !== ''
+                            ? missionary.summary
+                            : '기도제목 정보 없음'));
 
                 const popupHTML = `
                     <div class="missionary-popup-content">

@@ -26,66 +26,46 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <ul class="sidebar-menu">
-                <li>
-                    <a href="index.html" class="active">
-                        <i class="fas fa-chart-line"></i>
-                        대시보드
-                    </a>
-                </li>
-                <li>
-                    <a href="missionaries.html">
-                        <i class="fas fa-users"></i>
-                        선교사 관리
-                    </a>
-                </li>
-                <li>
-                    <a href="newsletters.html">
-                        <i class="fas fa-newspaper"></i>
-                        뉴스레터 관리
-                    </a>
-                </li>
-                <li>
-                    <a href="prayers.html">
-                        <i class="fas fa-praying-hands"></i>
-                        기도 제목
-                    </a>
-                </li>
-                <li>
-                    <a href="supporters.html">
-                        <i class="fas fa-hand-holding-heart"></i>
-                        후원자 관리
-                    </a>
-                </li>
-                <li>
-                    <a href="groups.html">
-                        <i class="fas fa-layer-group"></i>
-                        그룹 관리
-                    </a>
-                </li>
-                <li>
-                    <a href="certificates.html">
-                        <i class="fas fa-certificate"></i>
-                        증명서 발급
-                    </a>
-                </li>
-                <li>
-                    <a href="communications.html">
-                        <i class="fas fa-envelope"></i>
-                        연락하기
-                    </a>
-                </li>
-                <li>
-                    <a href="inquiries.html">
-                        <i class="fas fa-question-circle"></i>
-                        문의 관리
-                    </a>
-                </li>
+                <li><a href="index.html" class="active"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
+                <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
+                <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="report-upload.html"><i class="fas fa-file-alt"></i> 소식 일괄 등록</a></li>
+                <li><a href="prok-integration.html"><i class="fas fa-share-square"></i> 총회 게시판 업로드</a></li>
+                <li><a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> 긴급 알림 송출</a></li>
+                <li><a href="supporters.html"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+                <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+                <li><a href="certificates.html"><i class="fas fa-certificate"></i> 증명서 발급</a></li>
+                <li><a href="communications.html"><i class="fas fa-envelope"></i> 연락하기</a></li>
+                <li><a href="inquiries.html"><i class="fas fa-question-circle"></i> 문의 관리</a></li>
+                <li><a href="admins.html"><i class="fas fa-user-shield"></i> 관리 권한 설정</a></li>
             </ul>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
             <h2 style="margin-bottom: 2rem;">📊 대시보드</h2>
+
+            <!-- Quick Actions -->
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <button class="btn btn-primary" onclick="window.location.href='missionaries.html'"
+                    style="padding: 1.5rem;">
+                    <i class="fas fa-user-plus" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                    선교사 추가
+                </button>
+                <button class="btn btn-success" onclick="window.location.href='newsletters.html'"
+                    style="padding: 1.5rem;">
+                    <i class="fas fa-file-upload" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                    뉴스레터 업로드
+                </button>
+                <button class="btn" onclick="window.location.href='../index.html'" target="_blank"
+                    style="padding: 1.5rem; background: #9B59B6; color: white;">
+                    <i class="fas fa-external-link-alt"
+                        style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                    지도 보기
+                </button>
+            </div>
 
             <!-- Stats Cards -->
             <div
@@ -131,65 +111,48 @@
                 </div>
             </div>
 
-            <!-- Recent Newsletters (Last 3 months) -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">📰 최근 3개월 뉴스레터</h3>
-                    <button class="btn btn-primary" onclick="window.location.href='newsletters.html'">
-                        <i class="fas fa-plus"></i> 뉴스레터 업로드
-                    </button>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+
+                <!-- Recent Newsletters (Last 3 months) -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📰 최근 3개월 뉴스레터</h3>
+                        <button class="btn btn-primary" onclick="window.location.href='newsletters.html'">
+                            <i class="fas fa-plus"></i> 뉴스레터 업로드
+                        </button>
+                    </div>
+                    <div id="recentNewsletters">
+                        <div class="spinner"></div>
+                    </div>
                 </div>
-                <div id="recentNewsletters">
-                    <div class="spinner"></div>
+
+                <!-- Recent Prayer Requests (Latest 10) -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🙏 최근 기도요청 (10명)</h3>
+                        <button class="btn btn-primary" onclick="window.location.href='prayers.html'">
+                            <i class="fas fa-praying-hands"></i> 전체 보기
+                        </button>
+                    </div>
+                    <div id="recentPrayerRequests">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+
+                <!-- Recent Updates -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📝 최근 업데이트</h3>
+                        <button class="btn btn-primary" onclick="window.location.href='missionaries.html'">
+                            <i class="fas fa-plus"></i> 선교사 추가
+                        </button>
+                    </div>
+                    <div id="recentUpdates">
+                        <div class="spinner"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Recent Prayer Requests (Latest 10) -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">🙏 최근 기도요청 (10명)</h3>
-                    <button class="btn btn-primary" onclick="window.location.href='prayers.html'">
-                        <i class="fas fa-praying-hands"></i> 전체 보기
-                    </button>
-                </div>
-                <div id="recentPrayerRequests">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-
-            <!-- Recent Updates -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">📝 최근 업데이트</h3>
-                    <button class="btn btn-primary" onclick="window.location.href='missionaries.html'">
-                        <i class="fas fa-plus"></i> 선교사 추가
-                    </button>
-                </div>
-                <div id="recentUpdates">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
-                <button class="btn btn-primary" onclick="window.location.href='missionaries.html'"
-                    style="padding: 1.5rem;">
-                    <i class="fas fa-user-plus" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
-                    선교사 추가
-                </button>
-                <button class="btn btn-success" onclick="window.location.href='newsletters.html'"
-                    style="padding: 1.5rem;">
-                    <i class="fas fa-file-upload" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
-                    뉴스레터 업로드
-                </button>
-                <button class="btn" onclick="window.location.href='../index.html'" target="_blank"
-                    style="padding: 1.5rem; background: #9B59B6; color: white;">
-                    <i class="fas fa-external-link-alt"
-                        style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
-                    지도 보기
-                </button>
-            </div>
         </main>
     </div>
 
@@ -329,7 +292,11 @@
                             <tr>
                                 <td><strong>${m.name}</strong></td>
                                 <td>${m.country || '-'}${m.city ? ` / ${m.city}` : ''}</td>
-                                <td style="max-width: 300px;">${m.summary || m.prayerTopic || '-'}</td>
+                                <td style="max-width: 300px;">
+                                    ${((m.summary || m.prayerTopic || '-').length > 50)
+                    ? (m.summary || m.prayerTopic).substring(0, 50) + '...'
+                    : (m.summary || m.prayerTopic || '-')}
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -349,6 +316,7 @@
                 setTimeout(initDashboard, 500);
             }
         });
+
     </script>
 </body>
 

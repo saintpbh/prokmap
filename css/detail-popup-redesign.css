@@ -298,6 +298,7 @@
     line-height: 1.6;
     color: var(--popup-text-dark);
     margin: 0;
+    white-space: pre-wrap;
 }
 
 /* 뉴스레터 섹션 */
@@ -317,6 +318,7 @@
     font-size: 13px;
     line-height: 1.5;
     color: var(--popup-text-dark);
+    white-space: pre-wrap;
 }
 
 /* 하단 액션 버튼 그룹 */

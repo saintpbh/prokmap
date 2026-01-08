@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선교사 정보 업데이트</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/themes/light.css" />
+    <link rel="stylesheet" href="admin/css/admin.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+        }
+
+        .update-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 20px;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .readonly-field {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #6c757d;
+        }
+
+        .tab-content {
+            padding: 1.5rem 0.5rem;
+        }
+
+        .section-header {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+            margin: 1.5rem 0 1rem 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-header i {
+            margin-right: 0.5rem;
+            color: #3498db;
+        }
+
+        /* Family Table */
+        .family-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        .family-table th,
+        .family-table td {
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+            vertical-align: middle;
+        }
+
+        .family-table th {
+            background-color: #f8f9fa;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Mobile-friendly table or stack */
+            .family-table,
+            .family-table thead,
+            .family-table tbody,
+            .family-table th,
+            .family-table td,
+            .family-table tr {
+                display: block;
+            }
+
+            .family-table thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            .family-table tr {
+                border: 1px solid #ccc;
+                margin-bottom: 1rem;
+            }
+
+            .family-table td {
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+            }
+
+            .family-table td:before {
+                position: absolute;
+                top: 6px;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+            }
+
+            .family-table td:nth-of-type(1):before {
+                content: "이름";
+            }
+
+            .family-table td:nth-of-type(2):before {
+                content: "관계/성별";
+            }
+
+            .family-table td:nth-of-type(3):before {
+                content: "생년월일";
+            }
+
+            .family-table td:nth-of-type(4):before {
+                content: "연락처/이메일";
+            }
+
+            .family-table td:nth-of-type(5):before {
+                content: "관리";
+            }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="update-container">
+        <div class="glass-container">
+            <div class="card-header" style="margin-bottom: 1.5rem;">
+                <h2 class="card-title" style="margin: 0;"><i class="fas fa-user-edit"></i> 선교사 정보 업데이트</h2>
+                <div style="font-size: 0.9em; color: #666; margin-top: 0.5rem;">
+                    * 변경하신 내용은 관리자 검토 후 사이트에 반영될 수 있습니다.
+                </div>
+            </div>
+
+            <div id="loadingMessage" style="text-align: center; padding: 3rem;">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem;">정보를 안전하게 불러오는 중입니다...</p>
+            </div>
+
+            <div id="errorMessage" style="display: none; text-align: center; color: #dc3545; padding: 3rem;">
+                <i class="fas fa-lock fa-3x" style="margin-bottom: 1rem;"></i>
+                <h3>접근 권한이 없거나 만료된 링크입니다.</h3>
+                <p>관리자에게 새로운 링크를 요청해주세요.</p>
+            </div>
+
+            <form id="updateForm" style="display: none;">
+                <input type="hidden" id="missionaryId">
+                <input type="hidden" id="accessKey">
+
+                <!-- 기본 정보 (Read Only) -->
+                <div
+                    style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #4A90E2;">
+                    <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+                        <div>
+                            <span style="font-weight: bold; color: #4A90E2;">이름:</span>
+                            <span id="nameDisplay" style="font-size: 1.1em; margin-right: 1rem;">-</span>
+                        </div>
+                        <div>
+                            <span style="font-weight: bold; color: #4A90E2;">국가/도시:</span>
+                            <span id="locationDisplay">-</span>
+                        </div>
+                        <div>
+                            <span style="font-weight: bold; color: #4A90E2;">파송 교단/단체:</span>
+                            <span id="orgDisplay">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <sl-tab-group>
+                    <sl-tab slot="nav" panel="ministry-report">📑 사역 보고</sl-tab>
+                    <sl-tab slot="nav" panel="ministry-intro">📢 사역 소개</sl-tab>
+                    <sl-tab slot="nav" panel="personal">👤 개인정보 변경</sl-tab>
+
+                    <!-- 1. 사역 보고 탭 -->
+                    <sl-tab-panel name="ministry-report">
+                        <div class="tab-content">
+                            <div class="section-header"><i class="fas fa-pray"></i> 기도제목</div>
+
+                            <div class="form-group">
+                                <label class="form-label">📌 맵 순환용 제목 (요약)</label>
+                                <input type="text" id="summaryPrayer" class="form-input"
+                                    placeholder="지도 팝업에 표시될 짧은 기도제목 (50자 내외)">
+                                <small style="color: #666;">예: 현지 지도자 훈련과 건축 사역의 안전을 위해 기도해주세요.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">🙏 현재 기도 제목 (상세창)</label>
+                                <textarea id="prayerTopic" class="form-textarea" rows="4"
+                                    placeholder="상세한 기도제목을 번호 매겨 적어주세요."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">🙏 기도 요청 (기본/상시)</label>
+                                <textarea id="prayer" class="form-textarea" rows="3"
+                                    placeholder="기본적으로 노출될 기도 제목을 입력하세요."></textarea>
+                            </div>
+
+                            <div class="form-group"
+                                style="background: #fff8ee; padding: 10px; border-radius: 5px; border: 1px solid #ffe8cc;">
+                                <label class="form-label">📰 최근 소식 요약</label>
+                                <textarea id="summary" class="form-textarea" rows="3"
+                                    placeholder="최근 선교 소식을 짧게 요약해주세요. (뉴스레터 요약 등)"></textarea>
+                            </div>
+
+                            <div class="section-header"><i class="fas fa-bullhorn"></i> 사역 보고서</div>
+
+                            <div class="form-group">
+                                <label class="form-label">최근 사역 보고</label>
+                                <textarea id="ministryReport" class="form-textarea" rows="6"
+                                    placeholder="최근 사역 내용과 소식을 자유롭게 나눠주세요."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">관련 자료 업로드</label>
+                                <div
+                                    style="border: 2px dashed #ddd; padding: 1.5rem; text-align: center; border-radius: 8px;">
+                                    <input type="file" id="reportFiles" class="form-input" multiple
+                                        accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png">
+                                    <p style="margin: 0.5rem 0 0; color: #666; font-size: 0.9em;">
+                                        뉴스레터(PDF), 사역보고서(DOC), 사진(JPG) 등을 올릴 수 있습니다.<br>
+                                        (최대 5개 파일)
+                                    </p>
+                                </div>
+                                <div id="fileList" style="margin-top: 0.5rem;"></div>
+                            </div>
+                        </div>
+                    </sl-tab-panel>
+
+                    <!-- 2. 사역 소개 탭 (New) -->
+                    <sl-tab-panel name="ministry-intro">
+                        <div class="tab-content">
+                            <div class="section-header"><i class="fas fa-lightbulb"></i> 사역 비전 및 소개</div>
+
+                            <div class="form-group">
+                                <label class="form-label">사역 소개 및 비전</label>
+                                <textarea id="ministryVision" class="form-textarea" rows="8"
+                                    placeholder="선교 사역의 핵심 비전과 주요 사역 내용을 소개해주세요."></textarea>
+                            </div>
+
+                            <div class="section-header"><i class="fas fa-images"></i> 사역 사진 (지도 표시용)</div>
+                            <div class="form-group">
+                                <label class="form-label">사역 사진 업로드</label>
+                                <input type="file" id="ministryPhoto" class="form-input" accept="image/*" multiple>
+                                <small style="color:#666; display:block;">최대 3장. 새로 선택하면 기존 사진이 교체됩니다.<br>이 사진들은 지도 팝업과
+                                    선교사 상세 정보에 노출됩니다.</small>
+                            </div>
+
+                            <div class="section-header"><i class="fab fa-youtube"></i> 사역 동영상</div>
+                            <div class="form-group">
+                                <label class="form-label">동영상 링크</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <span
+                                        style="display: inline-flex; align-items: center; background: #eee; padding: 0 0.8rem; border-radius: 4px; color: #555;">
+                                        <i class="fas fa-link"></i>
+                                    </span>
+                                    <input type="url" id="videoLink" class="form-input"
+                                        placeholder="YouTube 또는 Vimeo 링크 (https://...)">
+                                </div>
+                                <small style="color:#666; display:block; margin-top:0.3rem;">소개하고 싶은 사역 동영상의 링크를
+                                    입력해주세요.</small>
+                            </div>
+                        </div>
+                    </sl-tab-panel>
+
+                    <!-- 3. 개인정보 탭 -->
+                    <sl-tab-panel name="personal">
+                        <div class="tab-content">
+                            <div class="section-header"><i class="fas fa-address-book"></i> 연락처 상세 정보</div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">휴대폰 (현지)</label>
+                                    <input type="text" id="mobile" class="form-input" placeholder="예: +1 123-456-7890">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">한국 연락처</label>
+                                    <input type="text" id="koreaPhone" class="form-input"
+                                        placeholder="예: 010-1234-5678">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">교회/사무실 전화</label>
+                                    <input type="text" id="phoneChurch" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">사택 전화</label>
+                                    <input type="text" id="phoneHome" class="form-input">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">현지 주소</label>
+                                <input type="text" id="localAddress" class="form-input" placeholder="우편물 수령 가능한 주소">
+                            </div>
+
+                            <div class="section-header"><i class="fas fa-heartbeat"></i> 건강 상태</div>
+                            <div class="form-group">
+                                <label class="form-label">현재 건강 상태</label>
+                                <select id="healthStatus" class="form-select" style="width: 100%; max-width: 300px;">
+                                    <option value="healthy">💪 건강함 (양호)</option>
+                                    <option value="weak">🩹 다소 허약 (지속적 관리 필요)</option>
+                                    <option value="treatment">🏥 치료 중 (수술/입원 등)</option>
+                                    <option value="critical">🚨 위독 (긴급 기도 필요)</option>
+                                </select>
+                            </div>
+
+                            <div class="section-header" style="display: flex; justify-content: space-between;">
+                                <span><i class="fas fa-users"></i> 가족 정보</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addFamilyRow()">
+                                    <i class="fas fa-plus"></i> 가족 추가
+                                </button>
+                            </div>
+
+                            <table class="family-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 20%;">이름</th>
+                                        <th style="width: 20%;">관계/성별</th>
+                                        <th style="width: 20%;">생년월일</th>
+                                        <th style="width: 30%;">연락처/이메일</th>
+                                        <th style="width: 10%;">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="familyListBody">
+                                    <!-- JS로 동적 추가됨 -->
+                                </tbody>
+                            </table>
+
+                            <div class="section-header"><i class="fas fa-user-circle"></i> 프로필 사진</div>
+                            <div class="form-group">
+                                <label class="form-label">가족/프로필 사진</label>
+                                <input type="file" id="familyPhoto" class="form-input" accept="image/*">
+                                <small style="color:#666; display:block;">현재 프로필 사진을 교체하려면 선택하세요.</small>
+                            </div>
+                        </div>
+                    </sl-tab-panel>
+                </sl-tab-group>
+
+                <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ddd; text-align: right;">
+                    <button type="submit" class="btn btn-primary btn-lg" style="min-width: 200px;">
+                        <i class="fas fa-save"></i> 변경사항 저장하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <!-- Shoelace -->
+    <script type="module"
+        src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/shoelace-autoloader.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/update.js"></script>
+</body>
+
+</html>

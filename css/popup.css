@@ -208,6 +208,13 @@
     color: #4a5568;
     line-height: 1.5;
     font-size: 14px;
+    white-space: pre-wrap;
+}
+
+.missionary-prayer-topic,
+.prayer-topic {
+    white-space: pre-wrap;
+    line-height: 1.4;
 }
 
 /* 기도 토스트 알림 */

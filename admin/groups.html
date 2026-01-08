@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>그룹 관리 - 선교사 관리 시스템</title>
     <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/search-add.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -25,8 +26,15 @@
                 <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
                 <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
                 <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="report-upload.html"><i class="fas fa-file-alt"></i> 소식 일괄 등록</a></li>
+                <li><a href="prok-integration.html"><i class="fas fa-share-square"></i> 총회 게시판 업로드</a></li>
+                <li><a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> 긴급 알림 송출</a></li>
                 <li><a href="supporters.html"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
                 <li><a href="groups.html" class="active"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+                <li><a href="certificates.html"><i class="fas fa-certificate"></i> 증명서 발급</a></li>
+                <li><a href="communications.html"><i class="fas fa-envelope"></i> 연락하기</a></li>
+                <li><a href="inquiries.html"><i class="fas fa-question-circle"></i> 문의 관리</a></li>
+                <li><a href="admins.html"><i class="fas fa-user-shield"></i> 관리 권한 설정</a></li>
             </ul>
         </aside>
 
@@ -64,10 +72,18 @@
                     <textarea id="groupDescription" class="form-textarea" rows="2"></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">그룹 멤버 선택</label>
-                    <select id="groupMembers" class="form-select" multiple size="8">
-                    </select>
-                    <small style="color: #666;">Ctrl 키를 누른 채 클릭하여 여러 선교사를 선택</small>
+                    <label class="form-label">그룹 멤버 관리</label>
+                    <div class="search-add-container">
+                        <div id="selectedMembers" class="selected-items">
+                            <!-- Selected items will appear here -->
+                        </div>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="memberSearchInput" class="form-input" placeholder="이름으로 검색하여 추가..."
+                                autocomplete="off">
+                            <div id="memberSearchResults" class="search-results-dropdown"></div>
+                        </div>
+                    </div>
+                    <small style="color: #666; display: block; margin-top: 0.5rem;">이름을 검색하여 클릭하면 추가됩니다.</small>
                 </div>
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
                     <button type="button" class="btn" onclick="AdminUtils.closeModal('groupModal')"
@@ -86,6 +102,8 @@
     <script>
         let allGroups = [];
         let allMissionaries = [];
+        // 스크립트 전역 변수로 선택된 멤버 ID 관리
+        let selectedMemberIds = new Set();
 
         firebase.auth().onAuthStateChanged((user) => {
             if (user && adminAuth.allowedEmails.includes(user.email)) {
@@ -96,13 +114,23 @@
         async function init() {
             await Promise.all([loadGroups(), loadMissionaries()]);
             document.getElementById('groupForm').addEventListener('submit', saveGroup);
+
+            // 검색 이벤트 리스너
+            const searchInput = document.getElementById('memberSearchInput');
+            searchInput.addEventListener('input', handleMemberSearch);
+            searchInput.addEventListener('focus', handleMemberSearch);
+
+            // 외부 클릭 시 드롭다운 닫기
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-input-wrapper')) {
+                    document.getElementById('memberSearchResults').classList.remove('active');
+                }
+            });
         }
 
         async function loadMissionaries() {
             allMissionaries = await firebaseDB.getMissionaries();
-            const select = document.getElementById('groupMembers');
-            select.innerHTML = allMissionaries.filter(m => m.isActive !== false)
-                .map(m => `<option value="${m.id}">${m.name} (${m.country})</option>`).join('');
+            // 기존 select box 초기화 로직 제거됨 ('검색' 방식이므로 불필요)
         }
 
         async function loadGroups() {
@@ -150,6 +178,11 @@
             document.getElementById('groupModalTitle').textContent = '그룹 생성';
             document.getElementById('groupForm').reset();
             document.getElementById('groupId').value = '';
+
+            // 초기화
+            selectedMemberIds.clear();
+            renderSelectedMembers();
+
             AdminUtils.openModal('groupModal');
         }
 
@@ -160,21 +193,23 @@
             document.getElementById('groupId').value = id;
             document.getElementById('groupName').value = group.name || '';
             document.getElementById('groupDescription').value = group.description || '';
-            const select = document.getElementById('groupMembers');
-            Array.from(select.options).forEach(opt => {
-                opt.selected = (group.memberIds || []).includes(opt.value);
-            });
+
+            // 멤버 데이터 로드
+            selectedMemberIds.clear();
+            (group.memberIds || []).forEach(memberId => selectedMemberIds.add(memberId));
+            renderSelectedMembers();
+
             AdminUtils.openModal('groupModal');
         }
 
         async function saveGroup(e) {
             e.preventDefault();
             const id = document.getElementById('groupId').value;
-            const select = document.getElementById('groupMembers');
+            // selectedMemberIds Set을 배열로 변환하여 저장
             const data = {
                 name: document.getElementById('groupName').value.trim(),
                 description: document.getElementById('groupDescription').value.trim(),
-                memberIds: Array.from(select.selectedOptions).map(opt => opt.value),
+                memberIds: Array.from(selectedMemberIds),
                 updatedAt: new Date().toISOString()
             };
             try {
@@ -203,6 +238,79 @@
                 AdminUtils.showToast('삭제 중 오류가 발생했습니다.', 'error');
             }
         }
+
+        // --- Search & Add Logic ---
+
+        function handleMemberSearch(e) {
+            const term = e.target.value.toLowerCase().trim();
+            const resultsContainer = document.getElementById('memberSearchResults');
+
+            if (!term) {
+                resultsContainer.classList.remove('active');
+                return;
+            }
+
+            // 활성 상태이고, 이미 선택되지 않은 선교사 필터링
+            const results = allMissionaries.filter(m =>
+                m.isActive !== false &&
+                !selectedMemberIds.has(m.id) &&
+                (m.name.toLowerCase().includes(term) || (m.country && m.country.toLowerCase().includes(term)))
+            ).slice(0, 10); // 최대 10개 표시
+
+            if (results.length > 0) {
+                resultsContainer.innerHTML = results.map(m => `
+                    <div class="search-result-item" onclick="addMember('${m.id}')">
+                        <span class="name">${m.name}</span>
+                        <span class="meta">${m.country || '-'}</span>
+                    </div>
+                `).join('');
+                resultsContainer.classList.add('active');
+            } else {
+                resultsContainer.innerHTML = '<div class="search-result-item" style="cursor: default;">검색 결과가 없습니다.</div>';
+                resultsContainer.classList.add('active');
+            }
+        }
+
+        function addMember(id) {
+            selectedMemberIds.add(id);
+            renderSelectedMembers();
+
+            // 검색창 초기화 및 드롭다운 닫기
+            document.getElementById('memberSearchInput').value = '';
+            document.getElementById('memberSearchResults').classList.remove('active');
+            document.getElementById('memberSearchInput').focus();
+        }
+
+        function removeMember(id) {
+            selectedMemberIds.delete(id);
+            renderSelectedMembers();
+        }
+
+        function renderSelectedMembers() {
+            const container = document.getElementById('selectedMembers');
+            container.innerHTML = '';
+
+            selectedMemberIds.forEach(id => {
+                const member = allMissionaries.find(m => m.id === id);
+                if (member) {
+                    const el = document.createElement('div');
+                    el.className = 'selected-item';
+                    el.innerHTML = `
+                        ${member.name}
+                        <span class="remove-item" onclick="removeMember('${id}')">&times;</span>
+                    `;
+                    container.appendChild(el);
+                }
+            });
+        }
+
+        // 전역 함수 노출 (HTML onclick용)
+        window.addMember = addMember;
+        window.removeMember = removeMember;
+        window.editGroup = editGroup;
+        window.deleteGroup = deleteGroup;
+        window.saveGroup = saveGroup;
+        window.openAddGroupModal = openAddGroupModal;
     </script>
 </body>
 

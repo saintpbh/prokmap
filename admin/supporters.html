@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>후원자 관리 - 선교사 관리 시스템</title>
     <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/search-add.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -25,8 +26,15 @@
                 <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
                 <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
                 <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="report-upload.html"><i class="fas fa-file-alt"></i> 소식 일괄 등록</a></li>
+                <li><a href="prok-integration.html"><i class="fas fa-share-square"></i> 총회 게시판 업로드</a></li>
+                <li><a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> 긴급 알림 송출</a></li>
                 <li><a href="supporters.html" class="active"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
                 <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+                <li><a href="certificates.html"><i class="fas fa-certificate"></i> 증명서 발급</a></li>
+                <li><a href="communications.html"><i class="fas fa-envelope"></i> 연락하기</a></li>
+                <li><a href="inquiries.html"><i class="fas fa-question-circle"></i> 문의 관리</a></li>
+                <li><a href="admins.html"><i class="fas fa-user-shield"></i> 관리 권한 설정</a></li>
             </ul>
         </aside>
 
@@ -34,9 +42,14 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">💰 후원자 목록</h3>
-                    <button class="btn btn-primary" onclick="openAddSupporterModal()">
-                        <i class="fas fa-plus"></i> 후원자 추가
-                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" onclick="openSupportUploadModal()">
+                            <i class="fas fa-file-upload"></i> 후원 내역 업로드
+                        </button>
+                        <button class="btn btn-primary" onclick="openAddSupporterModal()">
+                            <i class="fas fa-plus"></i> 후원자 추가
+                        </button>
+                    </div>
                 </div>
 
                 <div style="margin-bottom: 1rem;">
@@ -89,10 +102,21 @@
                 </div>
 
                 <h4 style="margin-top: 1rem; margin-bottom: 1rem; color: var(--primary-color);">💵 후원 정보</h4>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label class="form-label">후원 유형</label>
+                    <div style="display: flex; gap: 1.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="radio" name="supportType" value="regular" checked> 정기 후원
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="radio" name="supportType" value="onetime"> 일시 후원
+                        </label>
+                    </div>
+                </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label class="form-label">월 후원 금액</label>
-                        <input type="number" id="monthlyAmount" class="form-input" placeholder="0">
+                        <label class="form-label">후원 금액</label>
+                        <input type="number" id="amount" class="form-input" placeholder="0">
                     </div>
                     <div class="form-group">
                         <label class="form-label">주민등록번호 (연말정산용)</label>
@@ -101,11 +125,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">후원 선교사 선택</label>
-                    <select id="supportedMissionaries" class="form-select" multiple size="5">
-                        <!-- 선교사 목록이 동적으로 채워짐 -->
-                    </select>
-                    <small style="color: #666;">Ctrl 키를 누른 채 클릭하여 여러 선교사를 선택할 수 있습니다</small>
+                    <label class="form-label">후원 선교사 관리</label>
+                    <div class="search-add-container">
+                        <div id="selectedMissionaries" class="selected-items">
+                            <!-- Selected items will appear here -->
+                        </div>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="missionarySearchInput" class="form-input"
+                                placeholder="이름으로 검색하여 추가..." autocomplete="off">
+                            <div id="missionarySearchResults" class="search-results-dropdown"></div>
+                        </div>
+                    </div>
+                    <small style="color: #666; display: block; margin-top: 0.5rem;">이름을 검색하여 클릭하면 추가됩니다.</small>
                 </div>
 
                 <div class="form-group">
@@ -126,12 +157,143 @@
         </div>
     </div>
 
+    <!-- Support Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-upload"></i> 후원 내역 일괄 업로드</h3>
+                <button class="modal-close"
+                    onclick="document.getElementById('uploadModal').classList.remove('active')">&times;</button>
+            </div>
+
+            <div class="upload-area" id="dropZone"
+                style="border: 3px dashed #ddd; padding: 2rem; text-align: center; background: #f8f9fa; border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                <i class="fas fa-file-excel" style="font-size: 3rem; color: #2ecc71; margin-bottom: 1rem;"></i>
+                <h3>엑셀 파일을 이곳에 드래그하거나 클릭하여 선택하세요</h3>
+                <p style="color: #666; margin-top: 0.5rem;">.xlsx, .xls 형식 지원</p>
+                <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;">
+            </div>
+
+            <div id="uploadLoading" style="display: none; text-align: center; padding: 3rem;">
+                <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                <p style="font-size: 1.1rem; color: #555;">파일을 분석하고 있습니다...</p>
+            </div>
+
+            <!-- Header Mapping Section -->
+            <div id="headerMappingSection" style="display: none; padding: 2rem;">
+                <h4 style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;">📊 엑셀 항목
+                    매핑</h4>
+                <p style="color: #666; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                    엑셀 파일의 각 항목이 시스템의 어떤 정보에 해당하는지 선택해주세요.<br>
+                    <small>* 정확한 매핑을 위해 각 항목을 신중하게 선택해 주세요.</small>
+                </p>
+
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label class="form-label" style="font-weight: bold;">📅 입금일자</label>
+                        <select id="mapDate" class="form-select"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="font-weight: bold;">👤 후원자 (입금자)</label>
+                        <select id="mapSupporter" class="form-select"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="font-weight: bold;">🙏 선교사/프로그램</label>
+                        <select id="mapMissionary" class="form-select"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="font-weight: bold;">💰 입금액</label>
+                        <select id="mapAmount" class="form-select"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="font-weight: bold;">💸 송금일자 (선택)</label>
+                        <select id="mapTransferDate" class="form-select"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="">(입금일자와 동일)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button type="button" class="btn" onclick="resetUploadUI()"
+                        style="background: #95a5a6; color: white; margin-right: 10px;">취소</button>
+                    <button type="button" class="btn btn-primary" id="applyMappingBtn">
+                        다음 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="previewSection" style="display: none; margin-top: 2rem;">
+                <div class="status-summary"
+                    style="display: flex; gap: 1rem; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 5px;">
+                    <div class="summary-card"
+                        style="background: #f8f9fa; padding: 1rem; border-radius: 8px; min-width: 120px;">
+                        <div style="font-size: 0.9rem; color: #666;">총 건수</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #333;" id="totalCount">-</div>
+                    </div>
+                    <div class="summary-card"
+                        style="background: #e8f5e9; padding: 1rem; border-radius: 8px; min-width: 120px;">
+                        <div style="font-size: 0.9rem; color: #2e7d32;">매칭 성공</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2e7d32;" id="matchSuccessCount">-
+                        </div>
+                    </div>
+                    <div class="summary-card"
+                        style="background: #ffebee; padding: 1rem; border-radius: 8px; min-width: 120px;">
+                        <div style="font-size: 0.9rem; color: #c62828;">선교사 미확인</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #c62828;"
+                            id="matchFailMissionaryCount">-</div>
+                    </div>
+                    <div class="summary-card"
+                        style="background: #f3e5f5; padding: 1rem; border-radius: 8px; min-width: 120px;">
+                        <div style="font-size: 0.9rem; color: #7b1fa2;">총 금액</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: #7b1fa2;" id="totalAmount">-</div>
+                    </div>
+                </div>
+
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table" style="width: 100%; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+                            <tr>
+                                <th>일자</th>
+                                <th>입금자 (엑셀)</th>
+                                <th>매칭 후원자</th>
+                                <th>선교사/프로그램 (엑셀)</th>
+                                <th>매칭 선교사</th>
+                                <th>금액</th>
+                                <th>상태</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTableBody">
+                            <!-- Rows will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="action-buttons" style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+                    <button class="btn btn-primary" id="uploadBtn" disabled
+                        style="padding: 1rem 2rem; font-size: 1.1rem;">
+                        <i class="fas fa-save"></i> 확인된 내역 저장하기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="../js/firebase-config.js"></script>
     <script src="js/common.js"></script>
-    <script src="js/supporters.js"></script>
+    <script src="js/supporters.js?v=1.2"></script>
+    <script src="js/support-upload.js?v=2.0"></script>
 </body>
 
 </html>

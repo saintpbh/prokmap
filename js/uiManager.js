@@ -294,8 +294,8 @@ const UIManager = {
             return;
         }
 
-        // 데스크탑: window.showDetailPopup 직접 호출 (detailPopup.js의 함수)
-        if (window.showDetailPopup && typeof window.showDetailPopup === 'function') {
+        // 데스크탑: window.renderDetailPopup 호출 (detailPopup.js의 UI 함수)
+        if (window.renderDetailPopup && typeof window.renderDetailPopup === 'function') {
             const missionaryInfo = this.dataManager.state.missionaryInfo || {};
             const элементы = {
                 detailPopup: this.elements.detailPopup || document.getElementById('detailPopup'),
@@ -304,10 +304,10 @@ const UIManager = {
 
             console.log('[UIManager] window.showDetailPopup 호출 중...', { name, latlngArray, elements: элементы });
 
-            // detailPopup.js의 전역 함수 호출
-            window.showDetailPopup(name, latlngArray, missionaryInfo, элементы);
+            // detailPopup.js의 UI 전용 렌더링 함수 호출
+            window.renderDetailPopup(name, latlngArray, missionaryInfo, элементы);
         } else {
-            console.error('[UIManager] window.showDetailPopup 함수를 찾을 수 없습니다.');
+            console.error('[UIManager] window.renderDetailPopup 함수를 찾을 수 없습니다.');
             // 폴백: 모던 팝업 시도
             this.showModernDetailPopup(name, latlngArray);
         }
@@ -334,8 +334,8 @@ const UIManager = {
         const missionaryInfo = this.dataManager.state.missionaryInfo;
 
         // 새로운 detailPopup 모듈 사용
-        if (window.showDetailPopup) {
-            window.showDetailPopup(name, latlngArray, missionaryInfo, elements);
+        if (window.renderDetailPopup) {
+            window.renderDetailPopup(name, latlngArray, missionaryInfo, elements);
         } else {
             // 폴백: 테스트 디자인 기반 상세 팝업 생성
             this.createTestStyleDetailPopup(name, latlngArray);
@@ -603,6 +603,9 @@ const UIManager = {
         this.elements.sidebarClose.addEventListener('click', () => this.closeSidebar());
         this.elements.sidebarOverlay.addEventListener('click', () => this.closeSidebar());
 
+        // 필터 초기화 (최초 1회 또는 매번)
+        this.initFilters();
+
         // 검색 기능 - Shoelace input 이벤트
         if (this.elements.sidebarSearch) {
             // 기존 이벤트 리스너 제거
@@ -642,6 +645,55 @@ const UIManager = {
         if (this.mapController && this.mapController.resumePrayerRotation && !this.mapController.state.fixedCountry) {
             this.mapController.resumePrayerRotation();
         }
+    },
+
+    // 필터 초기화 및 이벤트 리스너 설정
+    initFilters() {
+        const presbyterySelect = document.getElementById('filter-presbytery');
+        if (presbyterySelect) {
+            // 노회 목록 채우기
+            const presbyteries = Object.keys(this.dataManager.state.presbyteryStats || {}).sort();
+            presbyterySelect.innerHTML = presbyteries.map(p => `<sl-option value="${p}">${p}</sl-option>`).join('');
+
+            // 필터 적용 버튼 이벤트
+            const applyBtn = document.getElementById('apply-filter-btn');
+            if (applyBtn) {
+                applyBtn.addEventListener('click', () => this.applyFilters());
+            }
+        }
+    },
+
+    applyFilters() {
+        const presbyterySelect = document.getElementById('filter-presbytery');
+        const activeCheck = document.getElementById('filter-status-active');
+        const vacationCheck = document.getElementById('filter-status-vacation');
+        const retiredCheck = document.getElementById('filter-status-retired');
+
+        const criteria = {
+            presbytery: presbyterySelect ? presbyterySelect.value : null,
+            status: []
+        };
+
+        if (activeCheck && activeCheck.checked) criteria.status.push('active');
+        if (vacationCheck && vacationCheck.checked) criteria.status.push('vacation');
+        if (retiredCheck && retiredCheck.checked) criteria.status.push('returned', 'retired');
+
+        // DataManager 필터 적용
+        this.dataManager.applyFilters(criteria);
+
+        // 지도 마커 다시 그리기
+        this.renderGlobalMarkers();
+
+        // 사이드바 리스트가 열려 있다면 리스트도 갱신
+        if (this.elements.sidebarPanel.classList.contains('open')) {
+            const filteredMissionaries = this.dataManager.state.filtered.missionaries;
+            this.renderSidebarList(filteredMissionaries);
+        }
+
+        // 국가별 테이블 갱신
+        this.renderCountryTable();
+        // 노회별 테이블 갱신
+        this.renderPresbyteryTable();
     },
 
     renderSidebarList(missionaries) {

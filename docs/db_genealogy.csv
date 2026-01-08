@@ -1,0 +1,14 @@
+Platform,Path/Collection,Purpose,Fields (Major),Files Involved
+Realtime Database,missionaries/,Main registry of all missionaries,"name, country, city, lat, lng, contact, familyMembers, prayerTopic, summary, status",js/missionaryMap.js; admin/js/missionaries.js; js/update.js
+Realtime Database,supporters/,Registry of individual/group supporters,"name, phone, email, organization, address",admin/js/supporters.js; admin/js/support-upload.js
+Realtime Database,support_history/,Transaction log of donations,"missionaryId, supporterId, amount, date, depositorName",admin/js/support-upload.js; admin/js/missionaries.js
+Realtime Database,inquiries/,User contact form submissions,"name, email, subject, content, date",admin/inquiries.html; js/ui/detailPopup.js
+Realtime Database,missionaryGroups/,Custom missionary groupings,"name, description, missionaryIds",admin/groups.html
+Realtime Database,newsletters/,Registry of uploaded PDF files,"name, prayer, date, url",js/setup.js; admin/newsletters.html
+Firestore,newsletters,Metadata for newsletters (external links),"missionaryName, summary, date, url, isExternalLink",js/setup.js
+Firestore,test,Connection heartbeat check,test_field,js/firebase-config.js
+Storage,missionaries/{id}/,Individual files per missionary,"familyPhoto_*.jpg, missionaryPhoto_*.jpg, document_*.pdf",js/update.js; admin/js/missionaries.js
+Storage,newsletters/,PDF storage bucket for newsletters,*.pdf,js/setup.js; admin/newsletters.html
+Hardcoded,js/missionaryMap.js,Country flags & Map config,COUNTRY_FLAGS (Mapping),js/missionaryMap.js
+Hardcoded,js/setup.js,Default prayer strings,Default Prayer Topics,js/setup.js
+Hardcoded,js/dataManager.js,UI field aliasing,"sentDate, englishName, newsletter",js/dataManager.js

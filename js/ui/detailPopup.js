@@ -18,6 +18,14 @@ const PRAYER_CONFIG = {
 // 팝업 위치 저장/복원을 위한 유틸리티 함수들
 const POPUP_POSITION_KEY = 'missionaryDetailPopupPosition';
 
+// 현재 열려 있는 팝업 상태 추적 (실시간 업데이트용)
+window.currentDetailPopupState = {
+    isOpen: false,
+    name: null,
+    latlng: null,
+    elements: null
+};
+
 // 저장된 팝업 위치 가져오기
 function getSavedPopupPosition() {
     try {
@@ -218,134 +226,22 @@ function createSafeAvatarSVG(name, size = 80) {
     `)}`;
 }
 
-// 선교사 상세 정보 가져오기 (Firestore + 로컬 데이터)
-async function fetchMissionaryDetails(name) {
-    try {
-        // Firestore에서 선교사 정보 가져오기
-        if (firebase && firebase.firestore) {
-            const db = firebase.firestore();
-
-            // 선교사 기본 정보 (이제 누구나 읽기 가능)
-            let missionary = null;
-            try {
-                // 먼저 missionaryProfiles 컬렉션에서 시도 (누구나 읽기 가능)
-                const profileDoc = await db.collection('missionaryProfiles')
-                    .where('name', '==', name)
-                    .limit(1)
-                    .get();
-
-                if (!profileDoc.empty) {
-                    missionary = profileDoc.docs[0].data();
-                    console.log('missionaryProfiles에서 선교사 정보 찾음:', name);
-                } else {
-                    // missionaries 컬렉션에서 기본 정보만 가져오기 시도
-                    const missionaryDoc = await db.collection('missionaries')
-                        .where('name', '==', name)
-                        .limit(1)
-                        .get();
-
-                    if (!missionaryDoc.empty) {
-                        const fullData = missionaryDoc.docs[0].data();
-                        // 기본 정보만 추출 (보안 규칙에 따라 허용된 필드만)
-                        missionary = {
-                            name: fullData.name,
-                            country: fullData.country,
-                            city: fullData.city,
-                            sent_date: fullData.sent_date,
-                            organization: fullData.organization,
-                            presbytery: fullData.presbytery,
-                            prayer: fullData.prayer,
-                            summary: fullData.summary,
-                            image: fullData.image // 이미지도 기본 정보에 포함
-                        };
-                        console.log('missionaries에서 선교사 기본 정보 찾음:', name);
-                    }
-                }
-            } catch (error) {
-                // 권한 오류는 정상적인 상황이므로 로그만 출력
-                if (error.code === 'permission-denied') {
-                    console.log('Firestore 선교사 데이터 읽기 권한이 없습니다. (일반적인 상황)');
-                } else {
-                    console.warn('선교사 데이터 가져오기 실패:', error.message);
-                }
-            }
-
-            // 뉴스레터 요약 정보 (Firebase 인덱스 오류 방지)
-            let latestNewsletter = null;
-            // Firebase 쿼리는 나중에 인덱스가 설정된 후에 활성화
-            /*
-            try {
-                // 먼저 newsletterSummaries 컬렉션에서 시도
-                const summaryDoc = await db.collection('newsletterSummaries')
-                    .where('missionaryName', '==', name)
-                    .orderBy('date', 'desc')
-                    .limit(1)
-                    .get();
-                
-                if (!summaryDoc.empty) {
-                    latestNewsletter = summaryDoc.docs[0].data();
-                    console.log('newsletterSummaries에서 뉴스레터 요약 찾음:', name);
-                } else {
-                    // newsletters 컬렉션에서 요약 정보만 가져오기 시도
-                    const newsletterDoc = await db.collection('newsletters')
-                        .where('missionaryName', '==', name)
-                        .orderBy('date', 'desc')
-                        .limit(1)
-                        .get();
-                    
-                    if (!newsletterDoc.empty) {
-                        const newsletterData = newsletterDoc.docs[0].data();
-                        // 요약 정보만 추출
-                        latestNewsletter = {
-                            summary: newsletterData.summary || newsletterData.content?.substring(0, 200) + '...',
-                            title: newsletterData.title,
-                            date: newsletterData.date,
-                            missionaryName: newsletterData.missionaryName
-                        };
-                        console.log('newsletters에서 뉴스레터 요약 찾음:', name);
-                    }
-                }
-            } catch (error) {
-                console.log('Firebase 인덱스가 설정되지 않았습니다. 기본 정보를 사용합니다.');
-            }
-            */
-
-            // 기도 요청 정보 (Firebase 인덱스 오류 방지)
-            let prayerRequests = [];
-            // Firebase 쿼리는 나중에 인덱스가 설정된 후에 활성화
-            /*
-            try {
-                const prayerDoc = await db.collection('prayerRequests')
-                    .where('missionaryName', '==', name)
-                    .orderBy('date', 'desc')
-                    .limit(3) // 최근 3개만
-                    .get();
-                
-                if (!prayerDoc.empty) {
-                    prayerRequests = prayerDoc.docs.map(doc => doc.data());
-                    console.log('prayerRequests에서 기도 요청 찾음:', name, prayerRequests.length);
-                }
-            } catch (error) {
-                console.log('Firebase 인덱스가 설정되지 않았습니다. 기본 정보를 사용합니다.');
-            }
-            */
-
-            return {
-                ...missionary,
-                id: missionary?.id || name,
-                latestNewsletter,
-                prayerRequests
-            };
-        }
-    } catch (error) {
-        console.error('선교사 상세 정보 가져오기 실패:', error);
-    }
-
+// Firestore 의존성 제거됨 - RTDB 데이터만 사용
+function fetchMissionaryDetails(name) {
+    // 이제 Firestore에서 가져오지 않고, showDetailPopup에 전달된 데이터를 사용합니다.
     return null;
 }
 
-// 메인 상세보기 팝업 함수
-window.showDetailPopup = async function (name, latlng, missionaryInfo, elements) {
+// 메인 상세보기 팝업 렌더링 함수 (UI 전용)
+window.renderDetailPopup = async function (name, latlng, missionaryInfo, elements) {
+    // 현재 열려 있는 팝업 상태 저장 (UI 전용)
+    window.currentDetailPopupState = {
+        isOpen: true,
+        name: name,
+        latlng: latlng,
+        elements: elements
+    };
+
     // elements 객체 안전성 체크
     if (!elements || !elements.detailPopup) {
         console.error('detailPopup 요소를 찾을 수 없습니다. elements:', elements);
@@ -379,13 +275,22 @@ window.showDetailPopup = async function (name, latlng, missionaryInfo, elements)
         elements = defaultElements;
     }
 
-    // Firestore에서 최신 데이터 가져오기
-    const freshData = await fetchMissionaryDetails(name);
-    const info = freshData || missionaryInfo[name] || {};
+    // Firestore 로직 제거: 전달받은 RTDB(missionaryInfo) 데이터를 사용
+    // missionaryData는 missionaryMap.js에서 최신순으로 정렬된 가장 최신 데이터를 담고 있습니다.
+    const info = (missionaryInfo && missionaryInfo[name]) ? missionaryInfo[name] : {};
+
+    // [Test Simulation] 데이터 소스 확인 로그
+    console.log('[DetailPopup] Using RTDB Data for:', name, info);
+
+    // ID 보정
+    if (!info.id) info.id = name;
 
     const sentDate = info.sent_date ? new Date(info.sent_date) : null;
     const sentYear = sentDate ? sentDate.getFullYear() : '정보 없음';
-    const imgSrc = info.image && info.image.trim() ? info.image.trim() : createSafeAvatarSVG(name, 320);
+    // 가족/프로필 사진(familyPhotoUrl)을 최우선으로 사용, 없으면 기존 image 사용, 그 외 대체 아바타
+    const imgSrc = (info.familyPhotoUrl && info.familyPhotoUrl.trim())
+        ? info.familyPhotoUrl.trim()
+        : (info.image && info.image.trim() ? info.image.trim() : createSafeAvatarSVG(name, 320));
     const newsUrl = info.NewsLetter ? info.NewsLetter.trim() : '';
     const location = `${info.country || '정보없음'}, ${info.city || ''}`.replace(/, $/, '');
 
@@ -400,12 +305,22 @@ window.showDetailPopup = async function (name, latlng, missionaryInfo, elements)
     const newsletterSummary = info.summary || info.latestNewsletterSummary || '';
     const newsletterUrl = info.newsletterUrl || newsUrl || '';
 
-    // 기도제목: 최신 뉴스레터 요약 우선, 없으면 기존 기도제목 사용
-    let prayerHtml = '현지 정착과 건강을 위해';
-    if (info.latestNewsletter && info.latestNewsletter.summary && info.latestNewsletter.summary.trim()) {
-        prayerHtml = info.latestNewsletter.summary.trim();
+    // 기도제목 표준화 우선순위:
+    // 1. prayerTopic (상세창용 기도제목 - 🙏 현재 기도 제목 (상세창))
+    // 2. summaryPrayer (맵 순환용 요약 제목 - 📌 맵 순환용 제목 (요약))
+    // 3. prayer (기본 기도요청 - 🙏 기도 요청 (기본/상시))
+    // 4. summary / newsletterSummary (뉴스레터 요약 - 📰 최근 소식 요약)
+    // 5. Fallback (DB 설정 기본문구)
+    let prayerHtml = window.DataManager?.state?.settings?.phrases?.missionaryDefaultPrayer || '현지 정착과 건강을 위해';
+
+    if (info.prayerTopic && info.prayerTopic.trim()) {
+        prayerHtml = info.prayerTopic.trim();
+    } else if (info.summaryPrayer && info.summaryPrayer.trim()) { // 맵 순환용 요약 제목을 상세창에서도 활용
+        prayerHtml = info.summaryPrayer.trim();
     } else if (info.prayer && info.prayer.trim()) {
         prayerHtml = info.prayer.trim();
+    } else if (info.latestNewsletter && info.latestNewsletter.summary && info.latestNewsletter.summary.trim()) {
+        prayerHtml = info.latestNewsletter.summary.trim();
     } else if (newsletterSummary && newsletterSummary.trim()) {
         prayerHtml = newsletterSummary.trim();
     }
@@ -511,11 +426,11 @@ window.showDetailPopup = async function (name, latlng, missionaryInfo, elements)
 
                 <!-- 최신 뉴스레터 섹션 -->
                 <!-- 최신 뉴스레터 섹션 (버튼 제외, 요약만 표시) -->
-                ${info.latestNewsletter ? `
+                ${(info.latestNewsletter || info.summary) ? `
                 <div class="newsletter-section">
                     <h3 class="section-title">📰 최신 선교 소식</h3>
                     <div class="newsletter-summary">
-                        ${info.newsletterSummary || '최신 선교 소식이 업데이트되었습니다. 아래 버튼을 눌러 확인해보세요.'}
+                        ${info.summary || info.newsletterSummary || '최신 선교 소식이 업데이트되었습니다. 아래 버튼을 눌러 확인해보세요.'}
                     </div>
                 </div>
                 ` : ''}
@@ -816,7 +731,33 @@ async function submitInquiry(missionaryName, missionaryId) {
 
     try {
         if (firebase && firebase.database) {
+            // 1. Firebase에 문의 데이터 저장
             await firebase.database().ref('inquiries').push(inquiryData);
+
+            // 2. 관리자에게 알림 메일 발송 (EmailJS)
+            // TODO: [중요] EmailJS Service ID와 Template ID를 설정하세요
+            const SERVICE_ID = "YOUR_SERVICE_ID";
+            const TEMPLATE_ID = "YOUR_TEMPLATE_ID_ADMIN_NOTI"; // 관리자 알림용 템플릿 ID
+
+            if (typeof emailjs !== 'undefined') {
+                if (SERVICE_ID === "YOUR_SERVICE_ID" || !emailjs.publicKey) {
+                    console.warn('EmailJS 키 미설정으로 관리자 알림 메일 미발송');
+                    // 사용자에게는 굳이 알리지 않음 (내부 설정 문제이므로)
+                } else {
+                    const templateParams = {
+                        from_name: name,
+                        from_email: email,
+                        message: message,
+                        missionary_name: missionaryName,
+                        to_email: 'prok.oikos@gmail.com' // 관리자 이메일
+                    };
+
+                    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+                        .then(() => console.log('관리자 알림 메일 발송 성공'))
+                        .catch((err) => console.error('관리자 알림 메일 발송 실패:', err));
+                }
+            }
+
             alert('문의가 성공적으로 전송되었습니다!\n선교사님께서 확인 후 연락드릴 예정입니다.');
             closeInquiryModal();
         } else {
@@ -950,4 +891,37 @@ window.updatePrayerConfig = function (newConfig) {
 // 현재 설정 반환 함수
 window.getPrayerConfig = function () {
     return { ...PRAYER_CONFIG };
-} 
+}
+
+// 실시간 업데이트를 위한 리프레시 함수
+window.refreshDetailPopupIfOpen = function () {
+    if (!window.currentDetailPopupState || !window.currentDetailPopupState.isOpen) return;
+
+    const { name, latlng, elements } = window.currentDetailPopupState;
+    console.log(`[DetailPopup] 실시간 업데이트 감지: ${name} 정보를 갱신합니다.`);
+
+    // DataManager에서 직접 데이터 가져오기 (이미 fetchSettings/fetchData 리스너가 업데이트함)
+    const missionaryInfo = window.DataManager?.state?.missionaryInfo || {};
+
+    // 팝업 재렌더링
+    if (window.renderDetailPopup) {
+        window.renderDetailPopup(name, latlng, missionaryInfo, elements);
+    }
+};
+
+// 팝업 닫기 시 상태 초기화
+// 기존에 정의된 closeDetailPopup을 보완
+const originalCloseDetailPopup = window.closeDetailPopup;
+window.closeDetailPopup = function (elements) {
+    if (window.currentDetailPopupState) {
+        window.currentDetailPopupState.isOpen = false;
+    }
+
+    // 원래의 closeDetailPopup 로직 실행
+    if (typeof originalCloseDetailPopup === 'function') {
+        originalCloseDetailPopup(elements);
+    } else if (window.UIManager && window.UIManager.closeDetailPopup) {
+        // UIManager를 통한 닫기 시도
+        window.UIManager.closeDetailPopup();
+    }
+};

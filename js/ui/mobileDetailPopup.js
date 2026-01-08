@@ -1,14 +1,24 @@
 // 모바일 전용 상세보기 팝업
-(function() {
+(function () {
     let currentOverlay = null;
-    let currentPrayerBtn = null;
+    // 현재 열려 있는 팝업 상태 추적 (실시간 업데이트용)
+    window.currentMobileDetailState = {
+        isOpen: false,
+        missionaryData: null
+    };
 
     // CommonUtils 사용으로 중복 함수 제거
 
     // 모바일 상세보기 표시 함수
     function showMobileDetailPopup(missionaryData) {
         console.log('모바일 상세보기 표시:', missionaryData.name);
-        
+
+        // 상태 저장
+        window.currentMobileDetailState = {
+            isOpen: true,
+            missionaryData: missionaryData
+        };
+
         // 기존 오버레이 제거
         if (currentOverlay) {
             currentOverlay.remove();
@@ -18,7 +28,7 @@
         const overlay = document.createElement('div');
         overlay.className = 'mobile-detail-overlay';
         overlay.innerHTML = createMobileDetailHTML(missionaryData);
-        
+
         document.body.appendChild(overlay);
         currentOverlay = overlay;
 
@@ -37,7 +47,7 @@
         const sentYear = sentDate ? sentDate.getFullYear() : '정보 없음';
         const imgSrc = data.image && data.image.trim() ? data.image.trim() : window.CommonUtils.createAvatarSVG(data.name, 80);
         const location = `${data.country || '정보없음'}, ${data.city || ''}`.replace(/, $/, '');
-        
+
         return `
             <div class="mobile-detail-card">
                 <!-- 헤더 섹션 -->
@@ -83,7 +93,7 @@
                     <!-- 기도제목 섹션 -->
                     <div class="mobile-detail-prayer">
                         <h3 class="mobile-detail-prayer-title">기도제목</h3>
-                        <p class="mobile-detail-prayer-content">${data.prayer || '현지 정착과 건강을 위해 기도해 주세요.'}</p>
+                        <p class="mobile-detail-prayer-content">${data.prayerTopic || data.summaryPrayer || data.prayer || data.summary || window.DataManager?.state?.settings?.phrases?.missionaryDefaultPrayer || '현지 정착과 건강을 위해 기도해 주세요.'}</p>
                     </div>
                 </div>
             </div>
@@ -140,7 +150,7 @@
         card.addEventListener('touchmove', (e) => {
             currentY = e.touches[0].clientY;
             const deltaY = currentY - startY;
-            
+
             if (deltaY > 50) { // 50px 이상 아래로 스와이프
                 card.style.transform = `translateY(${deltaY}px) scale(${1 - deltaY * 0.001})`;
             }
@@ -148,7 +158,7 @@
 
         card.addEventListener('touchend', (e) => {
             const deltaY = currentY - startY;
-            
+
             if (deltaY > 100) { // 100px 이상 스와이프하면 닫기
                 closeMobileDetailPopup();
             } else {
@@ -160,6 +170,7 @@
 
     // 모바일 상세보기 닫기
     function closeMobileDetailPopup() {
+        window.currentMobileDetailState.isOpen = false;
         if (currentOverlay) {
             currentOverlay.classList.remove('visible');
             setTimeout(() => {
@@ -197,53 +208,53 @@
                     city: location.split(',')[1]?.trim() || '', // 위치에서 도시 추출
                     flagUrl: '' // 국기 URL은 handlePrayerClick에서 생성
                 };
-                
+
                 // 로딩 상태 표시
                 button.style.opacity = '0.7';
                 button.style.pointerEvents = 'none';
-                
+
                 const success = await window.handlePrayerClick(missionaryData);
-                
+
                 if (success) {
                     console.log(`${name} 선교사를 위한 기도 요청이 Firebase에 기록되었습니다.`);
-                    
+
                     // 성공 피드백 - 버튼 색상 변경
                     button.style.background = 'rgba(34, 197, 94, 0.8)';
                     button.style.color = 'white';
-                    
+
                     setTimeout(() => {
                         button.style.background = '';
                         button.style.color = '';
                     }, 2000);
                 } else {
                     console.log('기도 요청 Firebase 기록에 실패했습니다.');
-                    
+
                     // 실패 피드백
                     button.style.background = 'rgba(239, 68, 68, 0.8)';
                     button.style.color = 'white';
-                    
+
                     setTimeout(() => {
                         button.style.background = '';
                         button.style.color = '';
                     }, 2000);
                 }
-                
+
                 // 로딩 상태 해제
                 button.style.opacity = '1';
                 button.style.pointerEvents = 'auto';
-                
+
             } catch (error) {
                 console.error('기도 클릭 처리 중 오류:', error);
-                
+
                 // 오류 피드백
                 button.style.background = 'rgba(239, 68, 68, 0.8)';
                 button.style.color = 'white';
-                
+
                 setTimeout(() => {
                     button.style.background = '';
                     button.style.color = '';
                 }, 2000);
-                
+
                 // 로딩 상태 해제
                 button.style.opacity = '1';
                 button.style.pointerEvents = 'auto';
@@ -283,11 +294,26 @@
         }, 3000);
     }
 
+    // 실시간 업데이트를 위한 리프레시 함수
+    function refreshMobileDetailPopupIfOpen() {
+        if (!window.currentMobileDetailState || !window.currentMobileDetailState.isOpen) return;
+
+        const name = window.currentMobileDetailState.missionaryData.name;
+        console.log(`[MobileDetailPopup] 실시간 업데이트 감지: ${name} 정보를 갱신합니다.`);
+
+        // 최신 데이터 가져오기
+        const latestData = window.DataManager?.getMissionaryInfo(name);
+        if (latestData) {
+            showMobileDetailPopup(latestData);
+        }
+    }
+
     // 전역 함수로 노출
     window.MobileDetailPopup = {
         show: showMobileDetailPopup,
         close: closeMobileDetailPopup,
-        showToast: showMobilePrayerToast
+        showToast: showMobilePrayerToast,
+        refreshIfOpen: refreshMobileDetailPopupIfOpen
     };
 
     console.log('MobileDetailPopup 모듈 로드 완료');

@@ -6,34 +6,39 @@
 
 // 실제 함수 내용을 아래에 추가해 주세요.
 
-window.isRecent = function(updateDate) {
-    if (!updateDate) return false;
-    const days = (new Date() - new Date(updateDate)) / (1000 * 60 * 60 * 24);
-    return days < 60;
+window.isRecent = function (updateDate) {
+  if (!updateDate) return false;
+  const days = (new Date() - new Date(updateDate)) / (1000 * 60 * 60 * 24);
+  return days < 60;
 }
 
-window.getLatLng = function(item, country, constants) {
-    if (item.lat && item.lng && !isNaN(item.lat) && !isNaN(item.lng)) {
-        return [parseFloat(item.lat), parseFloat(item.lng)];
-    }
-    if (constants.CITY_LATLNGS && item.city && constants.CITY_LATLNGS[item.city]) {
-        return constants.CITY_LATLNGS[item.city];
-    }
-    return constants.LATLNGS[country] || [20, 0];
+window.normalizeName = function (name) {
+  if (!name || typeof name !== 'string') return '';
+  return name.replace(/\s+/g, '').trim();
+}
+
+window.getLatLng = function (item, country, constants) {
+  if (item.lat && item.lng && !isNaN(item.lat) && !isNaN(item.lng)) {
+    return [parseFloat(item.lat), parseFloat(item.lng)];
+  }
+  if (constants.CITY_LATLNGS && item.city && constants.CITY_LATLNGS[item.city]) {
+    return constants.CITY_LATLNGS[item.city];
+  }
+  return constants.LATLNGS[country] || [20, 0];
 }
 
 // Firebase에서 missionaries, news 데이터를 불러오는 fetchData 함수
-window.fetchData = function(callback) {
+window.fetchData = function (callback) {
   console.log('fetchData: Firebase 데이터 로딩 시작...');
-  
+
   if (!window.firebase || !window.firebase.database) {
     console.error('fetchData: Firebase SDK가 로드되지 않았습니다.');
     callback(new Error('Firebase not initialized'));
     return;
   }
-  
+
   const db = window.firebase.database();
-  
+
   // missionaries 데이터 실시간 리스너 설정 (Admin의 상세 데이터 포함)
   db.ref('missionaries').on('value', snapshot => {
     console.log('fetchData: missionaries 데이터 실시간 업데이트');
@@ -70,11 +75,11 @@ window.fetchData = function(callback) {
       }
     });
     console.log(`fetchData: ${missionaries.length}명의 선교사 데이터 로드됨 (상세 정보 포함)`);
-    
+
     // 콜백 호출
     callback(null, { missionaries, news: [] });
   });
-  
+
   // news 데이터 실시간 리스너 설정
   db.ref('news').on('value', newsSnap => {
     console.log('fetchData: news 데이터 실시간 업데이트');
@@ -92,12 +97,12 @@ window.fetchData = function(callback) {
 // 공통 함수들 - 중복 제거를 위해 통합
 window.CommonUtils = {
   // 아바타 SVG 생성 함수
-  createAvatarSVG: function(name, size = 80) {
+  createAvatarSVG: function (name, size = 80) {
     if (!name) return '';
-    
+
     // 이름에서 이니셜 추출
     const initials = name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
-    
+
     // 배경색 생성 (이름 기반)
     const colors = [
       '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
@@ -105,22 +110,22 @@ window.CommonUtils = {
     ];
     const colorIndex = name.charCodeAt(0) % colors.length;
     const bgColor = colors[colorIndex];
-    
+
     const svgString = `
       <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="${bgColor}"/>
-        <text x="${size/2}" y="${size/2 + size/8}" font-family="Arial, sans-serif" font-size="${size/3}" 
+        <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="${bgColor}"/>
+        <text x="${size / 2}" y="${size / 2 + size / 8}" font-family="Arial, sans-serif" font-size="${size / 3}" 
               fill="white" text-anchor="middle" dominant-baseline="middle" font-weight="bold">
           ${initials}
         </text>
       </svg>
     `;
-    
+
     return `data:image/svg+xml;base64,${this.safeBtoa(svgString)}`;
   },
 
   // 안전한 base64 인코딩 함수
-  safeBtoa: function(str) {
+  safeBtoa: function (str) {
     try {
       return btoa(unescape(encodeURIComponent(str)));
     } catch (e) {
@@ -130,7 +135,7 @@ window.CommonUtils = {
   },
 
   // 토스트 메시지 표시 함수
-  showToast: function(message, type = 'info') {
+  showToast: function (message, type = 'info') {
     // 기존 토스트 제거
     const existingToast = document.querySelector('.toast-message');
     if (existingToast) {
@@ -186,7 +191,7 @@ window.CommonUtils = {
   },
 
   // 디바운스 함수
-  debounce: function(func, wait) {
+  debounce: function (func, wait) {
     let timeout;
     return function executedFunction(...args) {
       const later = () => {
@@ -199,7 +204,7 @@ window.CommonUtils = {
   },
 
   // 파일 크기 포맷팅 함수
-  formatFileSize: function(bytes) {
+  formatFileSize: function (bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -208,7 +213,7 @@ window.CommonUtils = {
   },
 
   // 날짜 포맷팅 함수
-  formatDate: function(date) {
+  formatDate: function (date) {
     if (!date) return '';
     const d = new Date(date);
     return d.toLocaleDateString('ko-KR', {
@@ -219,7 +224,7 @@ window.CommonUtils = {
   },
 
   // 안전한 JSON 파싱 함수
-  safeJSONParse: function(str, defaultValue = null) {
+  safeJSONParse: function (str, defaultValue = null) {
     try {
       return JSON.parse(str);
     } catch (e) {
@@ -229,7 +234,7 @@ window.CommonUtils = {
   },
 
   // 안전한 함수 실행 함수
-  safeExecute: function(fn, ...args) {
+  safeExecute: function (fn, ...args) {
     try {
       return fn(...args);
     } catch (error) {

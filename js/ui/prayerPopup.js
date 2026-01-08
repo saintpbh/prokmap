@@ -17,15 +17,31 @@ class PrayerPopupManager {
         this.fadeDuration = 300; // 페이드 애니메이션 시간
         this.autoRestartDelay = 3000; // 자동 재시작 지연 시간 (3초)
         this.isVisible = true; // 비주얼/인비주얼 상태 (true: 비주얼, false: 인비주얼)
+        this.isEnabled = localStorage.getItem('prayer-popup-enabled') !== 'false'; // 사용자 토글 상태
+    }
+
+    // 데이터 실시간 업데이트 지원
+    updateMissionaries(data) {
+        if (!data || data.length === 0) return;
+
+        console.log(`PrayerPopupManager: 데이터 업데이트 수신 (${data.length}명)`);
+
+        // 데이터 교체
+        this.missionaries = data;
+
+        // 현재 인덱스가 범위를 벗어나지 않도록 조정
+        if (this.currentIndex >= this.missionaries.length) {
+            this.currentIndex = 0;
+        }
     }
 
     // 순회 시작
     startRotation() {
-        if (this.isRunning) return;
-        
+        if (this.isRunning || !this.isEnabled) return;
+
         // 선교사 데이터 가져오기
         this.missionaries = window.MissionaryMap?.state?.missionaries || [];
-        
+
         if (this.missionaries.length === 0) {
             console.warn('선교사 데이터가 없습니다.');
             return;
@@ -34,15 +50,15 @@ class PrayerPopupManager {
         this.isRunning = true;
         this.isPaused = false;
         this.currentIndex = 0;
-        
+
         // 첫 번째 팝업 즉시 표시
         this.showNextPrayerPopup();
-        
+
         // 인터벌 설정
         this.interval = setInterval(() => {
             this.showNextPrayerPopup();
         }, this.animationDuration);
-        
+
         console.log('기도 팝업 순회 시작:', this.missionaries.length + '명의 선교사');
     }
 
@@ -71,14 +87,14 @@ class PrayerPopupManager {
         }
         this.isPaused = true;
         console.log('기도 팝업 일시정지');
-        
+
         // 현재 표시 중인 팝업 닫기
         this.closeCurrentPopup();
     }
 
     // 재개
     resume() {
-        if (this.isPaused && this.isRunning) {
+        if (this.isPaused && this.isRunning && this.isEnabled) {
             this.interval = setInterval(() => {
                 this.showNextPrayerPopup();
             }, this.animationDuration);
@@ -91,10 +107,10 @@ class PrayerPopupManager {
     forcePause() {
         this.pause();
         this.forcePaused = true;
-        
+
         // 현재 표시 중인 팝업 즉시 닫기 (강력한 정리)
         this.closeCurrentPopup();
-        
+
         // 추가로 DOM에서 모든 기도 팝업 관련 요소 정리
         setTimeout(() => {
             const allPrayerElements = document.querySelectorAll('.prayer-popup-v2, .prayer-popup, .floating-prayer-popup');
@@ -102,7 +118,7 @@ class PrayerPopupManager {
                 element.remove();
             });
         }, 50);
-        
+
         // 자동 재시작 타이머 정리
         if (this.autoRestartTimer) {
             clearTimeout(this.autoRestartTimer);
@@ -114,18 +130,18 @@ class PrayerPopupManager {
     // 강제 일시정지 해제
     forceResume() {
         // 국가별/노회별 파송현황 모드가 아닐 때만 재개
-        const isInDetailMode = window.missionaryMapInstance && 
-                             (window.missionaryMapInstance.state.fixedCountry || 
-                              window.missionaryMapInstance.state.fixedPresbytery || 
-                              window.missionaryMapInstance.state.isPaused);
-        
+        const isInDetailMode = window.missionaryMapInstance &&
+            (window.missionaryMapInstance.state.fixedCountry ||
+                window.missionaryMapInstance.state.fixedPresbytery ||
+                window.missionaryMapInstance.state.isPaused);
+
         if (isInDetailMode) {
             console.log('국가별/노회별 파송현황 모드: 기도 팝업 재개 건너뜀');
             // 현재 표시 중인 팝업도 닫기
             this.closeCurrentPopup();
             return;
         }
-        
+
         if (this.forcePaused) {
             this.forcePaused = false;
             this.resume();
@@ -152,22 +168,22 @@ class PrayerPopupManager {
     // 수동으로 팝업 닫기 (3초 후 자동 재시작, 단 특정 모드에서는 재시작 안함)
     manualClose() {
         this.closeCurrentPopup();
-        
+
         // 자동 재시작 타이머 설정
         if (this.autoRestartTimer) {
             clearTimeout(this.autoRestartTimer);
         }
-        
+
         this.autoRestartTimer = setTimeout(() => {
             // 자동 재시작 조건 체크
-            const isInDetailMode = window.missionaryMapInstance && 
-                                 (window.missionaryMapInstance.state.fixedCountry || 
-                                  window.missionaryMapInstance.state.fixedPresbytery || 
-                                  window.missionaryMapInstance.state.isPaused);
-            
-            const isCountryListVisible = window.countryMissionaryList && 
-                                       window.countryMissionaryList.isVisible;
-            
+            const isInDetailMode = window.missionaryMapInstance &&
+                (window.missionaryMapInstance.state.fixedCountry ||
+                    window.missionaryMapInstance.state.fixedPresbytery ||
+                    window.missionaryMapInstance.state.isPaused);
+
+            const isCountryListVisible = window.countryMissionaryList &&
+                window.countryMissionaryList.isVisible;
+
             // 다음 조건에서만 자동 재시작:
             // 1. 기도 팝업이 실행 중이고
             // 2. 강제 일시정지 상태가 아니고
@@ -176,7 +192,7 @@ class PrayerPopupManager {
             if (this.isRunning && !this.forcePaused && !isInDetailMode && !isCountryListVisible) {
                 console.log('기도 팝업 자동 재시작');
                 this.showNextPrayerPopup();
-                
+
                 // 인터벌 재설정
                 if (this.interval) {
                     clearInterval(this.interval);
@@ -197,6 +213,26 @@ class PrayerPopupManager {
         }, this.autoRestartDelay);
     }
 
+    // 토글 처리 (외부 컨트롤러용)
+    toggle(enabled) {
+        this.isEnabled = enabled;
+        localStorage.setItem('prayer-popup-enabled', enabled.toString());
+
+        if (enabled) {
+            if (this.isRunning) {
+                this.resume();
+            } else {
+                this.startRotation();
+            }
+        } else {
+            this.pause();
+            this.closeCurrentPopup();
+        }
+
+        // UI 강제 업데이트 이벤트 트리거 (필요할 경우)
+        window.dispatchEvent(new CustomEvent('prayer-cycle-state-changed', { detail: { enabled } }));
+    }
+
     // 비주얼 상태로 설정 (팝업 표시)
     setVisible() {
         this.isVisible = true;
@@ -213,13 +249,13 @@ class PrayerPopupManager {
 
     // 현재 상태 확인
     getStatus() {
-        const isInDetailMode = window.missionaryMapInstance && 
-                             (window.missionaryMapInstance.state.fixedCountry || 
-                              window.missionaryMapInstance.state.isPaused);
-        
-        const isCountryListVisible = window.countryMissionaryList && 
-                                   window.countryMissionaryList.isVisible;
-        
+        const isInDetailMode = window.missionaryMapInstance &&
+            (window.missionaryMapInstance.state.fixedCountry ||
+                window.missionaryMapInstance.state.isPaused);
+
+        const isCountryListVisible = window.countryMissionaryList &&
+            window.countryMissionaryList.isVisible;
+
         return {
             isRunning: this.isRunning,
             isPaused: this.isPaused,
@@ -235,19 +271,19 @@ class PrayerPopupManager {
     // 다음 기도 팝업 표시
     showNextPrayerPopup() {
         if (this.missionaries.length === 0) return;
-        
+
         // 국가별/노회별 파송현황 모드에서는 팝업 표시하지 않음
-        const isInDetailMode = window.missionaryMapInstance && 
-                             (window.missionaryMapInstance.state.fixedCountry || 
-                              window.missionaryMapInstance.state.fixedPresbytery);
-        
+        const isInDetailMode = window.missionaryMapInstance &&
+            (window.missionaryMapInstance.state.fixedCountry ||
+                window.missionaryMapInstance.state.fixedPresbytery);
+
         if (isInDetailMode) {
             console.log('국가별/노회별 파송현황 모드: 기도 팝업 표시 건너뜀');
             // 다음 인덱스로 이동만 수행
             this.currentIndex = (this.currentIndex + 1) % this.missionaries.length;
             return;
         }
-        
+
         // 인비주얼 상태라면 팝업 표시하지 않음
         if (!this.isVisible) {
             console.log('기도 팝업 인비주얼 상태: 팝업 표시 건너뜀');
@@ -255,13 +291,13 @@ class PrayerPopupManager {
             this.currentIndex = (this.currentIndex + 1) % this.missionaries.length;
             return;
         }
-        
+
         // 현재 팝업 닫기
         this.closeCurrentPopup();
-        
+
         // 다음 선교사 선택
         const missionary = this.missionaries[this.currentIndex];
-        
+
         // 기도 팝업 생성 및 표시
         const popupElement = this.createPrayerPopup({
             flagUrl: this.getFlagUrl(missionary.country),
@@ -270,7 +306,7 @@ class PrayerPopupManager {
             city: missionary.city || '',
             missionary
         });
-        
+
         // 팝업을 지도 컨테이너에 추가
         const mapContainer = document.getElementById('map');
         if (mapContainer) {
@@ -278,13 +314,13 @@ class PrayerPopupManager {
         } else {
             document.body.appendChild(popupElement);
         }
-        
+
         // 마커 위치에 말풍선 표시
         this.setPopupPosition(popupElement, missionary);
-        
+
         // 현재 팝업 참조 저장
         this.currentPopup = popupElement;
-        
+
         // 다음 인덱스로 이동
         this.currentIndex = (this.currentIndex + 1) % this.missionaries.length;
     }
@@ -292,13 +328,13 @@ class PrayerPopupManager {
     // 현재 팝업 닫기
     closeCurrentPopup() {
         let hasRemoved = false;
-        
+
         if (this.currentPopup) {
             this.currentPopup.remove();
             this.currentPopup = null;
             hasRemoved = true;
         }
-        
+
         // 모든 기도 팝업 정리 (강력한 안전장치)
         const existingPopups = document.querySelectorAll('.prayer-popup-v2');
         if (existingPopups.length > 0) {
@@ -307,7 +343,7 @@ class PrayerPopupManager {
             });
             hasRemoved = true;
         }
-        
+
         // 추가로 다른 기도 팝업 클래스들도 정리
         const otherPrayerPopups = document.querySelectorAll('.prayer-popup, .floating-prayer-popup');
         if (otherPrayerPopups.length > 0) {
@@ -316,7 +352,7 @@ class PrayerPopupManager {
             });
             hasRemoved = true;
         }
-        
+
         // 실제로 팝업을 제거했을 때만 로그 출력
         if (hasRemoved) {
             console.log('기도 팝업 완전 정리 완료');
@@ -332,29 +368,29 @@ class PrayerPopupManager {
     // 말풍선 위치 설정
     setPopupPosition(popupElement, missionary) {
         if (!window.MissionaryMap?.map) return;
-        
+
         // 선교사의 지도 좌표 가져오기
         const latlng = window.MissionaryMap.getLatLng(missionary, missionary.country);
         if (!latlng) return;
-        
+
         // 지도 좌표를 화면 픽셀 좌표로 변환
         const point = window.MissionaryMap.map.latLngToContainerPoint(latlng);
-        
+
         // 팝업의 실제 크기 가져오기
         const popupRect = popupElement.getBoundingClientRect();
         const popupWidth = popupRect.width;
         const popupHeight = popupRect.height;
         const tailHeight = 12;
-        
+
         // 팝업 위치 계산 (마커 위에 배치)
         const left = point.x - (popupWidth / 2);
         const top = point.y - popupHeight - tailHeight - 10;
-        
+
         // 화면 경계 체크
         const mapRect = window.MissionaryMap.map.getContainer().getBoundingClientRect();
         const adjustedLeft = Math.max(10, Math.min(left, mapRect.width - popupWidth - 10));
         const adjustedTop = Math.max(10, Math.min(top, mapRect.height - popupHeight - 10));
-        
+
         // 팝업 위치 설정
         popupElement.style.left = adjustedLeft + 'px';
         popupElement.style.top = adjustedTop + 'px';
@@ -364,10 +400,10 @@ class PrayerPopupManager {
     createPrayerPopup({ flagUrl, name, country, city, missionary }) {
         const wrapper = document.createElement('div');
         wrapper.className = 'prayer-popup-v2';
-        
+
         // 기본 기도 내용
         let prayer = this.getMissionaryPrayerTopic(name);
-        
+
         wrapper.innerHTML = `
             <div class="popup-close-btn" title="기도 팝업 닫기 (3초 후 자동 재시작)">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -401,10 +437,10 @@ class PrayerPopupManager {
 
         // Firestore에서 최신 뉴스레터 요약 가져오기
         this.loadLatestNewsletterSummary(wrapper, name);
-        
+
         // 이벤트 리스너 추가
         this.addEventListeners(wrapper, { name, country, city, missionary });
-        
+
         return wrapper;
     }
 
@@ -416,7 +452,7 @@ class PrayerPopupManager {
             const defaultPrayer = this.getMissionaryPrayerTopic(missionaryName);
             prayerText.textContent = defaultPrayer;
         }
-        
+
         // Firebase 쿼리는 나중에 인덱스가 설정된 후에 활성화
         /*
         if (!window.firebase?.firestore) {
@@ -481,11 +517,11 @@ class PrayerPopupManager {
         popupElement.addEventListener('mouseenter', () => {
             this.pause();
         });
-        
+
         popupElement.addEventListener('mouseleave', () => {
             this.resume();
         });
-        
+
         // 닫기 버튼 클릭
         const closeBtn = popupElement.querySelector('.popup-close-btn');
         if (closeBtn) {
@@ -495,7 +531,7 @@ class PrayerPopupManager {
                 this.manualClose(); // 수동 닫기 (3초 후 자동 재시작)
             });
         }
-        
+
         // 기도하기 버튼 클릭
         const prayerBtn = popupElement.querySelector('.prayer-action-btn');
         if (prayerBtn) {
@@ -510,15 +546,15 @@ class PrayerPopupManager {
     // 애니메이션과 함께 팝업 닫기
     closePopupWithAnimation(popupElement) {
         popupElement.classList.add('popup-closing');
-        
+
         setTimeout(() => {
             this.closeCurrentPopup();
-            
+
             // 순환 재시작
             if (this.isRunning) {
                 this.isPaused = false;
                 this.showNextPrayerPopup();
-                
+
                 if (this.interval) {
                     clearInterval(this.interval);
                 }
@@ -533,16 +569,16 @@ class PrayerPopupManager {
     async handlePrayerClick(buttonElement, missionaryData) {
         // 클릭 피드백
         buttonElement.classList.add('prayer-clicked');
-        
+
         try {
             // 로딩 상태
             buttonElement.disabled = true;
             buttonElement.classList.add('prayer-loading');
-            
+
             // 기도 처리
             if (window.handlePrayerClick) {
                 const success = await window.handlePrayerClick(missionaryData);
-                
+
                 if (success) {
                     // 성공 피드백
                     buttonElement.classList.add('prayer-success');
@@ -577,13 +613,31 @@ class PrayerPopupManager {
     // 선교사 기도 제목 가져오기
     getMissionaryPrayerTopic(missionaryName) {
         if (window.MissionaryMap?.state?.missionaries) {
-            const missionary = window.MissionaryMap.state.missionaries.find(m => 
+            const missionary = window.MissionaryMap.state.missionaries.find(m =>
                 m.name && m.name.trim() === missionaryName.trim()
             );
-            
+
             if (missionary) {
+                // 기도제목 우선순위 (표준화 정책 반영): 
+                // 1. summaryPrayer (맵 순환용 요약 제목 - 📌 맵 순환용 제목 (요약))
+                // 2. prayerTopic (상세 정보창용 기도제목 - 🙏 현재 기도 제목 (상세창))
+                // 3. prayer (기본 기도 요청 - 🙏 기도 요청 (기본/상시))
+                // 4. summary (뉴스레터 요약)
+
+                if (missionary.summaryPrayer && missionary.summaryPrayer.trim() !== '') {
+                    return missionary.summaryPrayer.length > 80 ?
+                        missionary.summaryPrayer.substring(0, 80) + '...' : missionary.summaryPrayer;
+                }
+                if (missionary.prayerTopic && missionary.prayerTopic.trim() !== '') {
+                    return missionary.prayerTopic.length > 80 ?
+                        missionary.prayerTopic.substring(0, 80) + '...' : missionary.prayerTopic;
+                }
+                if (missionary.prayer && missionary.prayer.trim() !== '') {
+                    return missionary.prayer.length > 80 ?
+                        missionary.prayer.substring(0, 80) + '...' : missionary.prayer;
+                }
                 if (missionary.summary && missionary.summary.trim() !== '') {
-                    return missionary.summary.length > 80 ? 
+                    return missionary.summary.length > 80 ?
                         missionary.summary.substring(0, 80) + '...' : missionary.summary;
                 }
                 return missionary.prayer || '현지 사역과 복음 전파를 위해 기도해 주세요.';

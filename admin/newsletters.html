@@ -25,7 +25,15 @@
                 <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
                 <li><a href="newsletters.html" class="active"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
                 <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="report-upload.html"><i class="fas fa-file-alt"></i> 소식 일괄 등록</a></li>
+                <li><a href="prok-integration.html"><i class="fas fa-share-square"></i> 총회 게시판 업로드</a></li>
+                <li><a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> 긴급 알림 송출</a></li>
                 <li><a href="supporters.html"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+                <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+                <li><a href="certificates.html"><i class="fas fa-certificate"></i> 증명서 발급</a></li>
+                <li><a href="communications.html"><i class="fas fa-envelope"></i> 연락하기</a></li>
+                <li><a href="inquiries.html"><i class="fas fa-question-circle"></i> 문의 관리</a></li>
+                <li><a href="admins.html"><i class="fas fa-user-shield"></i> 관리 권한 설정</a></li>
             </ul>
         </aside>
 
@@ -35,11 +43,21 @@
                     <h3 class="card-title">📰 뉴스레터 업로드</h3>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">선교사 선택 *</label>
-                    <select id="missionarySelect" class="form-select" required>
-                        <option value="">선교사를 선택하세요</option>
-                    </select>
+                <div class="form-group" style="position: relative;">
+                    <label class="form-label">선교사 검색 및 선택 *</label>
+                    <input type="text" id="missionarySearch" class="form-input" placeholder="이름 또는 국가로 검색..."
+                        autocomplete="off">
+                    <input type="hidden" id="selectedMissionaryId">
+                    <input type="hidden" id="selectedMissionaryName">
+
+                    <div id="searchResults" class="search-results-dropdown">
+                        <!-- Results will appear here -->
+                    </div>
+
+                    <div id="selectedDisplay" class="selected-display-box">
+                        <span>선택됨: <span id="selectedNameText"></span></span>
+                        <button onclick="resetSelection()" class="btn-reset-selection" title="선택 취소">✕</button>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -93,9 +111,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="../js/firebase-config.js"></script>
     <script src="js/common.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <script>
         let missionaries = [];
 
@@ -108,23 +127,92 @@
         async function initNewsletterPage() {
             await loadMissionaries();
             document.getElementById('uploadBtn').addEventListener('click', uploadNewsletter);
+
+            // Search Input Event
+            const searchInput = document.getElementById('missionarySearch');
+            searchInput.addEventListener('input', handleSearch);
+            searchInput.addEventListener('focus', handleSearch);
+
+            // Close search results when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.form-group')) {
+                    document.getElementById('searchResults').style.display = 'none';
+                }
+            });
+        }
+
+        function handleSearch(e) {
+            const query = e.target.value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('searchResults');
+
+            if (!query && e.type !== 'focus') {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            const filtered = missionaries.filter(m =>
+                m.name.toLowerCase().includes(query) ||
+                m.country.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML = '<div style="padding: 10px; color: #999;">검색 결과가 없습니다</div>';
+                resultsDiv.style.display = 'block';
+                return;
+            }
+
+            // Limit results for performance if needed, but 10-20 is fine
+            resultsDiv.innerHTML = filtered.slice(0, 50).map(m => `
+                <div onclick="selectMissionary('${m.id}', '${m.name}', '${m.country}')" 
+                     class="search-result-item">
+                    <strong>${m.name}</strong> <span style="color:#666; font-size:0.9em;">(${m.country})</span>
+                </div>
+            `).join('');
+
+            resultsDiv.style.display = 'block';
+        }
+
+        function selectMissionary(id, name, country) {
+            document.getElementById('selectedMissionaryId').value = id;
+            document.getElementById('selectedMissionaryName').value = name;
+
+            document.getElementById('selectedNameText').innerText = `${name} (${country})`;
+            document.getElementById('selectedDisplay').style.display = 'block';
+
+            document.getElementById('missionarySearch').style.display = 'none';
+            document.getElementById('searchResults').style.display = 'none';
+        }
+
+        function resetSelection() {
+            document.getElementById('selectedMissionaryId').value = '';
+            document.getElementById('selectedMissionaryName').value = '';
+
+            document.getElementById('selectedDisplay').style.display = 'none';
+            document.getElementById('missionarySearch').style.display = 'block';
+            document.getElementById('missionarySearch').value = '';
+            document.getElementById('missionarySearch').focus();
         }
 
         async function loadMissionaries() {
             missionaries = await firebaseDB.getMissionaries();
-            const select = document.getElementById('missionarySelect');
-            select.innerHTML = '<option value="">선교사를 선택하세요</option>' +
-                missionaries.map(m => `<option value="${m.id}:${m.name}">${m.name} (${m.country})</option>`).join('');
+            // No select to populate now
         }
 
         async function uploadNewsletter() {
-            const missionaryData = document.getElementById('missionarySelect').value;
+            const missionaryId = document.getElementById('selectedMissionaryId').value;
+            // Name not strictly needed for logic but good for confirm/toast if needed
+            // const missionaryName = document.getElementById('selectedMissionaryName').value;
+
             const title = document.getElementById('newsletterTitle').value.trim();
             const summary = document.getElementById('newsletterSummary').value.trim();
             const photoFiles = document.getElementById('ministryPhotos').files;
 
-            if (!missionaryData || !summary) {
-                AdminUtils.showToast('선교사와 요약을 입력해주세요.', 'error');
+            if (!missionaryId) {
+                AdminUtils.showToast('선교사를 선택해주세요.', 'error');
+                return;
+            }
+            if (!summary) {
+                AdminUtils.showToast('요약을 입력해주세요.', 'error');
                 return;
             }
 
@@ -132,8 +220,6 @@
                 AdminUtils.showToast('사역사진은 최대 3장까지 업로드 가능합니다.', 'error');
                 return;
             }
-
-            const [missionaryId, missionaryName] = missionaryData.split(':');
 
             try {
                 // PDF 파일 업로드
@@ -147,23 +233,22 @@
                     pdfUrl = await pdfRef.getDownloadURL();
                 }
 
-                // 사역사진 업로드
+                // 사역사진 업로드 (압축 포함 표준화)
                 const photoUrls = [];
                 for (let i = 0; i < photoFiles.length; i++) {
                     const file = photoFiles[i];
                     const timestamp = Date.now();
-                    const storage = firebase.storage();
-                    const storageRef = storage.ref();
-                    const photoRef = storageRef.child(`missionaries/${missionaryId}/ministry_${timestamp}_${i}.jpg`);
+                    const path = `missionaries/${missionaryId}/ministry_${timestamp}_${i}.jpg`;
 
-                    await photoRef.put(file);
-                    const downloadURL = await photoRef.getDownloadURL();
-                    photoUrls.push(downloadURL);
+                    const downloadURL = await AdminUtils.uploadImage(file, path);
+                    if (downloadURL) photoUrls.push(downloadURL);
                 }
 
                 // 선교사 데이터 업데이트 (요약, 사진, PDF URL 저장)
                 const updateData = {
                     summary: summary,
+                    summaryPrayer: summary, // 지도 회전 팝업용 (Newsletter Summary와 동기화)
+                    prayerTopic: summary,   // 기도 제목이 없는 경우 소식 요약을 기본으로 설정
                     latestNewsletterDate: new Date().toISOString().split('T')[0]
                 };
 
@@ -174,6 +259,17 @@
                 if (pdfUrl) {
                     updateData.newsletterUrl = pdfUrl;
                     updateData.NewsLetter = pdfUrl; // 레거시 지원
+                }
+
+                if (title) {
+                    // If title is used, maybe store it too? 
+                    // The original code didn't seem to store 'title' in the updateData for the missionary, 
+                    // maybe it was just for the 'newsletters' collection?
+                    // Original code didn't write to 'newsletters' collection explicitly in this function, 
+                    // just updated 'missionaries'.
+                    // Let's assume title is part of summary or separate if schema allows.
+                    // Taking safe approach: add it to updateData if commonly used.
+                    updateData.newsletterTitle = title;
                 }
 
                 await firebaseDB.updateMissionary(missionaryId, updateData);
@@ -187,7 +283,7 @@
         }
 
         function clearForm() {
-            document.getElementById('missionarySelect').value = '';
+            resetSelection();
             document.getElementById('newsletterTitle').value = '';
             document.getElementById('newsletterSummary').value = '';
             document.getElementById('ministryPhotos').value = '';

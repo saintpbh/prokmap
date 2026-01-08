@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데이터 일괄 등록 - 선교사 관리 시스템</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: #3498db;
+            background: #f8fbff;
+        }
+
+        .step-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .step-card h4 {
+            margin: 0.5rem 0;
+            color: #2c3e50;
+        }
+
+        .step-icon {
+            font-size: 2rem;
+            color: #3498db;
+            margin-bottom: 1rem;
+        }
+
+        .preview-table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+            max-height: 500px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        .log-area {
+            background: #2c3e50;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .log-entry {
+            margin-bottom: 0.25rem;
+        }
+
+        .log-success {
+            color: #2ecc71;
+        }
+
+        .log-error {
+            color: #e74c3c;
+        }
+
+        .log-info {
+            color: #3498db;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="admin-header">
+        <h1><i class="fas fa-globe"></i> 선교사 관리 시스템</h1>
+        <div class="user-info">
+            <span class="user-email" id="userEmail">loading...</span>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="missionaries.html" class="active"><i class="fas fa-users"></i> 선교사 관리</a></li>
+                <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
+                <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="report-upload.html"><i class="fas fa-file-alt"></i> 소식 일괄 등록</a></li>
+                <li><a href="prok-integration.html"><i class="fas fa-share-square"></i> 총회 게시판 업로드</a></li>
+                <li><a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> 긴급 알림 송출</a></li>
+                <li><a href="supporters.html"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+                <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+                <li><a href="certificates.html"><i class="fas fa-certificate"></i> 증명서 발급</a></li>
+                <li><a href="communications.html"><i class="fas fa-envelope"></i> 연락하기</a></li>
+                <li><a href="inquiries.html"><i class="fas fa-question-circle"></i> 문의 관리</a></li>
+                <li><a href="admins.html"><i class="fas fa-user-shield"></i> 관리 권한 설정</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📊 데이터 일괄 등록 (Excel)</h3>
+                    <button class="btn btn-outline" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i> 뒤로가기
+                    </button>
+                </div>
+
+                <div class="step-container">
+                    <div class="step-card">
+                        <i class="fas fa-file-download step-icon"></i>
+                        <h4>1. 템플릿 다운로드</h4>
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+                            데이터 형식이 미리 지정된 엑셀 파일을 다운로드하세요.
+                        </p>
+                        <button class="btn btn-primary" onclick="downloadTemplate()">
+                            <i class="fas fa-download"></i> 템플릿 받기
+                        </button>
+                    </div>
+                    <div class="step-card">
+                        <i class="fas fa-edit step-icon"></i>
+                        <h4>2. 데이터 작성</h4>
+                        <p style="font-size: 0.9rem; color: #666;">
+                            다운로드한 파일에 선교사 정보를 입력하세요.<br>
+                            (* 표시는 필수 입력)
+                        </p>
+                    </div>
+                    <div class="step-card">
+                        <i class="fas fa-file-upload step-icon"></i>
+                        <h4>3. 업로드 및 등록</h4>
+                        <p style="font-size: 0.9rem; color: #666;">
+                            작성된 파일을 업로드하면<br>자동으로 DB에 등록됩니다.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="upload-area" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt"
+                        style="font-size: 3rem; color: #cbd5e0; margin-bottom: 1rem;"></i>
+                    <p style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #4a5568;">
+                        여기로 엑셀 파일을 드래그하거나 클릭하여 선택하세요
+                    </p>
+                    <p style="color: #a0aec0; font-size: 0.9rem;">지원 형식: .xlsx, .xls</p>
+                    <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;">
+                </div>
+
+                <div id="previewSection" style="display: none;">
+                    <div class="card-header"
+                        style="background: #f8f9fa; margin: 0 -1.5rem; padding: 1rem 1.5rem; border-top: 1px solid #eee; border-beta: 1px solid #eee;">
+                        <span style="font-weight: bold;">📋 데이터 미리보기 (<span id="previewCount">0</span>건)</span>
+                        <button class="btn btn-success" id="uploadBtn" onclick="uploadData()">
+                            <i class="fas fa-cloud-upload-alt"></i> DB 등록 시작
+                        </button>
+                    </div>
+
+                    <div class="preview-table-container">
+                        <table class="data-table" id="previewTable">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="log-area" id="logArea"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <!-- SheetJS CDN -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+
+    <script>
+        let parsedData = [];
+        const requiredFields = ['name', 'country']; // 필수 필드
+
+        // 파일 드래그 앤 드롭 이벤트
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length) handleFile(files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        async function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // 첫 번째 시트 가져오기
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                // JSON 변환
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                if (jsonData.length === 0) {
+                    alert('데이터가 없는 파일입니다.');
+                    return;
+                }
+
+                parsedData = jsonData;
+                renderPreview(jsonData);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function renderPreview(data) {
+            document.getElementById('previewSection').style.display = 'block';
+            document.getElementById('previewCount').textContent = data.length;
+
+            const table = document.getElementById('previewTable');
+            const thead = table.querySelector('thead');
+            const tbody = table.querySelector('tbody');
+
+            // 헤더 생성 (첫 번째 데이터의 키 사용)
+            if (data.length > 0) {
+                const headers = Object.keys(data[0]);
+                thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+            }
+
+            // 바디 생성 (최대 10개만 미리보기)
+            tbody.innerHTML = data.slice(0, 10).map(row => {
+                return `<tr>${Object.values(row).map(val => `<td>${val || ''}</td>`).join('')}</tr>`;
+            }).join('');
+
+            if (data.length > 10) {
+                tbody.innerHTML += `<tr><td colspan="${Object.keys(data[0]).length}" style="text-align: center; color: #666;">... 외 ${data.length - 10}건 ...</td></tr>`;
+            }
+        }
+
+        function downloadTemplate() {
+            // 엑셀 템플릿 데이터
+            const templateData = [
+                {
+                    name: '홍길동',
+                    englishName: 'Hong Gil Dong',
+                    country: '필리핀',
+                    city: '마닐라',
+                    presbytery: '서울노회',
+                    organization: '필리핀선교회',
+                    status: 'active', // active, vacation, returned
+                    email: 'hong@example.com',
+                    sentDate: '2020-01-01',
+                    prayerTopic: '가족의 건강과 사역을 위해',
+                    lat: 14.5995,
+                    lng: 120.9842
+                }
+            ];
+
+            const ws = XLSX.utils.json_to_sheet(templateData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "선교사_템플릿");
+            XLSX.writeFile(wb, "선교사_데이터_템플릿.xlsx");
+        }
+
+        async function uploadData() {
+            if (!confirm(`총 ${parsedData.length}건의 데이터를 DB에 등록하시겠습니까?\n기존 이름이 같을 경우 업데이트되지 않고 새로 추가될 수 있으니 주의하세요.`)) {
+                return;
+            }
+
+            const btn = document.getElementById('uploadBtn');
+            const logArea = document.getElementById('logArea');
+            btn.disabled = true;
+            logArea.style.display = 'block';
+            logArea.innerHTML = '<div class="log-info">🚀 업로드를 시작합니다...</div>';
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (let i = 0; i < parsedData.length; i++) {
+                const row = parsedData[i];
+
+                try {
+                    // 필수 필드 검사
+                    if (!row.name || !row.country) {
+                        throw new Error(`[Row ${i + 1}] 필수 정보 누락 (이름, 국가)`);
+                    }
+
+                    // 데이터 정제
+                    const missionaryData = {
+                        name: String(row.name).trim(),
+                        englishName: row.englishName ? String(row.englishName).trim() : '',
+                        country: String(row.country).trim(),
+                        city: row.city ? String(row.city).trim() : '',
+                        presbytery: row.presbytery ? String(row.presbytery).trim() : '',
+                        organization: row.organization ? String(row.organization).trim() : '',
+                        status: row.status ? String(row.status).toLowerCase() : 'active',
+                        email: row.email ? String(row.email).trim() : '',
+                        sentDate: row.sentDate || new Date().toISOString().split('T')[0],
+                        prayerTopic: row.prayerTopic || '',
+                        lat: row.lat ? parseFloat(row.lat) : null,
+                        lng: row.lng ? parseFloat(row.lng) : null,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                        isActive: true
+                    };
+
+                    // Firebase Push
+                    await firebase.database().ref('missionaries').push(missionaryData);
+
+                    logArea.innerHTML += `<div class="log-success">✅ [${i + 1}/${parsedData.length}] ${row.name} 등록 성공</div>`;
+                    successCount++;
+                } catch (error) {
+                    console.error(error);
+                    logArea.innerHTML += `<div class="log-error">❌ [${i + 1}/${parsedData.length}] 실패: ${error.message}</div>`;
+                    errorCount++;
+                }
+
+                // 스크롤 자동 이동
+                logArea.scrollTop = logArea.scrollHeight;
+            }
+
+            logArea.innerHTML += `<div class="log-info">✨ 완료! 성공: ${successCount}건, 실패: ${errorCount}건</div>`;
+            btn.disabled = false;
+
+            if (successCount > 0) {
+                alert('업로드가 완료되었습니다. 로그를 확인해주세요.');
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>선교사 데이터 업데이트</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 2rem;
+        }
+
+        #status {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        #log {
+            border: 1px solid #ccc;
+            padding: 1rem;
+            background: #f9f9f9;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>선교사 소식 일괄 업데이트 도구</h1>
+    <p>이 페이지는 2025년 6월~12월 선교사 소식을 데이터베이스에 일괄 반영합니다.</p>
+    <p>실행하려면 관리자 계정으로 로그인되어 있어야 합니다. (로그인이 안 되어 있다면 missionaries.html 등을 먼저 방문해주세요)</p>
+
+    <div id="status">Ready to Start...</div>
+    <div id="log"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../js/firebase-config.js"></script>
+
+    <!-- Auth Check & Run -->
+    <script>
+        // Check Auth
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('status').innerText = 'Authenticated. Starting Update...';
+
+                // Dynamically load the update script
+                const script = document.createElement('script');
+                script.src = 'js/update_data_missionary_reports_v2.js';
+                document.body.appendChild(script);
+            } else {
+                document.getElementById('status').innerText = '로그인이 필요합니다. 관리자 페이지에 먼저 로그인해 주세요.';
+                document.getElementById('status').style.color = 'red';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -130,6 +130,15 @@ function getMissionaryPrayerTopic(missionaryName) {
         );
 
         if (missionary) {
+            // 기도제목 우선순위: prayerTopic > prayer > summary
+            if (missionary.prayerTopic && missionary.prayerTopic.trim() !== '') {
+                return missionary.prayerTopic.length > 60 ?
+                    missionary.prayerTopic.substring(0, 60) + '...' : missionary.prayerTopic;
+            }
+            if (missionary.prayer && missionary.prayer.trim() !== '') {
+                return missionary.prayer.length > 60 ?
+                    missionary.prayer.substring(0, 60) + '...' : missionary.prayer;
+            }
             if (missionary.summary && missionary.summary.trim() !== '') {
                 return missionary.summary.length > 60 ?
                     missionary.summary.substring(0, 60) + '...' : missionary.summary;

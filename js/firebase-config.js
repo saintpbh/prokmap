@@ -4,7 +4,7 @@ const firebaseConfig = {
   authDomain: "prokworldmap.firebaseapp.com",
   databaseURL: "https://prokworldmap-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "prokworldmap",
-  storageBucket: "prokworldmap.appspot.com",
+  storageBucket: "prokworldmap.firebasestorage.app",
   messagingSenderId: "728381830842",
   appId: "1:728381830842:web:ea9541db40f3710891f483",
   measurementId: "G-0MK0N145WP"
@@ -62,19 +62,19 @@ function initializeFirebase() {
 initializeFirebase();
 
 // Firebase 연결 상태 확인
-window.checkFirebaseConnection = function() {
+window.checkFirebaseConnection = function () {
   return new Promise((resolve, reject) => {
     if (!window.firebase) {
       reject(new Error('Firebase SDK가 로드되지 않았습니다.'));
       return;
     }
-    
+
     // Firebase가 초기화되었는지 확인
     if (!firebase.apps.length) {
       reject(new Error('Firebase가 초기화되지 않았습니다.'));
       return;
     }
-    
+
     try {
       // Realtime Database 연결 확인
       if (firebase.database) {
@@ -133,7 +133,7 @@ window.checkFirebaseConnection = function() {
 };
 
 // 페이지 로드 시 Firebase 연결 확인
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   window.checkFirebaseConnection()
     .then(() => {
       console.log('Firebase 연결 성공');

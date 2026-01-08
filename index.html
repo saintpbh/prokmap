@@ -38,6 +38,16 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Pretendard:wght@400;600;700&display=swap"
         rel="stylesheet">
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            // TODO: [중요] EmailJS 계정 생성 후 Public Key를 여기에 입력하세요
+            // https://dashboard.emailjs.com/admin/account
+            emailjs.init("YOUR_PUBLIC_KEY");
+        })();
+    </script>
 </head>
 
 <body>
@@ -159,11 +169,11 @@
                 <!-- 스크립트 로딩 -->
                 <script src="js/setup.js?v=1.0.1"></script>
                 <script src="js/dataManager.js?v=1.0.1"></script>
-                <script src="js/uiManager.js?v=1.0.1"></script>
+                <script src="js/uiManager.js?v=1.1.1"></script>
                 <script src="js/prayercount.js?v=1.0.1"></script>
-                <script src="js/missionaryMap.js?v=1.0.1"></script>
+                <script src="js/missionaryMap.js?v=1.1.1"></script>
                 <script src="js/globalSearchV2.js"></script> <!-- 새로운 검색 시스템 -->
-                <script src="js/ui/detailPopup.js?v=1.0.1"></script>
+                <script src="js/ui/detailPopup.js?v=1.1.1"></script>
                 <script src="js/ui/floatingMissionary.js?v=1.0.1"></script>
                 <script src="js/ui/floatingPopups.js?v=1.0.1"></script>
                 <!-- 새로운 기도 팝업 모듈 v2.0 -->

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>총회 게시판 연동 - 선교사 관리 시스템</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .integration-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            height: calc(100vh - 150px);
+        }
+
+        .list-section,
+        .log-section {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .missionary-list {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #eee;
+        }
+
+        .missionary-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .missionary-item:hover {
+            background: #f9f9f9;
+        }
+
+        .log-content {
+            flex: 1;
+            background: #2b2b2b;
+            color: #eee;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="admin-header">
+        <h1><i class="fas fa-globe"></i> 선교사 관리 시스템</h1>
+        <div class="user-info">
+            <span class="user-email" id="userEmail">loading...</span>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-chart-line"></i> 대시보드</a></li>
+                <li><a href="missionaries.html"><i class="fas fa-users"></i> 선교사 관리</a></li>
+                <li><a href="newsletters.html"><i class="fas fa-newspaper"></i> 뉴스레터 관리</a></li>
+                <li><a href="prayers.html"><i class="fas fa-praying-hands"></i> 기도 제목</a></li>
+                <li><a href="report-upload.html"><i class="fas fa-file-alt"></i> 소식 일괄 등록</a></li>
+                <li><a href="prok-integration.html" class="active"><i class="fas fa-share-square"></i> 총회 게시판 업로드</a>
+                </li>
+                <li><a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> 긴급 알림 송출</a></li>
+                <li><a href="supporters.html"><i class="fas fa-hand-holding-heart"></i> 후원자 관리</a></li>
+                <li><a href="groups.html"><i class="fas fa-layer-group"></i> 그룹 관리</a></li>
+                <li><a href="certificates.html"><i class="fas fa-certificate"></i> 증명서 발급</a></li>
+                <li><a href="communications.html"><i class="fas fa-envelope"></i> 연락하기</a></li>
+                <li><a href="inquiries.html"><i class="fas fa-question-circle"></i> 문의 관리</a></li>
+                <li><a href="admins.html"><i class="fas fa-user-shield"></i> 관리 권한 설정</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="card" style="height: 100%; border:none; box-shadow:none; background:transparent;">
+                <div class="card-header"
+                    style="background: white; border-radius: 8px; margin-bottom: 1rem; padding: 1rem 1.5rem;">
+                    <h3 class="card-title">🚀 총회 게시판 자동 업로드</h3>
+                    <div style="font-size: 0.9em; color: #666;">
+                        선교사 소식을 선택하여 총회 홈페이지(PROK) 선교 게시판에 자동으로 등록합니다.
+                    </div>
+                </div>
+
+                <div class="integration-container">
+                    <!-- List Section -->
+                    <div class="list-section">
+                        <div class="list-header">
+                            <div>
+                                <input type="text" id="searchInput" placeholder="이름 검색..." class="form-input"
+                                    style="width: 200px;">
+                                <select id="monthFilter" class="form-select" style="width: 150px;">
+                                    <option value="">최근 업데이트순</option>
+                                    <option value="today">오늘 업데이트됨</option>
+                                </select>
+                            </div>
+                            <button id="uploadBtn" class="btn btn-primary" disabled>
+                                <i class="fas fa-paper-plane"></i> 선택 항목 업로드
+                            </button>
+                        </div>
+                        <div class="table-header"
+                            style="display:flex; padding: 0.5rem 0.8rem; background:#f8f9fa; font-weight:bold; font-size:0.9em;">
+                            <div style="width: 40px;"><input type="checkbox" id="selectAll"></div>
+                            <div style="flex:1;">이름 / 국가</div>
+                            <div style="flex:2;">소식 요약</div>
+                            <div style="width: 100px; text-align:center;">상태</div>
+                        </div>
+                        <div id="missionaryList" class="missionary-list">
+                            <div style="padding: 2rem; text-align: center;">데이터 로딩 중...</div>
+                        </div>
+                    </div>
+
+                    <!-- Log Section -->
+                    <div class="log-section">
+                        <div class="list-header">
+                            <h4>📡 실행 로그</h4>
+                            <button class="btn btn-sm btn-outline"
+                                onclick="document.getElementById('logContent').innerText=''">Clear</button>
+                        </div>
+                        <div id="logContent" class="log-content">대기 중...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+
+    <script>
+        let allMissionaries = [];
+        let selectedIds = new Set();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (!user) window.location.href = 'login.html';
+                loadMissionaries();
+            });
+
+            document.getElementById('searchInput').addEventListener('input', renderList);
+            document.getElementById('selectAll').addEventListener('change', toggleAll);
+            document.getElementById('uploadBtn').addEventListener('click', startUpload);
+        });
+
+        async function loadMissionaries() {
+            try {
+                allMissionaries = await firebaseDB.getMissionaries();
+                // Sort by updatedAt desc
+                allMissionaries.sort((a, b) => {
+                    const dateA = a.updatedAt || '';
+                    const dateB = b.updatedAt || '';
+                    return dateB.localeCompare(dateA);
+                });
+                renderList();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderList() {
+            const listEl = document.getElementById('missionaryList');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            const filtered = allMissionaries.filter(m =>
+                (m.name.includes(search) || m.country.includes(search)) &&
+                (m.summary || m.prayerTopic) // Only show ones with content
+            );
+
+            listEl.innerHTML = '';
+            filtered.forEach(m => {
+                const isSelected = selectedIds.has(m.id);
+                const div = document.createElement('div');
+                div.className = 'missionary-item';
+                div.style.background = isSelected ? '#e3f2fd' : '';
+
+                // Truncate summary
+                let summaryPreview = m.summary || m.prayerTopic || '(내용 없음)';
+                if (summaryPreview.length > 50) summaryPreview = summaryPreview.substring(0, 50) + '...';
+
+                div.innerHTML = `
+                    <div style="width: 40px;">
+                        <input type="checkbox" class="select-chk" value="${m.id}" ${isSelected ? 'checked' : ''}>
+                    </div>
+                    <div style="flex:1;">
+                        <strong>${m.name}</strong> <small class="text-muted">| ${m.country}</small>
+                    </div>
+                    <div style="flex:2; font-size:0.9em; color:#555;">
+                        ${summaryPreview.replace(/\n/g, ' ')}
+                    </div>
+                    <div style="width: 150px; text-align:center;">
+                        <input type="file" id="file-${m.id}" class="form-input" style="padding: 2px; font-size: 0.8em;">
+                    </div>
+                `;
+
+                // Row click toggles checkbox (avoiding file input and chk itself)
+                div.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox' && e.target.type !== 'file') {
+                        const chk = div.querySelector('.select-chk');
+                        chk.checked = !chk.checked;
+                        toggleSelection(m.id, chk.checked);
+                    }
+                });
+
+                div.querySelector('.select-chk').addEventListener('change', (e) => {
+                    toggleSelection(m.id, e.target.checked);
+                });
+
+                // If file selected, auto-check
+                div.querySelector('input[type=file]').addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        const chk = div.querySelector('.select-chk');
+                        if (!chk.checked) {
+                            chk.checked = true;
+                            toggleSelection(m.id, true);
+                        }
+                    }
+                });
+
+                listEl.appendChild(div);
+            });
+
+            updateButtonState();
+        }
+
+        function toggleSelection(id, checked) {
+            if (checked) selectedIds.add(id);
+            else selectedIds.delete(id);
+            // Don't re-render list, just update style to keep file inputs
+            const chk = document.querySelector(`.select-chk[value="${id}"]`);
+            if (chk) {
+                const row = chk.closest('.missionary-item');
+                row.style.background = checked ? '#e3f2fd' : '';
+            }
+            updateButtonState();
+        }
+
+        function toggleAll(e) {
+            const checked = e.target.checked;
+            const chks = document.querySelectorAll('.select-chk');
+            chks.forEach(chk => {
+                chk.checked = checked;
+                toggleSelection(chk.value, checked);
+            });
+        }
+
+        function updateButtonState() {
+            const btn = document.getElementById('uploadBtn');
+            btn.disabled = selectedIds.size === 0;
+            btn.innerHTML = `<i class="fas fa-paper-plane"></i> 선택 항목 업로드 (${selectedIds.size}명)`;
+        }
+
+        async function startUpload() {
+            if (!confirm(`${selectedIds.size}명의 소식을 총회 홈페이지에 업로드하시겠습니까?`)) return;
+
+            // Prepare Data
+            const targets = allMissionaries.filter(m => selectedIds.has(m.id));
+            const baseData = targets.map((m, index) => ({
+                id: m.id, // Keep track for file mapping
+                name: m.name,
+                country: m.country,
+                summary: (m.summary || '') + '\n\n' + (m.prayerTopic || ''),
+                link: '',
+                fileUrl: ''
+            }));
+
+            // Create FormData
+            const formData = new FormData();
+            formData.append('data', JSON.stringify(baseData));
+
+            // Append files with keys matching index
+            baseData.forEach((item, index) => {
+                const fileInput = document.getElementById(`file-${item.id}`);
+                if (fileInput && fileInput.files.length > 0) {
+                    formData.append(`file_${index}`, fileInput.files[0]);
+                }
+            });
+
+            // Call API
+            const logEl = document.getElementById('logContent');
+            logEl.innerText = '🚀 서버에 요청 전송 중 (파일 업로드 포함)...\n';
+
+            try {
+                const res = await fetch('/api/prok-upload', {
+                    method: 'POST',
+                    body: formData // No Content-Type header needed (browser sets boundary)
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    logEl.innerText += '✅ 스크립트 실행 성공!\n\n';
+                    logEl.innerText += result.log;
+                } else {
+                    logEl.innerText += '❌ 실행 실패\n';
+                    logEl.innerText += result.message + '\n';
+                    logEl.innerText += result.log;
+                }
+
+            } catch (e) {
+                console.error(e);
+                logEl.innerText += `❌ 네트워크 오류: ${e.message}`;
+            }
+        }
+    </script>
+</body>
+
+</html>
