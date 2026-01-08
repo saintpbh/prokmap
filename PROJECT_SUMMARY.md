@@ -100,16 +100,12 @@ PcWeb/
     │   │   ├── auth.js: 인증 관련 로직
     │   │   └── app-init.js: 전역 앱 초기화 및 브릿지
     │   └── modules/ (기능별 모듈)
-    │       └── missionary/
-    │           ├── state.js: 선교사 모듈 상태 관리
-    │           ├── api.js: 데이터 처리 logic
-    │           ├── ui.js: 테이블 렌더링 및 필터
-    │           ├── map.js: 지도(Leaflet) 연동
-    │           ├── modals.js: 상세/수정 모달 logic
-    │           ├── family.js: 가족 관리 logic
-    │           └── main.js: 선교사 페이지 엔트리포인트
+    │       - `missionary/`: 선교사 관리 모듈
+    │       - `newsletter/`: 뉴스레터 업로드 모듈
+    │       - `supporter/`: 후원자 관리 모듈
     ├── common.js: (Legacy) 기존 페이지용 공통 스크립트
-    └── missionaries.js: (Legacy) 기존 선교사 관리 스크립트
+    ├── missionaries.js: (Legacy) 기존 선교사 관리 스크립트
+    └── supporters.js: (Legacy) 기존 후원자 관리 스크립트
 ```
 
 ## 🚀 개발 환경
